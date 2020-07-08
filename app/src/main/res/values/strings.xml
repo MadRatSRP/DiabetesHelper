@@ -10,4 +10,6 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
+
+    <string name="dropbox_access_token">cPkFw615PeAAAAAAAAAAWBPH76LtR2eEHmOmwxjyeq20KCSWMpzfkYfMLw8pKSS7</string>
 </resources>
