@@ -1,0 +1,15 @@
+# directories
+# project directory
+.PVS-Studio
+.idea
+.gradle
+build
+gradle
+
+# app module directory
+app/build
+
+
+# files
+*.iml
+*local.properties
