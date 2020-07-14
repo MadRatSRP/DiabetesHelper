@@ -38,13 +38,14 @@ class HomeFragment: Fragment(), HomeMVP.View {
 
         setupMVP()
 
-        val dropboxAccessToken = context?.getString(R.string.dropbox_access_token)
+        // Инициализируем клиент Dropbox
+        presenter?.initializeDropboxClient(context?.getString(R.string.dropbox_access_token)!!)
 
-        dropboxAccessToken?.let { presenter?.getDisplayNameDisposable(it) }
+        presenter?.getDisplayNameDisposable()
 
         context?.let { presenter?.getMetadataDisposable(it, "Собачка села на травку и сказала гав-гав") }
 
-        presenter?.getFileDisposable("/DiabetesHelper/test.txt")
+        presenter?.getFileDisposable("/test.txt")
     }
 
     override fun setupMVP(){

@@ -19,9 +19,23 @@ class HomePresenter(private val view: HomeMVP.View,
 
     private var client: DbxClientV2? = null
 
-    fun getDisplayNameDisposable(accessToken: String): @NonNull Disposable? {
+    override fun initializeDropboxClient(accessToken: String) {
+        val config = DbxRequestConfig
+            .newBuilder("DiabetesHelper")
+            .build()
+
+        client = DbxClientV2(config, accessToken)
+    }
+
+    override fun returnDisplayName(): String {
+        val fullAccount = client?.users()?.currentAccount
+
+        return fullAccount?.name?.displayName!!
+    }
+
+    override fun getDisplayNameDisposable(): @NonNull Disposable? {
         return Observable.fromCallable {
-            returnDisplayName(accessToken)
+            returnDisplayName()
         }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -30,18 +44,7 @@ class HomePresenter(private val view: HomeMVP.View,
             }
     }
 
-    fun returnDisplayName(accessToken: String): String {
-        val config = DbxRequestConfig
-            .newBuilder("jopka")
-            .build()
-        client = DbxClientV2(config, accessToken)
-
-        val fullAccount = client?.users()?.currentAccount
-
-        return fullAccount?.name?.displayName!!
-    }
-
-    fun getMetadataDisposable(context: Context, string: String): @NonNull Disposable? {
+    override fun getMetadataDisposable(context: Context, string: String): @NonNull Disposable? {
         return Observable.fromCallable {
             saveStringAsFile(context, string)
         }
@@ -50,7 +53,7 @@ class HomePresenter(private val view: HomeMVP.View,
             .subscribe{}
     }
 
-    fun saveStringAsFile(context: Context, string: String) {
+    override fun saveStringAsFile(context: Context, string: String) {
         val filePath = context.filesDir.path.toString() + "/fileName.txt"
 
         val file = File(filePath)
@@ -60,11 +63,9 @@ class HomePresenter(private val view: HomeMVP.View,
         // Upload "test.txt" to Dropbox
         FileInputStream(file).use { `in` ->
             client!!.files()
-                .uploadBuilder("/DiabetesHelper/test.txt")
+                .uploadBuilder("/test.txt")
                 .uploadAndFinish(`in`)
         }
-
-
     }
 
     override fun getFileDisposable(filePath: String): @NonNull Disposable? {
@@ -78,7 +79,7 @@ class HomePresenter(private val view: HomeMVP.View,
             }
     }
 
-    fun downloadFileFromServer(filePath: String): String {
+    override fun downloadFileFromServer(filePath: String): String {
         return client!!.files().download(filePath)
             .inputStream
             .bufferedReader()

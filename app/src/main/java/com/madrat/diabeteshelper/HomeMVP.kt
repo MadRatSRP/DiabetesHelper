@@ -1,5 +1,6 @@
 package com.madrat.diabeteshelper
 
+import android.content.Context
 import com.dropbox.core.v2.files.FileMetadata
 import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.disposables.Disposable
@@ -15,6 +16,12 @@ interface HomeMVP {
     interface Presenter {
 
         fun getFileDisposable(filePath: String): @NonNull Disposable?
+        fun initializeDropboxClient(accessToken: String)
+        fun returnDisplayName(): String
+        fun getDisplayNameDisposable(): @NonNull Disposable?
+        fun getMetadataDisposable(context: Context, string: String): @NonNull Disposable?
+        fun saveStringAsFile(context: Context, string: String)
+        fun downloadFileFromServer(filePath: String): String
     }
     interface Repository {
 
