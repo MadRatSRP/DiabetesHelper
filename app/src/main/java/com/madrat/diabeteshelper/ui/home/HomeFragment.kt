@@ -1,9 +1,7 @@
 package com.madrat.diabeteshelper.ui.home
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -58,6 +56,21 @@ class HomeFragment: Fragment(), HomeMVP.View {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.clear()
+        inflater.inflate(R.menu.buttons_menu_home, menu)
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.save_and_export_button -> {
+                showSaveAndExportDialog()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     override fun setupMVP(){
         presenter = HomePresenter(this, HomeRepository())
     }
@@ -70,6 +83,10 @@ class HomeFragment: Fragment(), HomeMVP.View {
     }*/
     override fun printFileContentToConsole(fileContent: String) {
         println(fileContent)
+    }
+
+    fun showSaveAndExportDialog() {
+        println("Salce")
     }
 
     override fun updateListOfHomes(listOfHomes: ArrayList<Home>) {
