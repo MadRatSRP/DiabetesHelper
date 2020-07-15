@@ -23,33 +23,7 @@ class MainActivity : AppCompatActivity() {
             this, R.id.nav_host_fragment
         )
 
-        val drawerToggle = ActionBarDrawerToggle(
-            this, binding.drawerLayout, R.string.open, R.string.close
-        )
-        binding.drawerLayout.addDrawerListener(drawerToggle)
-        drawerToggle.syncState()
-
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        NavigationUI.setupWithNavController(binding.navigationView, navController)
         NavigationUI.setupActionBarWithNavController(this,
             navController, binding.drawerLayout)
-    }
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId) {
-            android.R.id.home -> {
-                binding.drawerLayout.openDrawer(GravityCompat.START)
-                true
-            }
-            else ->
-                super.onOptionsItemSelected(item)
-        }
-    }
-    override fun onBackPressed() {
-        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            binding.drawerLayout.closeDrawer(GravityCompat.START)
-        } else {
-            super.onBackPressed()
-        }
     }
 }
