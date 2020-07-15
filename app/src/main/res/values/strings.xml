@@ -11,5 +11,7 @@
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
 
-    <string name="dropbox_access_token">cPkFw615PeAAAAAAAAAAXbpoY5sK_Wrp8EQq1MVNxf0K9Xk7QdI7xDFz-jS4g8bn</string>
+    <string name="dropbox_access_token">cPkFw615PeAAAAAAAAAAX_-vlGEWnlJUWfo75A1NO0_AasOA2cUnvCF5DEw_4oiS</string>
+    <string name="open">OPEN</string>
+    <string name="close">CLOSE</string>
 </resources>
