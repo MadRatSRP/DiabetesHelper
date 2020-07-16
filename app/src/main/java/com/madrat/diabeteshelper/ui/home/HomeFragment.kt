@@ -1,7 +1,10 @@
 package com.madrat.diabeteshelper.ui.home
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.*
+import android.widget.Button
+import android.widget.CheckBox
 import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -50,25 +53,9 @@ class HomeFragment: Fragment(), HomeMVP.View {
 
         presenter?.getFileDisposable("/test.txt")
 
-        binding.floatingActionButton.setOnClickListener { fabView ->
-            Snackbar.make(fabView, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+        binding.saveAndExportButton.setOnClickListener {
+            showSaveAndExportDialog()
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        menu.clear()
-        inflater.inflate(R.menu.buttons_menu_home, menu)
-    }
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.save_and_export_button -> {
-                showSaveAndExportDialog()
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     override fun setupMVP(){
@@ -86,7 +73,39 @@ class HomeFragment: Fragment(), HomeMVP.View {
     }
 
     fun showSaveAndExportDialog() {
-        println("Salce")
+        val builder = AlertDialog.Builder(context)
+        builder.setCancelable(true)
+
+        val dialogView = View.inflate(context,
+            R.layout.dialog_setup_file_format,null)
+        builder.setView(dialogView)
+
+        /*val newType: EditText = dialogView.findViewById(R.id.setup_contact_type)
+        val newValue: EditText = dialogView.findViewById(R.id.setup_contact_name)
+        val buttonCancel: Button = dialogView.findViewById(R.id.cancel_button)
+        val buttonYes: Button = dialogView.findViewById(R.id.add_contact_button)*/
+
+        val checkBoxCSV: CheckBox = dialogView.findViewById(R.id.checkBoxCSV)
+
+        val exportButton: Button = dialogView.findViewById(R.id.export_button)
+
+        val alertDialog = builder.create()
+        alertDialog.show()
+
+        exportButton.setOnClickListener {
+            if (checkBoxCSV.isChecked) {
+                println("CSV")
+            }
+        }
+
+        /*buttonCancel.setOnClickListener {
+            onAddContactDialogCancelButtonClicked(alertDialog)
+        }
+        buttonYes.setOnClickListener {
+            onAddContactDialogYesButtonClicked(
+                newType.text.toString().toUpperCase(Locale.getDefault()),
+                newValue.text.toString())
+        }*/
     }
 
     override fun updateListOfHomes(listOfHomes: ArrayList<Home>) {
