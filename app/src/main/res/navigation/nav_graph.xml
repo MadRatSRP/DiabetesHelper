@@ -21,5 +21,8 @@
         <argument
             android:name="list_of_extensions"
             app:argType="string[]" />
+        <argument
+            android:name="list_of_names"
+            app:argType="com.madrat.diabeteshelper.logic.Home[]" />
     </fragment>
 </navigation>

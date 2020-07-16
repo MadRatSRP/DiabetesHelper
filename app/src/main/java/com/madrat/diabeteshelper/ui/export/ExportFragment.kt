@@ -5,16 +5,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.madrat.diabeteshelper.HomeAdapter
+import com.dropbox.core.v2.teamlog.AssetLogInfo.file
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentExportBinding
-import com.madrat.diabeteshelper.databinding.FragmentHomeBinding
-import com.madrat.diabeteshelper.linearManager
+import com.madrat.diabeteshelper.logic.Home
+import de.siegmar.fastcsv.writer.CsvWriter
+import java.io.File
+import java.nio.charset.StandardCharsets
+
 
 class ExportFragment: Fragment() {
     // ViewBinding variables
     private var mBinding: FragmentExportBinding? = null
     private val binding get() = mBinding!!
+
+    private var listOfExtensions: ArrayList<String>? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -22,11 +27,11 @@ class ExportFragment: Fragment() {
         mBinding = FragmentExportBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        val listOfExtensions = arguments?.let {
+        listOfExtensions = arguments?.let {
             ExportFragmentArgs
                 .fromBundle(it)
                 .listOfExtensions
-                .toList()
+                .toCollection(ArrayList())
         }
 
         binding.amountOfExtensions.text = context?.getString(
@@ -39,21 +44,55 @@ class ExportFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /*setupMVP()
+        val listOfNames = arguments?.let {
+            ExportFragmentArgs
+                .fromBundle(it)
+                .listOfNames
+                .toList()
+        }
 
-        presenter?.setListOfHomes()
+        println(listOfNames)
 
-        // Инициализируем клиент Dropbox
-        presenter?.initializeDropboxClient(context?.getString(R.string.dropbox_access_token)!!)
+        binding.saveToUserDeviceButton.setOnClickListener {
+            saveFilesToUserDevice(listOfNames!!)
+        }
+    }
 
-        presenter?.getDisplayNameDisposable()
+    fun saveFilesToUserDevice(listOfHomes: List<Home>) {
+        val fileName = "example"
 
-        context?.let { presenter?.getMetadataDisposable(it, "Собачка села на травку и сказала гав-гав") }
+        if (listOfExtensions?.contains(".csv")!!) {
+            saveFileAsCSV(fileName, listOfHomes)
+        }
+    }
 
-        presenter?.getFileDisposable("/test.txt")
+    fun saveFileAsCSV(fileName: String,
+                      listOfHomes: List<Home>) {
+        val filesDirPath = context?.filesDir.toString()
 
-        binding.saveAndExportButton.setOnClickListener {
-            showSaveAndExportDialog()
-        }*/
+        //println(filesDirPath)
+
+        val nameForFileSaving = context?.getString(
+            R.string.pattern_csv, fileName
+        )
+
+        val pathToFile = filesDirPath + nameForFileSaving
+
+        val csvWriter = CsvWriter()
+
+        val data: MutableCollection<Array<String>> = ArrayList()
+        data.add(arrayOf("author", "value"))
+
+        listOfHomes.forEach { home->
+            data.add(arrayOf(home.author, home.value))
+        }
+
+        csvWriter.write(File(pathToFile), StandardCharsets.UTF_8, data)
+
+        val file = File(pathToFile)
+
+        println(file.readLines())
+
+        //println(file)
     }
 }

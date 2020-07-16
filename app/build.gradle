@@ -68,4 +68,5 @@ dependencies {
 
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
+    implementation group: 'de.siegmar', name: 'fastcsv', version: '1.0.3'
 }

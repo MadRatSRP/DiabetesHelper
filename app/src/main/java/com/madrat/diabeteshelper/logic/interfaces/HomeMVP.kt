@@ -1,6 +1,7 @@
 package com.madrat.diabeteshelper
 
 import android.content.Context
+import android.view.View
 import com.dropbox.core.v2.files.FileMetadata
 import com.madrat.diabeteshelper.logic.Home
 import io.reactivex.rxjava3.annotations.NonNull
@@ -14,6 +15,7 @@ interface HomeMVP {
         //fun showFileMetadata(metadata: FileMetadata)
         fun printFileContentToConsole(fileContent: String)
         fun updateListOfHomes(listOfHomes: ArrayList<Home>)
+        fun showSaveAndExportDialog(view: android.view.View)
     }
     interface Presenter {
 

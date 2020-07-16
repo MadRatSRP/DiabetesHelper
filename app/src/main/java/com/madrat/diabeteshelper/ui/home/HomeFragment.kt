@@ -2,11 +2,12 @@ package com.madrat.diabeteshelper.ui.home
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import androidx.fragment.app.Fragment
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import com.madrat.diabeteshelper.*
 import com.madrat.diabeteshelper.databinding.FragmentHomeBinding
@@ -72,7 +73,7 @@ class HomeFragment: Fragment(), HomeMVP.View {
         println(fileContent)
     }
 
-    fun showSaveAndExportDialog(view: View) {
+    override fun showSaveAndExportDialog(view: View) {
         val builder = AlertDialog.Builder(context)
         builder.setCancelable(true)
 
@@ -116,8 +117,10 @@ class HomeFragment: Fragment(), HomeMVP.View {
                 listOfExtensions.remove(".json")
             }
 
+            val listOfHomes = adapter?.getListOfHomes()?.toTypedArray()
+
             val action = HomeFragmentDirections.actionHomeViewToExportView(
-                listOfExtensions.toTypedArray()
+                listOfExtensions.toTypedArray(), listOfHomes!!
             )
 
             view.findNavController().navigate(action)

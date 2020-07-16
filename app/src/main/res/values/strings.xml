@@ -16,4 +16,9 @@
     <string name="close">CLOSE</string>
 
     <string name="export_amount_of_extensions">Выбрано расширений: %1$d</string>
+
+    <string name="pattern_csv">/%1$s.csv</string>
+    <string name="pattern_xml">/%1$s.xml</string>
+    <string name="pattern_json">/%1$s.json</string>
+
 </resources>

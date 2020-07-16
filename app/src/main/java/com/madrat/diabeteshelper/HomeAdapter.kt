@@ -11,11 +11,15 @@ class HomeAdapter
     : RecyclerView.Adapter<HomeAdapter.HomeHolder>() {
     private val listOfHomes = ArrayList<Home>()
 
+    fun getListOfHomes()
+            = listOfHomes
+
     fun updateListOfHomes(newListOfHomes: ArrayList<Home>) {
         listOfHomes.clear()
         listOfHomes.addAll(newListOfHomes)
         this.notifyDataSetChanged()
     }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeHolder
             = HomeHolder(parent.inflate(R.layout.list_of_homes))
 
