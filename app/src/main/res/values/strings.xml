@@ -14,4 +14,6 @@
     <string name="dropbox_access_token">cPkFw615PeAAAAAAAAAAX_-vlGEWnlJUWfo75A1NO0_AasOA2cUnvCF5DEw_4oiS</string>
     <string name="open">OPEN</string>
     <string name="close">CLOSE</string>
+
+    <string name="export_amount_of_extensions">Выбрано расширений: %1$d</string>
 </resources>

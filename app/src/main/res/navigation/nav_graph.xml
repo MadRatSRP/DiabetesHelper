@@ -3,11 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/home_view">
 
     <fragment
-        android:id="@+id/nav_home"
+        android:id="@+id/home_view"
         android:name="com.madrat.diabeteshelper.ui.home.HomeFragment"
         android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_home_view_to_export_view"
+            app:destination="@id/export_view" />
+    </fragment>
+    <fragment
+        android:id="@+id/export_view"
+        android:name="com.madrat.diabeteshelper.ui.export.ExportFragment"
+        android:label="ExportFragment" >
+        <argument
+            android:name="list_of_extensions"
+            app:argType="string[]" />
+    </fragment>
 </navigation>

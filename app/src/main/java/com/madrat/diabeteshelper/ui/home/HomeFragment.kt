@@ -6,8 +6,8 @@ import android.view.*
 import android.widget.Button
 import android.widget.CheckBox
 import androidx.fragment.app.Fragment
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import com.madrat.diabeteshelper.*
 import com.madrat.diabeteshelper.databinding.FragmentHomeBinding
 import com.madrat.diabeteshelper.logic.Home
@@ -54,7 +54,7 @@ class HomeFragment: Fragment(), HomeMVP.View {
         presenter?.getFileDisposable("/test.txt")
 
         binding.saveAndExportButton.setOnClickListener {
-            showSaveAndExportDialog()
+            showSaveAndExportDialog(view)
         }
     }
 
@@ -72,7 +72,7 @@ class HomeFragment: Fragment(), HomeMVP.View {
         println(fileContent)
     }
 
-    fun showSaveAndExportDialog() {
+    fun showSaveAndExportDialog(view: View) {
         val builder = AlertDialog.Builder(context)
         builder.setCancelable(true)
 
@@ -86,6 +86,9 @@ class HomeFragment: Fragment(), HomeMVP.View {
         val buttonYes: Button = dialogView.findViewById(R.id.add_contact_button)*/
 
         val checkBoxCSV: CheckBox = dialogView.findViewById(R.id.checkBoxCSV)
+        val checkBoxXML: CheckBox = dialogView.findViewById(R.id.checkBoxXML)
+        val checkBoxJSON: CheckBox = dialogView.findViewById(R.id.checkBoxJSON)
+
 
         val exportButton: Button = dialogView.findViewById(R.id.export_button)
 
@@ -93,19 +96,34 @@ class HomeFragment: Fragment(), HomeMVP.View {
         alertDialog.show()
 
         exportButton.setOnClickListener {
-            if (checkBoxCSV.isChecked) {
-                println("CSV")
-            }
-        }
+            val listOfExtensions = ArrayList<String>()
 
-        /*buttonCancel.setOnClickListener {
-            onAddContactDialogCancelButtonClicked(alertDialog)
+            if (checkBoxCSV.isChecked) {
+                listOfExtensions.add(".csv")
+            } else {
+                listOfExtensions.remove(".csv")
+            }
+
+            if (checkBoxXML.isChecked) {
+                listOfExtensions.add(".xml")
+            } else {
+                listOfExtensions.remove(".xml")
+            }
+
+            if (checkBoxJSON.isChecked) {
+                listOfExtensions.add(".json")
+            } else {
+                listOfExtensions.remove(".json")
+            }
+
+            val action = HomeFragmentDirections.actionHomeViewToExportView(
+                listOfExtensions.toTypedArray()
+            )
+
+            view.findNavController().navigate(action)
+
+            alertDialog.dismiss()
         }
-        buttonYes.setOnClickListener {
-            onAddContactDialogYesButtonClicked(
-                newType.text.toString().toUpperCase(Locale.getDefault()),
-                newValue.text.toString())
-        }*/
     }
 
     override fun updateListOfHomes(listOfHomes: ArrayList<Home>) {
