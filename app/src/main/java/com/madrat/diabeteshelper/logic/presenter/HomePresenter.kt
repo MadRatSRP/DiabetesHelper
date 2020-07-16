@@ -18,8 +18,6 @@ class HomePresenter(private val view: HomeMVP.View,
                     private val repository: HomeMVP.Repository)
     : HomeMVP.Presenter  {
 
-    private var client: DbxClientV2? = null
-
     override fun setListOfHomes() {
         val listOfHomes = ArrayList<Home>()
 
@@ -31,15 +29,7 @@ class HomePresenter(private val view: HomeMVP.View,
         view.updateListOfHomes(listOfHomes)
     }
 
-    override fun initializeDropboxClient(accessToken: String) {
-        val config = DbxRequestConfig
-            .newBuilder("DiabetesHelper")
-            .build()
-
-        client = DbxClientV2(config, accessToken)
-    }
-
-    override fun returnDisplayName(): String {
+    /*override fun returnDisplayName(): String {
         val fullAccount = client?.users()?.currentAccount
 
         return fullAccount?.name?.displayName!!
@@ -54,33 +44,11 @@ class HomePresenter(private val view: HomeMVP.View,
             .subscribe{result->
                 view.showDisplayName(result)
             }
-    }
+    }*/
 
-    override fun getMetadataDisposable(context: Context, string: String): @NonNull Disposable? {
-        return Observable.fromCallable {
-            saveStringAsFile(context, string)
-        }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe{}
-    }
 
-    override fun saveStringAsFile(context: Context, string: String) {
-        val filePath = context.filesDir.path.toString() + "/fileName.txt"
 
-        val file = File(filePath)
-
-        file.writeText(string)
-
-        // Upload "test.txt" to Dropbox
-        FileInputStream(file).use { `in` ->
-            client!!.files()
-                .uploadBuilder("/test.txt")
-                .uploadAndFinish(`in`)
-        }
-    }
-
-    override fun getFileDisposable(filePath: String): @NonNull Disposable? {
+    /*override fun getFileDisposable(filePath: String): @NonNull Disposable? {
         return Observable.fromCallable {
             downloadFileFromServer(filePath)
         }
@@ -96,5 +64,5 @@ class HomePresenter(private val view: HomeMVP.View,
             .inputStream
             .bufferedReader()
             .use(BufferedReader::readText)
-    }
+    }*/
 }

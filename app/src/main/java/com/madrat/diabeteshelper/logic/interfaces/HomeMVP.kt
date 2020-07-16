@@ -19,13 +19,10 @@ interface HomeMVP {
     }
     interface Presenter {
 
-        fun getFileDisposable(filePath: String): @NonNull Disposable?
-        fun initializeDropboxClient(accessToken: String)
-        fun returnDisplayName(): String
-        fun getDisplayNameDisposable(): @NonNull Disposable?
+        /*fun getFileDisposable(filePath: String): @NonNull Disposable?
         fun getMetadataDisposable(context: Context, string: String): @NonNull Disposable?
         fun saveStringAsFile(context: Context, string: String)
-        fun downloadFileFromServer(filePath: String): String
+        fun downloadFileFromServer(filePath: String): String*/
         fun setListOfHomes()
     }
     interface Repository {

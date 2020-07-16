@@ -1,8 +1,12 @@
 package com.madrat.diabeteshelper
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -72,4 +76,20 @@ fun RecyclerView.linearManager() {
 }
 fun RecyclerView.gridManager(spanCount: Int) {
     this.layoutManager = GridLayoutManager(context, spanCount)
+}
+
+// EditText
+inline fun EditText.hideKeyboardAndClearFocus(crossinline function: () -> Unit) {
+    this.setOnEditorActionListener { textView, actionId, event ->
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+            val inputMethodManager = this.context.getSystemService(
+                Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(textView.windowToken, 0)
+            this.isFocusable = false
+            this.isFocusableInTouchMode = true
+            function()
+            return@setOnEditorActionListener true
+        }
+        false
+    }
 }

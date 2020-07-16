@@ -45,14 +45,13 @@ class HomeFragment: Fragment(), HomeMVP.View {
 
         presenter?.setListOfHomes()
 
-        // Инициализируем клиент Dropbox
-        presenter?.initializeDropboxClient(context?.getString(R.string.dropbox_access_token)!!)
 
-        presenter?.getDisplayNameDisposable()
 
-        context?.let { presenter?.getMetadataDisposable(it, "Собачка села на травку и сказала гав-гав") }
+        //presenter?.getDisplayNameDisposable()
 
-        presenter?.getFileDisposable("/test.txt")
+        //context?.let { presenter?.getMetadataDisposable(it, "Собачка села на травку и сказала гав-гав") }
+
+        //presenter?.getFileDisposable("/test.txt")
 
         binding.saveAndExportButton.setOnClickListener {
             showSaveAndExportDialog(view)

@@ -21,4 +21,6 @@
     <string name="pattern_xml">/%1$s.xml</string>
     <string name="pattern_json">/%1$s.json</string>
 
+    <string name="filename_hint">Укажите название файла для сохранения:</string>
+
 </resources>
