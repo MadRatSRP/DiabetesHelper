@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+     name is the file name
+     path is the root of external storage, it means here: Environment.getExternalStorageDirectory()
+     -->
+    <files-path name="bober" path="."/>
+
+</paths>

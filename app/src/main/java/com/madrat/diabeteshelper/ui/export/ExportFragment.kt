@@ -1,9 +1,13 @@
 package com.madrat.diabeteshelper.ui.export
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
@@ -35,18 +39,21 @@ class ExportFragment: Fragment() {
 
     var client: DbxClientV2? = null
 
+    var args: ExportFragmentArgs? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // ViewBinding initialization
         mBinding = FragmentExportBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        listOfExtensions = arguments?.let {
-            ExportFragmentArgs
-                .fromBundle(it)
+        args = arguments?.let { ExportFragmentArgs.fromBundle(it) }
+
+        listOfExtensions =
+                args!!
                 .listOfExtensions
                 .toCollection(ArrayList())
-        }
+
 
         binding.amountOfExtensions.text = context?.getString(
             R.string.export_amount_of_extensions, listOfExtensions?.size
@@ -83,6 +90,10 @@ class ExportFragment: Fragment() {
 
         binding.saveToDropboxButton.setOnClickListener {
             saveFilesToDropbox(listOfNames!!)
+        }
+
+        binding.sendEmailButton.setOnClickListener {
+            composeEmail()
         }
     }
 
@@ -299,5 +310,149 @@ class ExportFragment: Fragment() {
         val savedFile = File(filePath)
 
         getMetadataDisposable(fileNameWithExtension!!, savedFile)
+    }
+
+    // Send files with Email
+    fun composeEmail() {
+        if (listOfExtensions?.size == 1) {
+            var filePath: Uri? = null
+
+            if (listOfExtensions?.contains(".csv")!!) {
+                val csvFile = getCSVFile("bober")
+
+                filePath = FileProvider.getUriForFile(
+                    requireContext(),
+                    "your.application.package.fileprovider",
+                    csvFile
+                )
+
+            }
+
+            if (listOfExtensions?.contains(".xml")!!) {
+                val xmlFile = getXMLFile("bober")
+
+                filePath = FileProvider.getUriForFile(
+                    requireContext(),
+                    "your.application.package.fileprovider",
+                    xmlFile
+                )
+            }
+
+            if (listOfExtensions?.contains(".json")!!) {
+                val jsonFile = getJSONFile("bober")
+
+                filePath = FileProvider.getUriForFile(
+                    requireContext(),
+                    "your.application.package.fileprovider",
+                    jsonFile
+                )
+            }
+
+            val emailIntent = Intent(Intent.ACTION_SEND)
+            // set the type to 'email'
+            // set the type to 'email'
+            emailIntent.type = "vnd.android.cursor.dir/email"
+            val to = arrayOf("mischa.alpeew@yandex.ru")
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, to)
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Scale Data")
+            emailIntent.putExtra(Intent.EXTRA_TEXT, "This is the body")
+            emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            // the attachment
+            // the attachment
+            emailIntent.putExtra(Intent.EXTRA_STREAM, filePath)
+            requireContext().startActivity(Intent.createChooser(emailIntent, "Send mail..."))
+        }
+
+
+
+    }
+    fun getCSVFile(fileName: String): File {
+        val filesDirPath = context?.filesDir.toString()
+
+        val nameForFileSaving = context?.getString(
+            R.string.pattern_csv, fileName
+        )
+
+        val pathToFile = filesDirPath + nameForFileSaving
+
+        val csvWriter = CsvWriter()
+
+        val data: MutableCollection<Array<String>> = ArrayList()
+        data.add(arrayOf("author", "value"))
+
+        val listOfHomes = args!!
+            .listOfNames
+            .toList()
+
+        listOfHomes.forEach { home->
+            data.add(arrayOf(home.author, home.value))
+        }
+
+        csvWriter.write(File(pathToFile), StandardCharsets.UTF_8, data)
+
+        return File(pathToFile)
+    }
+
+    fun getJSONFile(fileName: String): File {
+        val moshi = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
+
+        val jsonAdapter: JsonAdapter<Home> =
+            moshi.adapter<Home>(Home::class.java)
+
+        var finalJSON = ""
+
+        val listOfHomes = args!!
+            .listOfNames
+            .toList()
+
+        listOfHomes.forEach {home->
+            val json = jsonAdapter.toJson(home)
+
+            finalJSON += json
+        }
+
+        val filesDirectoryPath = context?.filesDir.toString()
+
+        val fileNameWithExtension = context?.getString(
+            R.string.pattern_json, fileName
+        )
+
+        val filePath = filesDirectoryPath + fileNameWithExtension
+
+        val file = File(filePath)
+
+        file.writeText(finalJSON)
+
+        return File(filePath)
+    }
+
+    fun getXMLFile(fileName: String): File {
+        val xmlMapper = XmlMapper()
+
+        var finalString = ""
+
+        val listOfHomes = args!!
+            .listOfNames
+            .toList()
+
+        listOfHomes.forEach { home->
+            finalString += xmlMapper.writeValueAsString(home)
+        }
+
+        val filesDirectoryPath = context?.filesDir.toString()
+
+        val fileNameWithExtension = context?.getString(
+            R.string.pattern_xml, fileName
+        )
+
+        val filePath = filesDirectoryPath + fileNameWithExtension
+
+        val file = File(filePath)
+
+        file.writeText(finalString)
+
+        return File(filePath)
     }
 }
