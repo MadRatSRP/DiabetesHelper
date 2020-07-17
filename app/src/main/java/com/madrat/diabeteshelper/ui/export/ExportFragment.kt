@@ -325,7 +325,6 @@ class ExportFragment: Fragment() {
                     "your.application.package.fileprovider",
                     csvFile
                 )
-
             }
 
             if (listOfExtensions?.contains(".xml")!!) {
@@ -361,10 +360,58 @@ class ExportFragment: Fragment() {
             // the attachment
             emailIntent.putExtra(Intent.EXTRA_STREAM, filePath)
             requireContext().startActivity(Intent.createChooser(emailIntent, "Send mail..."))
+        } else {
+            val listOfAttachments = ArrayList<Uri>()
+
+            if (listOfExtensions?.contains(".csv")!!) {
+                val csvFile = getCSVFile("bober")
+
+                listOfAttachments.add(
+                    FileProvider.getUriForFile(
+                        requireContext(),
+                        "your.application.package.fileprovider",
+                        csvFile)
+                )
+            }
+
+            if (listOfExtensions?.contains(".xml")!!) {
+                val xmlFile = getXMLFile("bober")
+
+                listOfAttachments.add(
+                    FileProvider.getUriForFile(
+                        requireContext(),
+                        "your.application.package.fileprovider",
+                        xmlFile
+                    )
+                )
+            }
+
+            if (listOfExtensions?.contains(".json")!!) {
+                val jsonFile = getJSONFile("bober")
+
+                listOfAttachments.add(
+                    FileProvider.getUriForFile(
+                        requireContext(),
+                        "your.application.package.fileprovider",
+                        jsonFile
+                    )
+                )
+            }
+
+            val emailIntent = Intent(Intent.ACTION_SEND_MULTIPLE)
+            // set the type to 'email'
+            // set the type to 'email'
+            emailIntent.type = "vnd.android.cursor.dir/email"
+            val to = arrayOf("mischa.alpeew@yandex.ru")
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, to)
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Scale Data")
+            emailIntent.putExtra(Intent.EXTRA_TEXT, "This is the body")
+            emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            // the attachment
+            // the attachment
+            emailIntent.putExtra(Intent.EXTRA_STREAM, listOfAttachments)
+            requireContext().startActivity(Intent.createChooser(emailIntent, "Send mail..."))
         }
-
-
-
     }
     fun getCSVFile(fileName: String): File {
         val filesDirPath = context?.filesDir.toString()
