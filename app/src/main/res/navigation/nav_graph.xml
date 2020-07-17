@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/home_view">
+    app:startDestination="@id/import_view">
 
     <fragment
         android:id="@+id/home_view"
@@ -24,5 +24,13 @@
         <argument
             android:name="list_of_names"
             app:argType="com.madrat.diabeteshelper.logic.Home[]" />
+    </fragment>
+    <fragment
+        android:id="@+id/import_view"
+        android:name="com.madrat.diabeteshelper.ui.imports.ImportFragment"
+        android:label="ImportFragment" >
+        <action
+            android:id="@+id/action_import_view_to_home_view"
+            app:destination="@id/home_view" />
     </fragment>
 </navigation>

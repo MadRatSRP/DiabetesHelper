@@ -45,24 +45,4 @@ class HomePresenter(private val view: HomeMVP.View,
                 view.showDisplayName(result)
             }
     }*/
-
-
-
-    /*override fun getFileDisposable(filePath: String): @NonNull Disposable? {
-        return Observable.fromCallable {
-            downloadFileFromServer(filePath)
-        }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe{result ->
-                view.printFileContentToConsole(result)
-            }
-    }
-
-    override fun downloadFileFromServer(filePath: String): String {
-        return client!!.files().download(filePath)
-            .inputStream
-            .bufferedReader()
-            .use(BufferedReader::readText)
-    }*/
 }
