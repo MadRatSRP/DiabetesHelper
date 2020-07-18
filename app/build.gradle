@@ -84,9 +84,6 @@ dependencies {
 
     implementation group: 'de.siegmar', name: 'fastcsv', version: '1.0.3'
 
-    implementation("com.squareup.moshi:moshi:1.9.3")
-    implementation("com.squareup.moshi:moshi-kotlin:1.9.3")
-
     // Jackson
     implementation (
             [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.11.1'],

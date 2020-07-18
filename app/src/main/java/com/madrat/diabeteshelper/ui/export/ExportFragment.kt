@@ -3,7 +3,6 @@ package com.madrat.diabeteshelper.ui.export
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,13 +11,11 @@ import androidx.fragment.app.Fragment
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import com.google.gson.Gson
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentExportBinding
 import com.madrat.diabeteshelper.hideKeyboardAndClearFocus
 import com.madrat.diabeteshelper.logic.Home
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import de.siegmar.fastcsv.writer.CsvWriter
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.annotations.NonNull
@@ -98,7 +95,7 @@ class ExportFragment: Fragment() {
     }
 
     // Save to Device
-    fun saveFilesToUserDevice(listOfHomes: List<Home>) {
+    private fun saveFilesToUserDevice(listOfHomes: List<Home>) {
         if (listOfExtensions?.contains(".csv")!!) {
             saveFileAsCSVToUserDevice(binding.setupFilename.text.toString(), listOfHomes)
         }
@@ -112,7 +109,7 @@ class ExportFragment: Fragment() {
         }
 
     }
-    fun saveFileAsCSVToUserDevice(fileName: String,
+    private fun saveFileAsCSVToUserDevice(fileName: String,
                                   listOfHomes: List<Home>) {
         val filesDirPath = context?.filesDir.toString()
 
@@ -141,22 +138,11 @@ class ExportFragment: Fragment() {
 
         //println(file)
     }
-    fun saveFileAsJsonToUserDevice(fileName: String,
+    private fun saveFileAsJsonToUserDevice(fileName: String,
                                    listOfHomes: List<Home>) {
-        val moshi = Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build()
+        val gson = Gson()
 
-        val jsonAdapter: JsonAdapter<Home> =
-            moshi.adapter<Home>(Home::class.java)
-
-        var finalJSON = ""
-
-        listOfHomes.forEach {home->
-            val json = jsonAdapter.toJson(home)
-
-            finalJSON += json
-        }
+        val jsonString = gson.toJson(listOfHomes)
 
         val filesDirectoryPath = context?.filesDir.toString()
 
@@ -168,13 +154,13 @@ class ExportFragment: Fragment() {
 
         val file = File(filePath)
 
-        file.writeText(finalJSON)
+        file.writeText(jsonString)
 
         val check = File(filePath)
 
         println(check.readLines())
     }
-    fun saveFileAsXmlToUserDevice(fileName: String,
+    private fun saveFileAsXmlToUserDevice(fileName: String,
                                   listOfHomes: List<Home>) {
         val xmlMapper = XmlMapper()
 
@@ -200,7 +186,7 @@ class ExportFragment: Fragment() {
     }
 
     // Save to Dropbox
-    fun saveFilesToDropbox(listOfHomes: List<Home>) {
+    private fun saveFilesToDropbox(listOfHomes: List<Home>) {
         if (listOfExtensions?.contains(".csv")!!) {
             saveFileAsCSVToDropbox(binding.setupFilename.text.toString(), listOfHomes)
         }
@@ -213,7 +199,7 @@ class ExportFragment: Fragment() {
             saveFileAsXmlToDropbox(binding.setupFilename.text.toString(), listOfHomes)
         }
     }
-    fun getMetadataDisposable(fileName: String, file: File): @NonNull Disposable? {
+    private fun getMetadataDisposable(fileName: String, file: File): @NonNull Disposable? {
         return Observable.fromCallable {
             saveStringAsFile(fileName, file)
         }
@@ -221,7 +207,7 @@ class ExportFragment: Fragment() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe()
     }
-    fun saveStringAsFile(fileName: String, file: File) {
+    private fun saveStringAsFile(fileName: String, file: File) {
         // Upload "test.txt" to Dropbox
         FileInputStream(file).use { `in` ->
             client!!.files()
@@ -229,7 +215,7 @@ class ExportFragment: Fragment() {
                 .uploadAndFinish(`in`)
         }
     }
-    fun saveFileAsCSVToDropbox(fileName: String, listOfHomes: List<Home>) {
+    private fun saveFileAsCSVToDropbox(fileName: String, listOfHomes: List<Home>) {
         val filesDirectoryPath = context?.filesDir.toString()
 
         val fileNameWithExtension = context?.getString(
@@ -253,21 +239,10 @@ class ExportFragment: Fragment() {
 
         getMetadataDisposable(fileNameWithExtension!!, file)
     }
-    fun saveFileAsJsonToDropbox(fileName: String, listOfHomes: List<Home>) {
-        val moshi = Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build()
+    private fun saveFileAsJsonToDropbox(fileName: String, listOfHomes: List<Home>) {
+        val gson = Gson()
 
-        val jsonAdapter: JsonAdapter<Home> =
-            moshi.adapter<Home>(Home::class.java)
-
-        var finalJSON: String = ""
-
-        listOfHomes.forEach {home->
-            val json = jsonAdapter.toJson(home)
-
-            finalJSON += json
-        }
+        val jsonString = gson.toJson(listOfHomes)
 
         val filesDirectoryPath = context?.filesDir.toString()
 
@@ -279,14 +254,14 @@ class ExportFragment: Fragment() {
 
         val file = File(filePath)
 
-        file.writeText(finalJSON)
+        file.writeText(jsonString)
 
         val savedFile = File(filePath)
 
         getMetadataDisposable(fileNameWithExtension!!, savedFile)
     }
 
-    fun saveFileAsXmlToDropbox(fileName: String, listOfHomes: List<Home>) {
+    private fun saveFileAsXmlToDropbox(fileName: String, listOfHomes: List<Home>) {
         val xmlMapper = XmlMapper()
 
         var finalString = ""
@@ -313,7 +288,7 @@ class ExportFragment: Fragment() {
     }
 
     // Send files with Email
-    fun composeEmail() {
+    private fun composeEmail() {
         if (listOfExtensions?.size == 1) {
             var filePath: Uri? = null
 
@@ -413,7 +388,7 @@ class ExportFragment: Fragment() {
             requireContext().startActivity(Intent.createChooser(emailIntent, "Send mail..."))
         }
     }
-    fun getCSVFile(fileName: String): File {
+    private fun getCSVFile(fileName: String): File {
         val filesDirPath = context?.filesDir.toString()
 
         val nameForFileSaving = context?.getString(
@@ -440,25 +415,14 @@ class ExportFragment: Fragment() {
         return File(pathToFile)
     }
 
-    fun getJSONFile(fileName: String): File {
-        val moshi = Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build()
-
-        val jsonAdapter: JsonAdapter<Home> =
-            moshi.adapter<Home>(Home::class.java)
-
-        var finalJSON = ""
+    private fun getJSONFile(fileName: String): File {
+        val gson = Gson()
 
         val listOfHomes = args!!
             .listOfNames
             .toList()
 
-        listOfHomes.forEach {home->
-            val json = jsonAdapter.toJson(home)
-
-            finalJSON += json
-        }
+        val jsonString = gson.toJson(listOfHomes)
 
         val filesDirectoryPath = context?.filesDir.toString()
 
@@ -470,12 +434,12 @@ class ExportFragment: Fragment() {
 
         val file = File(filePath)
 
-        file.writeText(finalJSON)
+        file.writeText(jsonString)
 
         return File(filePath)
     }
 
-    fun getXMLFile(fileName: String): File {
+    private fun getXMLFile(fileName: String): File {
         val xmlMapper = XmlMapper()
 
         var finalString = ""

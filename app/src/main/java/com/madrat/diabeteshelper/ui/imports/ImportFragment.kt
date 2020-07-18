@@ -12,24 +12,18 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.xml.XmlMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentImportBinding
 import com.madrat.diabeteshelper.hideKeyboardAndClearFocus
 import com.madrat.diabeteshelper.logic.Home
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.BufferedReader
-import java.io.InputStream
+import java.lang.reflect.Type
 
 class ImportFragment: Fragment() {
     // ViewBinding variables
@@ -145,23 +139,10 @@ class ImportFragment: Fragment() {
             .use(BufferedReader::readText)
     }
     fun deserializeJson(jsonString: String) {
-        val moshi = Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build()
+        val gson = Gson()
+        val itemType = object : TypeToken<List<Home>>() {}.type
+        val listOfHomes = gson.fromJson<List<Home>>(jsonString, itemType)
 
-        /*val listHome = Types.newParameterizedType(
-            List::class.java, Home::class.java
-        )*/
-
-        val adapter: JsonAdapter<Home> = moshi.adapter(Home::class.java)
-
-        val list = adapter.fromJson(jsonString)
-
-        println(list)
+        println(listOfHomes.toString())
     }
-    /*fun convertJsonToHomeObject(jsonString: String) {
-        val deserializedValue = jacksonObjectMapper().readerFor(Home::class.java).readValue<Home>(jsonString)
-
-        println(deserializedValue)
-    }*/
 }
