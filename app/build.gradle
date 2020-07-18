@@ -46,6 +46,8 @@ android {
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/ASL2.0'
         exclude("META-INF/*.kotlin_module")
+
+        //exclude group: 'xpp3', module: 'xpp3'
     }
 }
 
@@ -82,20 +84,38 @@ dependencies {
 
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
-    implementation group: 'de.siegmar', name: 'fastcsv', version: '1.0.3'
+    // Json
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    // Xml
+    implementation ("com.thoughtworks.xstream:xstream:1.4.8") {
+        exclude group: 'xpp3'
+    }
 
     // Jackson
-    implementation (
+    /*implementation (
             [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.11.1'],
             [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.11.1'],
             [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.1'],
             [group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.11.1']
-    )
+    )*/
 
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.1"
+    //implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.1"
 
-    implementation group: 'javax.xml.stream', name: 'stax-api', version: '1.0-2'
+    //implementation group: 'javax.xml.stream', name: 'stax-api', version: '1.0-2'
 
-    // Json
-    implementation 'com.google.code.gson:gson:2.8.6'
+    // CSV
+    implementation group: 'de.siegmar', name: 'fastcsv', version: '1.0.3'
+
+
+    // csx
+
+    // app/build.gradle
+    /*androidTestImplementation('com.google.android:android-test:4.1.1.4') {
+        exclude group: 'xpp3', module: 'xpp3'
+    }*/
+
+    /*implementation(':app') {
+        exclude module: 'xpp3'
+    }*/
 }

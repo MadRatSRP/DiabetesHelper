@@ -10,12 +10,12 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
-import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import com.google.gson.Gson
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentExportBinding
 import com.madrat.diabeteshelper.hideKeyboardAndClearFocus
 import com.madrat.diabeteshelper.logic.Home
+import com.thoughtworks.xstream.XStream
 import de.siegmar.fastcsv.writer.CsvWriter
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.annotations.NonNull
@@ -64,13 +64,11 @@ class ExportFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val dropboxKey = "cPkFw615PeAAAAAAAAAAYL7uycEhVhzImiCk1DTl-lJU7VUexoBkDxxHveCquhx4"
-
         val config = DbxRequestConfig
             .newBuilder("DiabetesHelper")
             .build()
 
-        client = DbxClientV2(config, dropboxKey)
+        client = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
 
         val listOfNames = arguments?.let {
             ExportFragmentArgs
@@ -162,7 +160,7 @@ class ExportFragment: Fragment() {
     }
     private fun saveFileAsXmlToUserDevice(fileName: String,
                                   listOfHomes: List<Home>) {
-        val xmlMapper = XmlMapper()
+        /*val xmlMapper = XmlMapper()
 
         var finalString = ""
 
@@ -182,7 +180,7 @@ class ExportFragment: Fragment() {
 
         file.writeText(finalString)
 
-        val savedFile = File(filePath)
+        val savedFile = File(filePath)*/
     }
 
     // Save to Dropbox
@@ -260,15 +258,10 @@ class ExportFragment: Fragment() {
 
         getMetadataDisposable(fileNameWithExtension!!, savedFile)
     }
-
     private fun saveFileAsXmlToDropbox(fileName: String, listOfHomes: List<Home>) {
-        val xmlMapper = XmlMapper()
+        val xStream = XStream()
 
-        var finalString = ""
-
-        listOfHomes.forEach { home->
-            finalString += xmlMapper.writeValueAsString(home)
-        }
+        val xmlString = xStream.toXML(listOfHomes)
 
         val filesDirectoryPath = context?.filesDir.toString()
 
@@ -280,7 +273,7 @@ class ExportFragment: Fragment() {
 
         val file = File(filePath)
 
-        file.writeText(finalString)
+        file.writeText(xmlString)
 
         val savedFile = File(filePath)
 
@@ -440,7 +433,7 @@ class ExportFragment: Fragment() {
     }
 
     private fun getXMLFile(fileName: String): File {
-        val xmlMapper = XmlMapper()
+        /*val xmlMapper = XmlMapper()
 
         var finalString = ""
 
@@ -462,8 +455,11 @@ class ExportFragment: Fragment() {
 
         val file = File(filePath)
 
-        file.writeText(finalString)
+        //file.writeText(finalString)
 
-        return File(filePath)
+
+        */
+
+        return File(""/*filePath*/)
     }
 }

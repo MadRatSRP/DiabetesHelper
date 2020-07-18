@@ -18,13 +18,12 @@ import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentImportBinding
 import com.madrat.diabeteshelper.hideKeyboardAndClearFocus
 import com.madrat.diabeteshelper.logic.Home
+import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.BufferedReader
-import java.lang.reflect.Type
-import java.util.*
 
 class ImportFragment: Fragment() {
     // ViewBinding variables
@@ -44,13 +43,11 @@ class ImportFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val dropboxKey = "cPkFw615PeAAAAAAAAAAYL7uycEhVhzImiCk1DTl-lJU7VUexoBkDxxHveCquhx4"
-
         val config = DbxRequestConfig
             .newBuilder("DiabetesHelper")
             .build()
 
-        client = DbxClientV2(config, dropboxKey)
+        client = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
 
         binding.importFromUserDeviceButton.setOnClickListener {
 
@@ -61,7 +58,11 @@ class ImportFragment: Fragment() {
         }
 
         binding.skipAndSetDefaultValuesButton.setOnClickListener {
-            view.findNavController().navigate(R.id.action_import_view_to_home_view)
+            val action = ImportFragmentDirections.actionImportViewToHomeView(
+                null
+            )
+
+            view.findNavController().navigate(action)
         }
     }
 
@@ -126,7 +127,9 @@ class ImportFragment: Fragment() {
 
                     }
                     ".xml" -> {
-                       // convertJsonToHomeObject(result)
+                        if (result != null) {
+                            listOfHomes = deserializeXml(result)
+                        }
                     }
                     ".json" -> {
                         if (result != null) {
@@ -147,6 +150,13 @@ class ImportFragment: Fragment() {
             .inputStream
             .bufferedReader()
             .use(BufferedReader::readText)
+    }
+    fun deserializeXml(xmlString: String): List<Home> {
+        val xStream = XStream()
+
+        val listOfHomes = xStream.fromXML(xmlString) as List<Home>
+
+        return listOfHomes
     }
     fun deserializeJson(jsonString: String): List<Home> {
         val gson = Gson()
