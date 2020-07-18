@@ -43,9 +43,13 @@ class HomeFragment: Fragment(), HomeMVP.View {
 
         setupMVP()
 
-        presenter?.setListOfHomes()
+        val listOfHomes = HomeFragmentArgs.fromBundle(requireArguments()).listOfHomes
 
-
+        if (listOfHomes.isEmpty()) {
+            presenter?.setListOfHomes()
+        } else {
+            updateListOfHomes(listOfHomes.toCollection(ArrayList()))
+        }
 
         //presenter?.getDisplayNameDisposable()
 

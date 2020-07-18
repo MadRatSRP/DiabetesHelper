@@ -24,6 +24,7 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.BufferedReader
 import java.lang.reflect.Type
+import java.util.*
 
 class ImportFragment: Fragment() {
     // ViewBinding variables
@@ -95,6 +96,9 @@ class ImportFragment: Fragment() {
             }
         }
 
+        val alertDialog = builder.create()
+        alertDialog.show()
+
         setAndSaveButton.setOnClickListener {view->
             val fileName = view.context.getString(
                 R.string.pattern_filename,
@@ -103,10 +107,9 @@ class ImportFragment: Fragment() {
             )
 
             getFileDisposable(fileName, fileExtension)
-        }
 
-        val alertDialog = builder.create()
-        alertDialog.show()
+            alertDialog.dismiss()
+        }
     }
     private fun getFileDisposable(filePath: String,
                                   fileExtension: String): Disposable? {
@@ -116,6 +119,8 @@ class ImportFragment: Fragment() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe{result ->
+                var listOfHomes: List<Home> = ArrayList()
+
                 when(fileExtension) {
                     ".csv" -> {
 
@@ -125,10 +130,15 @@ class ImportFragment: Fragment() {
                     }
                     ".json" -> {
                         if (result != null) {
-                            deserializeJson(result)
+                            listOfHomes = deserializeJson(result)
                         }
                     }
                 }
+
+                val action = ImportFragmentDirections.actionImportViewToHomeView(
+                    listOfHomes.toTypedArray()
+                )
+                view?.findNavController()?.navigate(action)
             }
     }
     private fun downloadFileFromServer(filePath: String): String {
@@ -138,11 +148,11 @@ class ImportFragment: Fragment() {
             .bufferedReader()
             .use(BufferedReader::readText)
     }
-    fun deserializeJson(jsonString: String) {
+    fun deserializeJson(jsonString: String): List<Home> {
         val gson = Gson()
-        val itemType = object : TypeToken<List<Home>>() {}.type
-        val listOfHomes = gson.fromJson<List<Home>>(jsonString, itemType)
 
-        println(listOfHomes.toString())
+        val listType = object : TypeToken<List<Home>>() { }.type
+
+        return gson.fromJson<List<Home>>(jsonString, listType)
     }
 }

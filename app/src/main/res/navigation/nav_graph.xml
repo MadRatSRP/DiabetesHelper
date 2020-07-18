@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_home_view_to_export_view"
             app:destination="@id/export_view" />
+        <argument
+            android:name="listOfHomes"
+            app:argType="com.madrat.diabeteshelper.logic.Home[]" />
     </fragment>
     <fragment
         android:id="@+id/export_view"
