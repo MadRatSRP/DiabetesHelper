@@ -95,5 +95,10 @@ dependencies {
             [group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.11.1']
     )
 
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.1"
+
     implementation group: 'javax.xml.stream', name: 'stax-api', version: '1.0-2'
+
+    // Json
+    implementation 'com.google.code.gson:gson:2.8.6'
 }
