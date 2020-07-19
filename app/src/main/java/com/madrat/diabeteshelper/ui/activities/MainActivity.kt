@@ -1,13 +1,12 @@
-package com.madrat.diabeteshelper
+package com.madrat.diabeteshelper.ui.activities
 
 import android.os.Bundle
-import android.view.MenuItem
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.GravityCompat
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
+import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.ActivityMainBinding
+import com.madrat.diabeteshelper.logic.util.viewBinding
 
 class MainActivity : AppCompatActivity() {
     // ViewBinding

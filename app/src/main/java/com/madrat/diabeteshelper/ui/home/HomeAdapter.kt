@@ -1,10 +1,12 @@
-package com.madrat.diabeteshelper
+package com.madrat.diabeteshelper.ui.home
 
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.ListOfHomesBinding
-import com.madrat.diabeteshelper.logic.Home
+import com.madrat.diabeteshelper.logic.util.inflate
+import com.madrat.diabeteshelper.logic.model.Home
 import kotlinx.android.extensions.LayoutContainer
 
 class HomeAdapter

@@ -3,7 +3,7 @@ package com.madrat.diabeteshelper
 import android.content.Context
 import android.view.View
 import com.dropbox.core.v2.files.FileMetadata
-import com.madrat.diabeteshelper.logic.Home
+import com.madrat.diabeteshelper.logic.model.Home
 import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.disposables.Disposable
 

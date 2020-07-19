@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.RadioGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.dropbox.core.DbxRequestConfig
@@ -16,8 +17,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentImportBinding
-import com.madrat.diabeteshelper.hideKeyboardAndClearFocus
-import com.madrat.diabeteshelper.logic.Home
+import com.madrat.diabeteshelper.logic.util.hideKeyboardAndClearFocus
+import com.madrat.diabeteshelper.logic.model.Home
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -26,7 +27,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVRecord
 import java.io.BufferedReader
-import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.StringReader
 
@@ -40,6 +40,8 @@ class ImportFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.import_title)
+
         // ViewBinding initialization
         mBinding = FragmentImportBinding.inflate(inflater, container, false)
 
@@ -171,7 +173,12 @@ class ImportFragment: Fragment() {
             )
 
             for (record in records) {
-                list.add(Home(record[0], record[1]))
+                list.add(
+                    Home(
+                        record[0],
+                        record[1]
+                    )
+                )
             }
 
             reader.close()

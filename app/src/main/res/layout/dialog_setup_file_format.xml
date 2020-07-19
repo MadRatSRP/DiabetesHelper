@@ -125,7 +125,7 @@
 
     <Button
         android:id="@+id/export_button"
-        android:text="Export data"
+        android:text="@string/move_to_export_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/json_layout"

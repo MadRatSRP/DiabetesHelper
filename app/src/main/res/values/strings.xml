@@ -25,4 +25,12 @@
 
     <string name="pattern_filename">/%1$s%2$s</string>
 
+    <string name="home_title">Главный экран</string>
+    <string name="home_save_data">Сохранить данные</string>
+
+    <string name="export_title">Экспорт данных</string>
+
+    <string name="import_title">Импорт данных</string>
+
+    <string name="move_to_export_data">Перейти к экспорту данных</string>
 </resources>

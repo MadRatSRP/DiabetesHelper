@@ -3,7 +3,7 @@ package com.madrat.diabeteshelper
 import android.content.Context
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
-import com.madrat.diabeteshelper.logic.Home
+import com.madrat.diabeteshelper.logic.model.Home
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable
@@ -21,10 +21,30 @@ class HomePresenter(private val view: HomeMVP.View,
     override fun setListOfHomes() {
         val listOfHomes = ArrayList<Home>()
 
-        listOfHomes.add(Home("Boris", "70.0"))
-        listOfHomes.add(Home("Semen", "54"))
-        listOfHomes.add(Home("Alexei", "72.4"))
-        listOfHomes.add(Home("Gennadiy", "12"))
+        listOfHomes.add(
+            Home(
+                "Boris",
+                "70.0"
+            )
+        )
+        listOfHomes.add(
+            Home(
+                "Semen",
+                "54"
+            )
+        )
+        listOfHomes.add(
+            Home(
+                "Alexei",
+                "72.4"
+            )
+        )
+        listOfHomes.add(
+            Home(
+                "Gennadiy",
+                "12"
+            )
+        )
 
         view.updateListOfHomes(listOfHomes)
     }

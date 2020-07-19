@@ -1,4 +1,4 @@
-package com.madrat.diabeteshelper
+package com.madrat.diabeteshelper.logic.util
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.google.gson.Gson
+import com.madrat.diabeteshelper.R
 import com.thoughtworks.xstream.XStream
 
 import java.io.File
@@ -70,7 +71,10 @@ class FragmentViewBindingDelegate<T : ViewBinding>(
 }
 
 fun <T : ViewBinding> Fragment.viewBinding(viewBindingFactory: (View) -> T) =
-    FragmentViewBindingDelegate(this, viewBindingFactory)
+    FragmentViewBindingDelegate(
+        this,
+        viewBindingFactory
+    )
 
 // ViewGroup
 fun ViewGroup.inflate(layoutRes: Int): View

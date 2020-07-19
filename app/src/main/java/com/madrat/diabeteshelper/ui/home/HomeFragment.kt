@@ -7,11 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.madrat.diabeteshelper.*
 import com.madrat.diabeteshelper.databinding.FragmentHomeBinding
-import com.madrat.diabeteshelper.logic.Home
+import com.madrat.diabeteshelper.logic.model.Home
+import com.madrat.diabeteshelper.logic.util.linearManager
 
 class HomeFragment: Fragment(), HomeMVP.View {
     //private val binding by viewBinding(FragmentHomeBinding::bind)
@@ -26,6 +28,8 @@ class HomeFragment: Fragment(), HomeMVP.View {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.home_title)
+
         // ViewBinding initialization
         mBinding = FragmentHomeBinding.inflate(inflater, container, false)
         val view = binding.root

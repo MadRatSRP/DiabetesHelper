@@ -6,13 +6,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
 import com.madrat.diabeteshelper.*
 import com.madrat.diabeteshelper.databinding.FragmentExportBinding
-import com.madrat.diabeteshelper.logic.Home
+import com.madrat.diabeteshelper.logic.model.Home
+import com.madrat.diabeteshelper.logic.util.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable
@@ -40,6 +42,8 @@ class ExportFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.export_title)
+
         // ViewBinding initialization
         mBinding = FragmentExportBinding.inflate(inflater, container, false)
         val view = binding.root
@@ -109,7 +113,8 @@ class ExportFragment: Fragment() {
     }
     private fun saveFileAsCSVToUserDevice(fileName: String,
                                           listOfHomes: List<Home>) {
-        val csvString = serializeListIntoCSV(listOfHomes)
+        val csvString =
+            serializeListIntoCSV(listOfHomes)
 
         createFileWithExtensionAndWriteContent(
             fileName, R.string.pattern_csv,
@@ -118,7 +123,10 @@ class ExportFragment: Fragment() {
     }
     private fun saveFileAsJsonToUserDevice(fileName: String,
                                            listOfHomes: List<Home>) {
-        val jsonString = serializeListIntoJSON(listOfHomes)
+        val jsonString =
+            serializeListIntoJSON(
+                listOfHomes
+            )
 
         createFileWithExtensionAndWriteContent(
             fileName, R.string.pattern_json,
@@ -127,7 +135,8 @@ class ExportFragment: Fragment() {
     }
     private fun saveFileAsXmlToUserDevice(fileName: String,
                                           listOfHomes: List<Home>) {
-        val xmlString = serializeListIntoXML(listOfHomes)
+        val xmlString =
+            serializeListIntoXML(listOfHomes)
 
         createFileWithExtensionAndWriteContent(
             fileName, R.string.pattern_xml,
@@ -200,7 +209,10 @@ class ExportFragment: Fragment() {
             File(pathToFile))
     }
     private fun saveFileAsJsonToDropbox(fileName: String, listOfHomes: List<Home>) {
-        val jsonString = serializeListIntoJSON(listOfHomes)
+        val jsonString =
+            serializeListIntoJSON(
+                listOfHomes
+            )
 
         val file = createFileWithExtensionAndWriteContent(
             fileName, R.string.pattern_json,
@@ -213,7 +225,8 @@ class ExportFragment: Fragment() {
             file)
     }
     private fun saveFileAsXmlToDropbox(fileName: String, listOfHomes: List<Home>) {
-        val xmlString = serializeListIntoXML(listOfHomes)
+        val xmlString =
+            serializeListIntoXML(listOfHomes)
 
         val file = createFileWithExtensionAndWriteContent(
             fileName, R.string.pattern_xml,
@@ -332,7 +345,8 @@ class ExportFragment: Fragment() {
             .listOfNames
             .toCollection(ArrayList())
 
-        val csvString = serializeListIntoCSV(listOfHomes)
+        val csvString =
+            serializeListIntoCSV(listOfHomes)
 
         return createFileWithExtensionAndWriteContent(
             fileName, R.string.pattern_csv,
@@ -345,7 +359,10 @@ class ExportFragment: Fragment() {
             .listOfNames
             .toCollection(ArrayList())
 
-        val jsonString = serializeListIntoJSON(listOfHomes)
+        val jsonString =
+            serializeListIntoJSON(
+                listOfHomes
+            )
 
         return createFileWithExtensionAndWriteContent(
             fileName, R.string.pattern_json, jsonString
@@ -357,7 +374,8 @@ class ExportFragment: Fragment() {
             .listOfNames
             .toCollection(ArrayList())
 
-        val xmlString = serializeListIntoXML(listOfHomes)
+        val xmlString =
+            serializeListIntoXML(listOfHomes)
 
         return createFileWithExtensionAndWriteContent(
             fileName, R.string.pattern_xml,
