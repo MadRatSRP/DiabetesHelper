@@ -1,17 +1,6 @@
 package com.madrat.diabeteshelper
 
-import android.content.Context
-import com.dropbox.core.DbxRequestConfig
-import com.dropbox.core.v2.DbxClientV2
-import com.madrat.diabeteshelper.logic.model.Home
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.annotations.NonNull
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.schedulers.Schedulers
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileInputStream
+import com.madrat.diabeteshelper.logic.Home
 
 
 class HomePresenter(private val view: HomeMVP.View,

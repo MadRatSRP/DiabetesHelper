@@ -1,4 +1,4 @@
-package com.madrat.diabeteshelper.logic.model
+package com.madrat.diabeteshelper.logic
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize

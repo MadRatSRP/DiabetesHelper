@@ -1,6 +1,7 @@
 package com.madrat.diabeteshelper.logic.util
 
 import android.content.Context
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -104,10 +105,12 @@ inline fun EditText.hideKeyboardAndClearFocus(crossinline function: () -> Unit) 
     }
 }
 
-fun Fragment.getPathToFile(fileNameWithExtension: String): String
-    = requireContext().filesDir.toString() + fileNameWithExtension
+fun getPathToFile(fileNameWithExtension: String): String
+    = Environment
+    .getExternalStorageDirectory()
+    .toString() + "/Apps/DiabetesHelper" + fileNameWithExtension
 
-fun Fragment.createFileWithExtension(fileNameWithExtension: String): File
+fun createFileWithExtension(fileNameWithExtension: String): File
     = File(getPathToFile(fileNameWithExtension))
 
 fun Fragment.createFileWithExtensionAndWriteContent(
@@ -120,6 +123,8 @@ fun Fragment.createFileWithExtensionAndWriteContent(
     val file = createFileWithExtension(fileNameWithExtension!!)
 
     file.writeText(content)
+
+    println(file.path)
 
     return file
 }

@@ -13,7 +13,7 @@ import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
 import com.madrat.diabeteshelper.*
 import com.madrat.diabeteshelper.databinding.FragmentExportBinding
-import com.madrat.diabeteshelper.logic.model.Home
+import com.madrat.diabeteshelper.logic.Home
 import com.madrat.diabeteshelper.logic.util.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.annotations.NonNull

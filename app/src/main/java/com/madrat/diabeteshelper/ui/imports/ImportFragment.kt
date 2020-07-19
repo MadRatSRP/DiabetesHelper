@@ -18,7 +18,7 @@ import com.google.gson.reflect.TypeToken
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentImportBinding
 import com.madrat.diabeteshelper.logic.util.hideKeyboardAndClearFocus
-import com.madrat.diabeteshelper.logic.model.Home
+import com.madrat.diabeteshelper.logic.Home
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable

@@ -2,6 +2,8 @@ package com.madrat.diabeteshelper.ui.home
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,10 +12,14 @@ import android.widget.CheckBox
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import com.madrat.diabeteshelper.*
+import com.madrat.diabeteshelper.HomeMVP
+import com.madrat.diabeteshelper.HomePresenter
+import com.madrat.diabeteshelper.HomeRepository
+import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentHomeBinding
-import com.madrat.diabeteshelper.logic.model.Home
+import com.madrat.diabeteshelper.logic.Home
 import com.madrat.diabeteshelper.logic.util.linearManager
+import java.io.File
 
 class HomeFragment: Fragment(), HomeMVP.View {
     //private val binding by viewBinding(FragmentHomeBinding::bind)
