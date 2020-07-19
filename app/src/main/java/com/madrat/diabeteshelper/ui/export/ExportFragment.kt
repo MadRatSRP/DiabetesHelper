@@ -13,16 +13,16 @@ import com.dropbox.core.v2.DbxClientV2
 import com.madrat.diabeteshelper.*
 import com.madrat.diabeteshelper.databinding.FragmentExportBinding
 import com.madrat.diabeteshelper.logic.Home
-import com.opencsv.CSVWriter
-import com.opencsv.bean.StatefulBeanToCsv
-import com.opencsv.bean.StatefulBeanToCsvBuilder
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import org.apache.commons.csv.CSVFormat
 import java.io.File
 import java.io.FileInputStream
+import java.io.IOException
+import java.io.Writer
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -172,12 +172,27 @@ class ExportFragment: Fragment() {
 
         val pathToFile = getPathToFile(fileNameWithExtension!!)
 
-        Files.newBufferedWriter(Paths.get(pathToFile)).use { writer ->
-            val beanToCsv: StatefulBeanToCsv<Home> = StatefulBeanToCsvBuilder<Home>(writer)
-                .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER)
-                .build()
+        try {
+            // create a writer
+            val writer: Writer = Files.newBufferedWriter(
+                Paths.get(requireContext().filesDir.toString() + fileNameWithExtension)
+            )
 
-            beanToCsv.write(listOfHomes)
+            // write CSV file
+            val printer = CSVFormat.DEFAULT.withHeader("author", "value").print(writer)
+
+            // write list to file
+            listOfHomes.forEach {
+                printer.printRecord(it.author, it.value)
+            }
+
+            // flush the stream
+            printer.flush()
+
+            // close the writer
+            writer.close()
+        } catch (ex: IOException) {
+            ex.printStackTrace()
         }
 
         getMetadataDisposable(context?.getString(

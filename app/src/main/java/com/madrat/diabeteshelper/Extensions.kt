@@ -20,9 +20,11 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.google.gson.Gson
 import com.thoughtworks.xstream.XStream
+
 import java.io.File
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
+
 
 // Activity
 inline fun <T : ViewBinding> AppCompatActivity.viewBinding(
@@ -118,6 +120,18 @@ fun Fragment.createFileWithExtensionAndWriteContent(
     return file
 }
 
+fun Fragment.createCsvFile(content: String): File {
+    val fileNameWithExtension = requireContext().getString(
+        R.string.pattern_csv, "example"
+    )
+    val pathToFile = getPathToFile(fileNameWithExtension)
+
+    val file = File(pathToFile)
+    file.writeText(content)
+
+    return file
+}
+
 // Serializers
 // JSON
 fun serializeListIntoJSON(srcObject: Any): String
@@ -128,4 +142,11 @@ fun serializeListIntoXML(srcObject: Any): String
 // CSV
 fun serializeListIntoCSV(srcObject: Any): String
     = ""
+
+/*fun getCellProcessors(): Array<CellProcessor> {
+    return arrayOf(
+        NotNull(),  // author
+        NotNull()  // value
+    )
+}*/
 

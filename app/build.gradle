@@ -92,20 +92,7 @@ dependencies {
         exclude group: 'xpp3'
     }
 
-    // Jackson
-    /*implementation (
-            [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.11.1'],
-            [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.11.1'],
-            [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.1'],
-            [group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.11.1']
-    )*/
-
-    //implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.1"
-
-    //implementation group: 'javax.xml.stream', name: 'stax-api', version: '1.0-2'
-
     // CSV
-    implementation group: 'de.siegmar', name: 'fastcsv', version: '1.0.3'
+    implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
 
-    implementation group: 'com.opencsv', name: 'opencsv', version: '5.2'
 }

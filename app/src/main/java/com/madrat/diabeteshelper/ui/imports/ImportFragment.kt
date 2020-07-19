@@ -18,22 +18,25 @@ import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentImportBinding
 import com.madrat.diabeteshelper.hideKeyboardAndClearFocus
 import com.madrat.diabeteshelper.logic.Home
-import com.opencsv.CSVReader
-import com.opencsv.bean.CsvToBeanBuilder
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVRecord
 import java.io.BufferedReader
+import java.io.ByteArrayInputStream
+import java.io.IOException
 import java.io.StringReader
+
 
 class ImportFragment: Fragment() {
     // ViewBinding variables
     private var mBinding: FragmentImportBinding? = null
     private val binding get() = mBinding!!
 
-    var client: DbxClientV2? = null
+    private var client: DbxClientV2? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -127,7 +130,9 @@ class ImportFragment: Fragment() {
 
                 when(fileExtension) {
                     ".csv" -> {
-
+                        if (result != null) {
+                            listOfHomes = deserializeCsv(result)
+                        }
                     }
                     ".xml" -> {
                         if (result != null) {
@@ -154,26 +159,34 @@ class ImportFragment: Fragment() {
             .bufferedReader()
             .use(BufferedReader::readText)
     }
-    fun deserializeCsv(csvString: String): List<Home> {
-        var listOfHomes = ArrayList<Home>()
+    private fun deserializeCsv(csvString: String): List<Home> {
+        val list = ArrayList<Home>()
 
-        /*CSVReader(StringReader(csvString)).use { reader ->
-            listOfHomes = CsvToBeanBuilder<List<Home>>(reader)
-                .withType()
-                .build()
-                .parse()
-        }*/
+        try {
+            val reader = StringReader(csvString)
 
-        return listOfHomes
+            // read csv file
+            val records: Iterable<CSVRecord> = CSVFormat.DEFAULT.parse(
+                reader
+            )
+
+            for (record in records) {
+                list.add(Home(record[0], record[1]))
+            }
+
+            reader.close()
+        } catch (ex: IOException) {
+            ex.printStackTrace()
+        }
+
+        return list
     }
-    fun deserializeXml(xmlString: String): List<Home> {
+    private fun deserializeXml(xmlString: String): List<Home> {
         val xStream = XStream()
 
-        val listOfHomes = xStream.fromXML(xmlString) as List<Home>
-
-        return listOfHomes
+        return xStream.fromXML(xmlString) as List<Home>
     }
-    fun deserializeJson(jsonString: String): List<Home> {
+    private fun deserializeJson(jsonString: String): List<Home> {
         val gson = Gson()
 
         val listType = object : TypeToken<List<Home>>() { }.type
