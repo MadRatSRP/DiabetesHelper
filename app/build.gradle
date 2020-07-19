@@ -107,15 +107,5 @@ dependencies {
     // CSV
     implementation group: 'de.siegmar', name: 'fastcsv', version: '1.0.3'
 
-
-    // csx
-
-    // app/build.gradle
-    /*androidTestImplementation('com.google.android:android-test:4.1.1.4') {
-        exclude group: 'xpp3', module: 'xpp3'
-    }*/
-
-    /*implementation(':app') {
-        exclude module: 'xpp3'
-    }*/
+    implementation group: 'com.opencsv', name: 'opencsv', version: '5.2'
 }

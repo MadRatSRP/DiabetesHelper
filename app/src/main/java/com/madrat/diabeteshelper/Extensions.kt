@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -17,6 +18,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import com.google.gson.Gson
+import com.thoughtworks.xstream.XStream
+import java.io.File
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -93,3 +97,35 @@ inline fun EditText.hideKeyboardAndClearFocus(crossinline function: () -> Unit) 
         false
     }
 }
+
+fun Fragment.getPathToFile(fileNameWithExtension: String): String
+    = requireContext().filesDir.toString() + fileNameWithExtension
+
+fun Fragment.createFileWithExtension(fileNameWithExtension: String): File
+    = File(getPathToFile(fileNameWithExtension))
+
+fun Fragment.createFileWithExtensionAndWriteContent(
+    fileName: String, @StringRes extensionId: Int,
+    content: String): File {
+    val fileNameWithExtension = context?.getString(
+        extensionId, fileName
+    )
+
+    val file = createFileWithExtension(fileNameWithExtension!!)
+
+    file.writeText(content)
+
+    return file
+}
+
+// Serializers
+// JSON
+fun serializeListIntoJSON(srcObject: Any): String
+    = Gson().toJson(srcObject)
+// XML
+fun serializeListIntoXML(srcObject: Any): String
+    = XStream().toXML(srcObject)
+// CSV
+fun serializeListIntoCSV(srcObject: Any): String
+    = ""
+

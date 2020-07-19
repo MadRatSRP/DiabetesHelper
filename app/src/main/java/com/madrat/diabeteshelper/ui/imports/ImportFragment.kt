@@ -18,12 +18,15 @@ import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentImportBinding
 import com.madrat.diabeteshelper.hideKeyboardAndClearFocus
 import com.madrat.diabeteshelper.logic.Home
+import com.opencsv.CSVReader
+import com.opencsv.bean.CsvToBeanBuilder
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.BufferedReader
+import java.io.StringReader
 
 class ImportFragment: Fragment() {
     // ViewBinding variables
@@ -150,6 +153,18 @@ class ImportFragment: Fragment() {
             .inputStream
             .bufferedReader()
             .use(BufferedReader::readText)
+    }
+    fun deserializeCsv(csvString: String): List<Home> {
+        var listOfHomes = ArrayList<Home>()
+
+        /*CSVReader(StringReader(csvString)).use { reader ->
+            listOfHomes = CsvToBeanBuilder<List<Home>>(reader)
+                .withType()
+                .build()
+                .parse()
+        }*/
+
+        return listOfHomes
     }
     fun deserializeXml(xmlString: String): List<Home> {
         val xStream = XStream()

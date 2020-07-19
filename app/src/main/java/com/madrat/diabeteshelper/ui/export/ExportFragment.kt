@@ -10,13 +10,12 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
-import com.google.gson.Gson
-import com.madrat.diabeteshelper.R
+import com.madrat.diabeteshelper.*
 import com.madrat.diabeteshelper.databinding.FragmentExportBinding
-import com.madrat.diabeteshelper.hideKeyboardAndClearFocus
 import com.madrat.diabeteshelper.logic.Home
-import com.thoughtworks.xstream.XStream
-import de.siegmar.fastcsv.writer.CsvWriter
+import com.opencsv.CSVWriter
+import com.opencsv.bean.StatefulBeanToCsv
+import com.opencsv.bean.StatefulBeanToCsvBuilder
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable
@@ -24,7 +23,8 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
 import java.io.FileInputStream
-import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
 
 
 class ExportFragment: Fragment() {
@@ -108,79 +108,31 @@ class ExportFragment: Fragment() {
 
     }
     private fun saveFileAsCSVToUserDevice(fileName: String,
-                                  listOfHomes: List<Home>) {
-        val filesDirPath = context?.filesDir.toString()
+                                          listOfHomes: List<Home>) {
+        val csvString = serializeListIntoCSV(listOfHomes)
 
-        //println(filesDirPath)
-
-        val nameForFileSaving = context?.getString(
-            R.string.pattern_csv, fileName
+        createFileWithExtensionAndWriteContent(
+            fileName, R.string.pattern_csv,
+            csvString
         )
-
-        val pathToFile = filesDirPath + nameForFileSaving
-
-        val csvWriter = CsvWriter()
-
-        val data: MutableCollection<Array<String>> = ArrayList()
-        data.add(arrayOf("author", "value"))
-
-        listOfHomes.forEach { home->
-            data.add(arrayOf(home.author, home.value))
-        }
-
-        csvWriter.write(File(pathToFile), StandardCharsets.UTF_8, data)
-
-        val file = File(pathToFile)
-
-        println(file.readLines())
-
-        //println(file)
     }
     private fun saveFileAsJsonToUserDevice(fileName: String,
-                                   listOfHomes: List<Home>) {
-        val gson = Gson()
+                                           listOfHomes: List<Home>) {
+        val jsonString = serializeListIntoJSON(listOfHomes)
 
-        val jsonString = gson.toJson(listOfHomes)
-
-        val filesDirectoryPath = context?.filesDir.toString()
-
-        val fileNameWithExtension = context?.getString(
-            R.string.pattern_json, fileName
+        createFileWithExtensionAndWriteContent(
+            fileName, R.string.pattern_json,
+            jsonString
         )
-
-        val filePath = filesDirectoryPath + fileNameWithExtension
-
-        val file = File(filePath)
-
-        file.writeText(jsonString)
-
-        val check = File(filePath)
-
-        println(check.readLines())
     }
     private fun saveFileAsXmlToUserDevice(fileName: String,
-                                  listOfHomes: List<Home>) {
-        /*val xmlMapper = XmlMapper()
+                                          listOfHomes: List<Home>) {
+        val xmlString = serializeListIntoXML(listOfHomes)
 
-        var finalString = ""
-
-        listOfHomes.forEach { home->
-            finalString += xmlMapper.writeValueAsString(home)
-        }
-
-        val filesDirectoryPath = context?.filesDir.toString()
-
-        val fileNameWithExtension = context?.getString(
-            R.string.pattern_json, fileName
+        createFileWithExtensionAndWriteContent(
+            fileName, R.string.pattern_xml,
+            xmlString
         )
-
-        val filePath = filesDirectoryPath + fileNameWithExtension
-
-        val file = File(filePath)
-
-        file.writeText(finalString)
-
-        val savedFile = File(filePath)*/
     }
 
     // Save to Dropbox
@@ -214,70 +166,49 @@ class ExportFragment: Fragment() {
         }
     }
     private fun saveFileAsCSVToDropbox(fileName: String, listOfHomes: List<Home>) {
-        val filesDirectoryPath = context?.filesDir.toString()
-
         val fileNameWithExtension = context?.getString(
             R.string.pattern_csv, fileName
         )
 
-        val filePath = filesDirectoryPath + fileNameWithExtension
+        val pathToFile = getPathToFile(fileNameWithExtension!!)
 
-        val csvWriter = CsvWriter()
+        Files.newBufferedWriter(Paths.get(pathToFile)).use { writer ->
+            val beanToCsv: StatefulBeanToCsv<Home> = StatefulBeanToCsvBuilder<Home>(writer)
+                .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER)
+                .build()
 
-        val data: MutableCollection<Array<String>> = ArrayList()
-        data.add(arrayOf("author", "value"))
-
-        listOfHomes.forEach { home->
-            data.add(arrayOf(home.author, home.value))
+            beanToCsv.write(listOfHomes)
         }
 
-        csvWriter.write(File(filePath), StandardCharsets.UTF_8, data)
-
-        val file = File(filePath)
-
-        getMetadataDisposable(fileNameWithExtension!!, file)
+        getMetadataDisposable(context?.getString(
+            R.string.pattern_csv, fileName)!!,
+            File(pathToFile))
     }
     private fun saveFileAsJsonToDropbox(fileName: String, listOfHomes: List<Home>) {
-        val gson = Gson()
+        val jsonString = serializeListIntoJSON(listOfHomes)
 
-        val jsonString = gson.toJson(listOfHomes)
-
-        val filesDirectoryPath = context?.filesDir.toString()
-
-        val fileNameWithExtension = context?.getString(
-            R.string.pattern_json, fileName
+        val file = createFileWithExtensionAndWriteContent(
+            fileName, R.string.pattern_json,
+            jsonString
         )
 
-        val filePath = filesDirectoryPath + fileNameWithExtension
-
-        val file = File(filePath)
-
-        file.writeText(jsonString)
-
-        val savedFile = File(filePath)
-
-        getMetadataDisposable(fileNameWithExtension!!, savedFile)
+        getMetadataDisposable(
+            context?.getString(
+                R.string.pattern_json, fileName)!!,
+            file)
     }
     private fun saveFileAsXmlToDropbox(fileName: String, listOfHomes: List<Home>) {
-        val xStream = XStream()
+        val xmlString = serializeListIntoXML(listOfHomes)
 
-        val xmlString = xStream.toXML(listOfHomes)
-
-        val filesDirectoryPath = context?.filesDir.toString()
-
-        val fileNameWithExtension = context?.getString(
-            R.string.pattern_xml, fileName
+        val file = createFileWithExtensionAndWriteContent(
+            fileName, R.string.pattern_xml,
+            xmlString
         )
 
-        val filePath = filesDirectoryPath + fileNameWithExtension
-
-        val file = File(filePath)
-
-        file.writeText(xmlString)
-
-        val savedFile = File(filePath)
-
-        getMetadataDisposable(fileNameWithExtension!!, savedFile)
+        getMetadataDisposable(
+            context?.getString(
+                R.string.pattern_xml, fileName)!!,
+            file)
     }
 
     // Send files with Email
@@ -382,84 +313,40 @@ class ExportFragment: Fragment() {
         }
     }
     private fun getCSVFile(fileName: String): File {
-        val filesDirPath = context?.filesDir.toString()
-
-        val nameForFileSaving = context?.getString(
-            R.string.pattern_csv, fileName
-        )
-
-        val pathToFile = filesDirPath + nameForFileSaving
-
-        val csvWriter = CsvWriter()
-
-        val data: MutableCollection<Array<String>> = ArrayList()
-        data.add(arrayOf("author", "value"))
-
         val listOfHomes = args!!
             .listOfNames
-            .toList()
+            .toCollection(ArrayList())
 
-        listOfHomes.forEach { home->
-            data.add(arrayOf(home.author, home.value))
-        }
+        val csvString = serializeListIntoCSV(listOfHomes)
 
-        csvWriter.write(File(pathToFile), StandardCharsets.UTF_8, data)
-
-        return File(pathToFile)
+        return createFileWithExtensionAndWriteContent(
+            fileName, R.string.pattern_csv,
+            csvString
+        )
     }
 
     private fun getJSONFile(fileName: String): File {
-        val gson = Gson()
-
         val listOfHomes = args!!
             .listOfNames
-            .toList()
+            .toCollection(ArrayList())
 
-        val jsonString = gson.toJson(listOfHomes)
+        val jsonString = serializeListIntoJSON(listOfHomes)
 
-        val filesDirectoryPath = context?.filesDir.toString()
-
-        val fileNameWithExtension = context?.getString(
-            R.string.pattern_json, fileName
+        return createFileWithExtensionAndWriteContent(
+            fileName, R.string.pattern_json, jsonString
         )
-
-        val filePath = filesDirectoryPath + fileNameWithExtension
-
-        val file = File(filePath)
-
-        file.writeText(jsonString)
-
-        return File(filePath)
     }
 
     private fun getXMLFile(fileName: String): File {
-        /*val xmlMapper = XmlMapper()
-
-        var finalString = ""
-
         val listOfHomes = args!!
             .listOfNames
-            .toList()
+            .toCollection(ArrayList())
 
-        listOfHomes.forEach { home->
-            finalString += xmlMapper.writeValueAsString(home)
-        }
+        val xmlString = serializeListIntoXML(listOfHomes)
 
-        val filesDirectoryPath = context?.filesDir.toString()
-
-        val fileNameWithExtension = context?.getString(
-            R.string.pattern_xml, fileName
+        return createFileWithExtensionAndWriteContent(
+            fileName, R.string.pattern_xml,
+            xmlString
         )
-
-        val filePath = filesDirectoryPath + fileNameWithExtension
-
-        val file = File(filePath)
-
-        //file.writeText(finalString)
-
-
-        */
-
-        return File(""/*filePath*/)
     }
 }
