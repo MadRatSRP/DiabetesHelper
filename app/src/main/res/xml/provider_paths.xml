@@ -5,6 +5,6 @@
      name is the file name
      path is the root of external storage, it means here: Environment.getExternalStorageDirectory()
      -->
-    <files-path name="bober" path="."/>
+    <files-path name="export_to_email" path="."/>
 
 </paths>

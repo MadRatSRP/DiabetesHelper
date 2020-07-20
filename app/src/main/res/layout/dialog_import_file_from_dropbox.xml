@@ -59,7 +59,7 @@
 
     <Button
         android:id="@+id/set_and_move_to_home_button"
-        android:text="Set and move"
+        android:text="Импортировать значения"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/radio_group"

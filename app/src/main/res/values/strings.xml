@@ -33,4 +33,10 @@
     <string name="import_title">Импорт данных</string>
 
     <string name="move_to_export_data">Перейти к экспорту данных</string>
+
+    <string name="topic_hint">Укажите тему сообщения</string>
+
+    <string name="receiver_hint">Укажите получателя сообщения</string>
+
+    <string name="message_hint">Укажите сообщение</string>
 </resources>

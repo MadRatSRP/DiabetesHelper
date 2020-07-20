@@ -1,20 +1,26 @@
 package com.madrat.diabeteshelper.ui.export
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
 import com.madrat.diabeteshelper.*
 import com.madrat.diabeteshelper.databinding.FragmentExportBinding
 import com.madrat.diabeteshelper.logic.Home
 import com.madrat.diabeteshelper.logic.util.*
+import com.madrat.diabeteshelper.ui.home.HomeFragmentDirections
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable
@@ -241,11 +247,44 @@ class ExportFragment: Fragment() {
 
     // Send files with Email
     private fun composeEmail() {
+        val builder = AlertDialog.Builder(context)
+        builder.setCancelable(true)
+
+        val dialogView = View.inflate(context,
+            R.layout.dialog_send_email,null)
+        builder.setView(dialogView)
+
+        val setupEmailReceiver: EditText = dialogView.findViewById(R.id.setup_receiver_email)
+        val setupEmailTopic: EditText = dialogView.findViewById(R.id.setup_email_topic)
+        val setupEmailMessage: EditText = dialogView.findViewById(R.id.setup_email_message)
+        val sendMessageToEmailButton: Button = dialogView.findViewById(R.id.send_message_to_email_button)
+
+        setupEmailReceiver.hideKeyboardAndClearFocus {  }
+        setupEmailTopic.hideKeyboardAndClearFocus {  }
+        setupEmailMessage.hideKeyboardAndClearFocus {  }
+
+        val email = "mischa.alpeew@yandex.ru"
+        val topic = "DiabetesHelper_Проверка"
+        val message = "Проверка для отправки файлов по электронной почте"
+
+        val alertDialog = builder.create()
+        alertDialog.show()
+
+        sendMessageToEmailButton.setOnClickListener {
+            sendDataToEmail(alertDialog,
+                email,
+                topic,
+                message, "export_to_email")
+        }
+    }
+
+    fun sendDataToEmail(alertDialog: AlertDialog, messageReceiver: String,
+                        messageTopic: String, message: String, fileName: String) {
         if (listOfExtensions?.size == 1) {
             var filePath: Uri? = null
 
             if (listOfExtensions?.contains(".csv")!!) {
-                val csvFile = getCSVFile("bober")
+                val csvFile = getCSVFile(fileName)
 
                 filePath = FileProvider.getUriForFile(
                     requireContext(),
@@ -255,7 +294,7 @@ class ExportFragment: Fragment() {
             }
 
             if (listOfExtensions?.contains(".xml")!!) {
-                val xmlFile = getXMLFile("bober")
+                val xmlFile = getXMLFile(fileName)
 
                 filePath = FileProvider.getUriForFile(
                     requireContext(),
@@ -265,7 +304,7 @@ class ExportFragment: Fragment() {
             }
 
             if (listOfExtensions?.contains(".json")!!) {
-                val jsonFile = getJSONFile("bober")
+                val jsonFile = getJSONFile(fileName)
 
                 filePath = FileProvider.getUriForFile(
                     requireContext(),
@@ -278,10 +317,10 @@ class ExportFragment: Fragment() {
             // set the type to 'email'
             // set the type to 'email'
             emailIntent.type = "vnd.android.cursor.dir/email"
-            val to = arrayOf("mischa.alpeew@yandex.ru")
+            val to = arrayOf(messageReceiver)
             emailIntent.putExtra(Intent.EXTRA_EMAIL, to)
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Scale Data")
-            emailIntent.putExtra(Intent.EXTRA_TEXT, "This is the body")
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, messageTopic)
+            emailIntent.putExtra(Intent.EXTRA_TEXT, message)
             emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             // the attachment
             // the attachment
@@ -291,7 +330,7 @@ class ExportFragment: Fragment() {
             val listOfAttachments = ArrayList<Uri>()
 
             if (listOfExtensions?.contains(".csv")!!) {
-                val csvFile = getCSVFile("bober")
+                val csvFile = getCSVFile(fileName)
 
                 listOfAttachments.add(
                     FileProvider.getUriForFile(
@@ -302,7 +341,7 @@ class ExportFragment: Fragment() {
             }
 
             if (listOfExtensions?.contains(".xml")!!) {
-                val xmlFile = getXMLFile("bober")
+                val xmlFile = getXMLFile(fileName)
 
                 listOfAttachments.add(
                     FileProvider.getUriForFile(
@@ -314,7 +353,7 @@ class ExportFragment: Fragment() {
             }
 
             if (listOfExtensions?.contains(".json")!!) {
-                val jsonFile = getJSONFile("bober")
+                val jsonFile = getJSONFile(fileName)
 
                 listOfAttachments.add(
                     FileProvider.getUriForFile(
@@ -329,17 +368,20 @@ class ExportFragment: Fragment() {
             // set the type to 'email'
             // set the type to 'email'
             emailIntent.type = "vnd.android.cursor.dir/email"
-            val to = arrayOf("mischa.alpeew@yandex.ru")
+            val to = arrayOf(messageReceiver)
             emailIntent.putExtra(Intent.EXTRA_EMAIL, to)
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Scale Data")
-            emailIntent.putExtra(Intent.EXTRA_TEXT, "This is the body")
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, messageTopic)
+            emailIntent.putExtra(Intent.EXTRA_TEXT, message)
             emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             // the attachment
             // the attachment
             emailIntent.putExtra(Intent.EXTRA_STREAM, listOfAttachments)
             requireContext().startActivity(Intent.createChooser(emailIntent, "Send mail..."))
+
+            alertDialog.dismiss()
         }
     }
+
     private fun getCSVFile(fileName: String): File {
         val listOfHomes = args!!
             .listOfNames
