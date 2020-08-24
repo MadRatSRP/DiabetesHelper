@@ -19,14 +19,15 @@ import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentHomeBinding
 import com.madrat.diabeteshelper.logic.Home
 import com.madrat.diabeteshelper.logic.util.linearManager
+import com.madrat.diabeteshelper.logic.util.viewBinding
 import java.io.File
 
 class HomeFragment: Fragment(), HomeMVP.View {
-    //private val binding by viewBinding(FragmentHomeBinding::bind)
+    private val binding by viewBinding(FragmentHomeBinding::bind)
 
     // ViewBinding variables
-    private var mBinding: FragmentHomeBinding? = null
-    private val binding get() = mBinding!!
+    //private var mBinding: FragmentHomeBinding? = null
+    //private val binding get() = mBinding!!
 
     private var presenter: HomePresenter? = null
 
@@ -37,7 +38,7 @@ class HomeFragment: Fragment(), HomeMVP.View {
         (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.home_title)
 
         // ViewBinding initialization
-        mBinding = FragmentHomeBinding.inflate(inflater, container, false)
+        /*mBinding = FragmentHomeBinding.inflate(inflater, container, false)*/
         val view = binding.root
 
         adapter = HomeAdapter()

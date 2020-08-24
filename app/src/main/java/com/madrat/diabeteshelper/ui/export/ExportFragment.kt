@@ -18,6 +18,7 @@ import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
 import com.madrat.diabeteshelper.*
 import com.madrat.diabeteshelper.databinding.FragmentExportBinding
+import com.madrat.diabeteshelper.databinding.FragmentHomeBinding
 import com.madrat.diabeteshelper.logic.Home
 import com.madrat.diabeteshelper.logic.util.*
 import com.madrat.diabeteshelper.ui.home.HomeFragmentDirections
@@ -37,8 +38,7 @@ import java.nio.file.Paths
 
 class ExportFragment: Fragment() {
     // ViewBinding variables
-    private var mBinding: FragmentExportBinding? = null
-    private val binding get() = mBinding!!
+    private val binding by viewBinding(FragmentExportBinding::bind)
 
     private var listOfExtensions: ArrayList<String>? = null
 
@@ -51,7 +51,6 @@ class ExportFragment: Fragment() {
         (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.export_title)
 
         // ViewBinding initialization
-        mBinding = FragmentExportBinding.inflate(inflater, container, false)
         val view = binding.root
 
         args = arguments?.let { ExportFragmentArgs.fromBundle(it) }
@@ -60,7 +59,6 @@ class ExportFragment: Fragment() {
                 args!!
                 .listOfExtensions
                 .toCollection(ArrayList())
-
 
         binding.amountOfExtensions.text = context?.getString(
             R.string.export_amount_of_extensions, listOfExtensions?.size

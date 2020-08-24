@@ -33,66 +33,97 @@ android {
     buildFeatures {
         viewBinding true
     }
+}
 
-    packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/LICENSE.md'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/NOTICE.md'
-        exclude 'META-INF/notice.txt'
-        exclude 'META-INF/ASL2.0'
-        exclude("META-INF/*.kotlin_module")
+ext {
+    // Logic
+    // RxJava 3
+    rxJavaVersion = "3.0.5"
+    // RxAndroid
+    rxAndroidVersion = "3.0.0"
 
-        //exclude group: 'xpp3', module: 'xpp3'
-    }
+    // Jetpack
+    // Constraint Layout
+    constraintLayoutVersion = "1.1.3"
+    // AppCompat
+    appCompatVersion = '1.2.0'
+    // Kotlin Extensions - Core
+    coreExtensionsVersion = '1.3.1'
+    // Navigation
+    navigationVersion = "2.3.0"
+    // Material
+    materialVersion = '1.2.0'
+    // Lifecycle
+    lifecycleVersion = "2.2.0"
+
+    // Other
+    // Google Gson
+    gsonVersion = "2.8.6"
+    // XStream
+    xStreamVersion = "1.4.12"
+    // Apache Common CSV
+    csvVersion = "1.8"
+    // Dropbox Java SDK
+    dropboxVersion = '3.1.5'
+
+    // Testing
+    // Junit
+    junitVersion = "4.13"
+    // Junit Ext
+    junitExtVersion = "1.1.1"
+    // Espresso
+    espressoVersion = "3.2.0"
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.0'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.material:material:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'androidx.navigation:navigation-fragment:2.3.0'
-    implementation 'androidx.navigation:navigation-ui:2.3.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.3.0'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.3.0'
-    testImplementation 'junit:junit:4.13'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    // Dropbox Java SDK
-    implementation 'com.dropbox.core:dropbox-core-sdk:3.1.4'
-
+    // Logic
     // RxJava 3
-    implementation "io.reactivex.rxjava3:rxjava:3.0.4"
-
+    implementation "io.reactivex.rxjava3:rxjava:$rxJavaVersion"
     // RxAndroid
-    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation "io.reactivex.rxjava3:rxandroid:$rxAndroidVersion"
 
+    // Jetpack
+    // Constraint Layout
+    implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
+    // AppCompat
+    implementation "androidx.appcompat:appcompat:$appCompatVersion"
+    // Kotlin Extensions - Core
+    implementation "androidx.core:core-ktx:$coreExtensionsVersion"
+    // Navigation
+    implementation "androidx.navigation:navigation-fragment:$navigationVersion"
+    implementation "androidx.navigation:navigation-ui:$navigationVersion"
+    implementation "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
+    implementation "androidx.navigation:navigation-ui-ktx:$navigationVersion"
+    // Material
+    implementation "com.google.android.material:material:$materialVersion"
+    // Lifecycle
+    implementation "androidx.lifecycle:lifecycle-runtime:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
 
-    def lifecycle_version = "2.2.0"
-
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
-
-    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
-
-    // Json
-    implementation 'com.google.code.gson:gson:2.8.6'
-
-    // Xml
-    implementation ("com.thoughtworks.xstream:xstream:1.4.8") {
+    // Other
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    // Google Gson
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    // XStream
+    implementation("com.thoughtworks.xstream:xstream:$xStreamVersion") {
         exclude group: 'xpp3'
     }
+    // Apache Common CSV
+    implementation "org.apache.commons:commons-csv:$csvVersion"
+    // Dropbox Java SDK
+    implementation "com.dropbox.core:dropbox-core-sdk:$dropboxVersion"
 
-    // CSV
-    implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
-
+    // Testing
+    // Junit
+    testImplementation "junit:junit:$junitVersion"
+    // Junit Ext
+    androidTestImplementation "androidx.test.ext:junit:$junitExtVersion"
+    // Espresso
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
 }

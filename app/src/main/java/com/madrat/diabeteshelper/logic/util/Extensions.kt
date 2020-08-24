@@ -22,20 +22,10 @@ import androidx.viewbinding.ViewBinding
 import com.google.gson.Gson
 import com.madrat.diabeteshelper.R
 import com.thoughtworks.xstream.XStream
-
 import java.io.File
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-
-// Activity
-inline fun <T : ViewBinding> AppCompatActivity.viewBinding(
-    crossinline bindingInflater: (LayoutInflater) -> T) =
-    lazy(LazyThreadSafetyMode.NONE) {
-        bindingInflater.invoke(layoutInflater)
-    }
-
-// Fragment
 class FragmentViewBindingDelegate<T : ViewBinding>(
     val fragment: Fragment,
     val viewBindingFactory: (View) -> T
@@ -72,10 +62,13 @@ class FragmentViewBindingDelegate<T : ViewBinding>(
 }
 
 fun <T : ViewBinding> Fragment.viewBinding(viewBindingFactory: (View) -> T) =
-    FragmentViewBindingDelegate(
-        this,
-        viewBindingFactory
-    )
+    FragmentViewBindingDelegate(this, viewBindingFactory)
+
+inline fun <T : ViewBinding> AppCompatActivity.viewBinding(
+    crossinline bindingInflater: (LayoutInflater) -> T) =
+    lazy(LazyThreadSafetyMode.NONE) {
+        bindingInflater.invoke(layoutInflater)
+    }
 
 // ViewGroup
 fun ViewGroup.inflate(layoutRes: Int): View
