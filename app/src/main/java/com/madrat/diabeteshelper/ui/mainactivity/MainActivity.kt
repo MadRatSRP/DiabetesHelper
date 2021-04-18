@@ -1,4 +1,4 @@
-package com.madrat.diabeteshelper.ui.activities
+package com.madrat.diabeteshelper.ui.mainactivity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -6,15 +6,16 @@ import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.ActivityMainBinding
-import com.madrat.diabeteshelper.logic.util.viewBinding
 
 class MainActivity : AppCompatActivity() {
-    // ViewBinding
-    private val binding by viewBinding(ActivityMainBinding::inflate)
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding.root)
+        // ViewBinding initialization
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         setSupportActionBar(binding.toolbar)
 

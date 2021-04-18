@@ -8,20 +8,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
-import com.madrat.diabeteshelper.*
+import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentExportBinding
-import com.madrat.diabeteshelper.databinding.FragmentHomeBinding
 import com.madrat.diabeteshelper.logic.Home
 import com.madrat.diabeteshelper.logic.util.*
-import com.madrat.diabeteshelper.ui.home.HomeFragmentDirections
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable
@@ -37,8 +33,8 @@ import java.nio.file.Paths
 
 
 class ExportFragment: Fragment() {
-    // ViewBinding variables
-    private val binding by viewBinding(FragmentExportBinding::bind)
+    private var nullableBinding: FragmentExportBinding? = null
+    private val binding get() = nullableBinding!!
 
     private var listOfExtensions: ArrayList<String>? = null
 
@@ -47,10 +43,10 @@ class ExportFragment: Fragment() {
     var args: ExportFragmentArgs? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.export_title)
-
         // ViewBinding initialization
+        nullableBinding = FragmentExportBinding.inflate(inflater, container, false)
         val view = binding.root
 
         args = arguments?.let { ExportFragmentArgs.fromBundle(it) }

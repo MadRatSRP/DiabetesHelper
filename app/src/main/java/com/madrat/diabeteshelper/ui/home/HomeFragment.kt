@@ -2,8 +2,6 @@ package com.madrat.diabeteshelper.ui.home
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.os.Environment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,26 +17,18 @@ import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentHomeBinding
 import com.madrat.diabeteshelper.logic.Home
 import com.madrat.diabeteshelper.logic.util.linearManager
-import com.madrat.diabeteshelper.logic.util.viewBinding
-import java.io.File
 
 class HomeFragment: Fragment(), HomeMVP.View {
-    private val binding by viewBinding(FragmentHomeBinding::bind)
-
-    // ViewBinding variables
-    //private var mBinding: FragmentHomeBinding? = null
-    //private val binding get() = mBinding!!
-
+    private var nullableBinding: FragmentHomeBinding? = null
+    private val binding get() = nullableBinding!!
     private var presenter: HomePresenter? = null
-
     private var adapter: HomeAdapter? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.home_title)
-
         // ViewBinding initialization
-        /*mBinding = FragmentHomeBinding.inflate(inflater, container, false)*/
+        nullableBinding = FragmentHomeBinding.inflate(inflater, container, false)
         val view = binding.root
 
         adapter = HomeAdapter()
