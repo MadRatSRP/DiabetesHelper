@@ -7,7 +7,6 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-    <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
 
@@ -25,7 +24,6 @@
 
     <string name="pattern_filename">/%1$s%2$s</string>
 
-    <string name="home_title">Главный экран</string>
     <string name="home_save_data">Сохранить данные</string>
 
     <string name="export_title">Экспорт данных</string>
@@ -39,4 +37,11 @@
     <string name="receiver_hint">Укажите получателя сообщения</string>
 
     <string name="message_hint">Укажите сообщение</string>
+
+    <!--Главный экран-->
+    <string name="title_home">Главный</string>
+    <!--Дневник диабетика-->
+    <string name="title_diabetes_diary">Дневник диабетика</string>
+    <!--Дневник питания-->
+    <string name="title_food_diary">Дневник питания</string>
 </resources>

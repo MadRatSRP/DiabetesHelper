@@ -63,11 +63,11 @@ class ImportFragment: Fragment(R.layout.fragment_import) {
         }
 
         binding.skipAndSetDefaultValuesButton.setOnClickListener {
-            val action = ImportFragmentDirections.actionImportViewToHomeView(
+            /*val action = ImportFragmentDirections.actionImportViewToHomeView(
                 null
             )
 
-            view.findNavController().navigate(action)
+            view.findNavController().navigate(action)*/
         }
     }
 
@@ -145,10 +145,10 @@ class ImportFragment: Fragment(R.layout.fragment_import) {
                     }
                 }
 
-                val action = ImportFragmentDirections.actionImportViewToHomeView(
+                /*val action = ImportFragmentDirections.actionImportViewToHomeView(
                     listOfHomes.toTypedArray()
                 )
-                view?.findNavController()?.navigate(action)
+                view?.findNavController()?.navigate(action)*/
             }
     }
     private fun downloadFileFromServer(filePath: String): String {

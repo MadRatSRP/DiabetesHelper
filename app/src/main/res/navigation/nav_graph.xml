@@ -1,40 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/import_view">
+    app:startDestination="@id/navigation_home">
 
     <fragment
-        android:id="@+id/home_view"
+        android:id="@+id/navigation_home"
         android:name="com.madrat.diabeteshelper.ui.home.HomeFragment"
-        android:label="@string/menu_home"
+        android:label="@string/title_home"
         tools:layout="@layout/fragment_home" >
-        <action
-            android:id="@+id/action_home_view_to_export_view"
-            app:destination="@id/export_view" />
-        <argument
-            android:name="listOfHomes"
-            app:argType="com.madrat.diabeteshelper.logic.Home[]"
-            app:nullable="true" />
-    </fragment>
-    <fragment
-        android:id="@+id/export_view"
-        android:name="com.madrat.diabeteshelper.ui.export.ExportFragment"
-        android:label="ExportFragment" >
-        <argument
-            android:name="list_of_extensions"
-            app:argType="string[]" />
-        <argument
-            android:name="list_of_names"
-            app:argType="com.madrat.diabeteshelper.logic.Home[]" />
-    </fragment>
-    <fragment
-        android:id="@+id/import_view"
-        android:name="com.madrat.diabeteshelper.ui.imports.ImportFragment"
-        android:label="ImportFragment" >
-        <action
-            android:id="@+id/action_import_view_to_home_view"
-            app:destination="@id/home_view" />
     </fragment>
 </navigation>

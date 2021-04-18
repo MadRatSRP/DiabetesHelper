@@ -26,7 +26,7 @@ class HomeFragment: Fragment(), HomeMVP.View {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.home_title)
+        (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.title_home)
         // ViewBinding initialization
         nullableBinding = FragmentHomeBinding.inflate(inflater, container, false)
         val view = binding.root
@@ -44,13 +44,13 @@ class HomeFragment: Fragment(), HomeMVP.View {
 
         setupMVP()
 
-        val listOfHomes = HomeFragmentArgs.fromBundle(requireArguments()).listOfHomes
+        /*val listOfHomes = HomeFragmentArgs.fromBundle(requireArguments()).listOfHomes
 
         if (listOfHomes == null) {
             presenter?.setListOfHomes()
         } else {
             updateListOfHomes(listOfHomes.toCollection(ArrayList()))
-        }
+        }*/
 
         //presenter?.getDisplayNameDisposable()
 
@@ -123,11 +123,11 @@ class HomeFragment: Fragment(), HomeMVP.View {
 
             val listOfHomes = adapter?.getListOfHomes()?.toTypedArray()
 
-            val action = HomeFragmentDirections.actionHomeViewToExportView(
+            /*val action = HomeFragmentDirections.actionHomeViewToExportView(
                 listOfExtensions.toTypedArray(), listOfHomes!!
-            )
+            )*/
 
-            view.findNavController().navigate(action)
+            //view.findNavController().navigate(action)
 
             alertDialog.dismiss()
         }

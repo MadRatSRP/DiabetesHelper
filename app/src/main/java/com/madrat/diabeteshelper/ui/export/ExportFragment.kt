@@ -40,7 +40,7 @@ class ExportFragment: Fragment() {
 
     var client: DbxClientV2? = null
 
-    var args: ExportFragmentArgs? = null
+    //var args: ExportFragmentArgs? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -49,7 +49,7 @@ class ExportFragment: Fragment() {
         nullableBinding = FragmentExportBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        args = arguments?.let { ExportFragmentArgs.fromBundle(it) }
+        /*args = arguments?.let { ExportFragmentArgs.fromBundle(it) }
 
         listOfExtensions =
                 args!!
@@ -58,7 +58,7 @@ class ExportFragment: Fragment() {
 
         binding.amountOfExtensions.text = context?.getString(
             R.string.export_amount_of_extensions, listOfExtensions?.size
-        )
+        )*/
 
         binding.setupFilename.hideKeyboardAndClearFocus {  }
 
@@ -74,7 +74,7 @@ class ExportFragment: Fragment() {
 
         client = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
 
-        val listOfNames = arguments?.let {
+        /*val listOfNames = arguments?.let {
             ExportFragmentArgs
                 .fromBundle(it)
                 .listOfNames
@@ -89,7 +89,7 @@ class ExportFragment: Fragment() {
 
         binding.saveToDropboxButton.setOnClickListener {
             saveFilesToDropbox(listOfNames!!)
-        }
+        }*/
 
         binding.sendEmailButton.setOnClickListener {
             composeEmail()
@@ -272,39 +272,39 @@ class ExportFragment: Fragment() {
         }
     }
 
-    fun sendDataToEmail(alertDialog: AlertDialog, messageReceiver: String,
-                        messageTopic: String, message: String, fileName: String) {
+    private fun sendDataToEmail(alertDialog: AlertDialog, messageReceiver: String,
+                                messageTopic: String, message: String, fileName: String) {
         if (listOfExtensions?.size == 1) {
             var filePath: Uri? = null
 
             if (listOfExtensions?.contains(".csv")!!) {
-                val csvFile = getCSVFile(fileName)
+                /*val csvFile = getCSVFile(fileName)
 
                 filePath = FileProvider.getUriForFile(
                     requireContext(),
                     "your.application.package.fileprovider",
                     csvFile
-                )
+                )*/
             }
 
             if (listOfExtensions?.contains(".xml")!!) {
-                val xmlFile = getXMLFile(fileName)
+                /*val xmlFile = getXMLFile(fileName)
 
                 filePath = FileProvider.getUriForFile(
                     requireContext(),
                     "your.application.package.fileprovider",
                     xmlFile
-                )
+                )*/
             }
 
             if (listOfExtensions?.contains(".json")!!) {
-                val jsonFile = getJSONFile(fileName)
+                /*val jsonFile = getJSONFile(fileName)
 
                 filePath = FileProvider.getUriForFile(
                     requireContext(),
                     "your.application.package.fileprovider",
                     jsonFile
-                )
+                )*/
             }
 
             val emailIntent = Intent(Intent.ACTION_SEND)
@@ -324,18 +324,18 @@ class ExportFragment: Fragment() {
             val listOfAttachments = ArrayList<Uri>()
 
             if (listOfExtensions?.contains(".csv")!!) {
-                val csvFile = getCSVFile(fileName)
+                /*val csvFile = getCSVFile(fileName)
 
                 listOfAttachments.add(
                     FileProvider.getUriForFile(
                         requireContext(),
                         "your.application.package.fileprovider",
                         csvFile)
-                )
+                )*/
             }
 
             if (listOfExtensions?.contains(".xml")!!) {
-                val xmlFile = getXMLFile(fileName)
+                /*val xmlFile = getXMLFile(fileName)
 
                 listOfAttachments.add(
                     FileProvider.getUriForFile(
@@ -343,11 +343,11 @@ class ExportFragment: Fragment() {
                         "your.application.package.fileprovider",
                         xmlFile
                     )
-                )
+                )*/
             }
 
             if (listOfExtensions?.contains(".json")!!) {
-                val jsonFile = getJSONFile(fileName)
+                /*val jsonFile = getJSONFile(fileName)
 
                 listOfAttachments.add(
                     FileProvider.getUriForFile(
@@ -355,7 +355,7 @@ class ExportFragment: Fragment() {
                         "your.application.package.fileprovider",
                         jsonFile
                     )
-                )
+                )*/
             }
 
             val emailIntent = Intent(Intent.ACTION_SEND_MULTIPLE)
@@ -376,8 +376,8 @@ class ExportFragment: Fragment() {
         }
     }
 
-    private fun getCSVFile(fileName: String): File {
-        val listOfHomes = args!!
+    private fun getCSVFile(fileName: String) {
+        /*val listOfHomes = args!!
             .listOfNames
             .toCollection(ArrayList())
 
@@ -387,11 +387,11 @@ class ExportFragment: Fragment() {
         return createFileWithExtensionAndWriteContent(
             fileName, R.string.pattern_csv,
             csvString
-        )
+        )*/
     }
 
-    private fun getJSONFile(fileName: String): File {
-        val listOfHomes = args!!
+    private fun getJSONFile(fileName: String) {
+        /*val listOfHomes = args!!
             .listOfNames
             .toCollection(ArrayList())
 
@@ -402,11 +402,11 @@ class ExportFragment: Fragment() {
 
         return createFileWithExtensionAndWriteContent(
             fileName, R.string.pattern_json, jsonString
-        )
+        )*/
     }
 
-    private fun getXMLFile(fileName: String): File {
-        val listOfHomes = args!!
+    private fun getXMLFile(fileName: String) {
+        /*val listOfHomes = args!!
             .listOfNames
             .toCollection(ArrayList())
 
@@ -416,6 +416,6 @@ class ExportFragment: Fragment() {
         return createFileWithExtensionAndWriteContent(
             fileName, R.string.pattern_xml,
             xmlString
-        )
+        )*/
     }
 }
