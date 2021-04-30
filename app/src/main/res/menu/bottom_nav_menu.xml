@@ -4,9 +4,9 @@
         android:id="@+id/navigation_home"
         android:title="@string/title_home" />
     <item
-        android:id="@+id/navigation_diabetes_diary"
+        android:id="@+id/navigation_diary_diabetes"
         android:title="@string/title_diabetes_diary" />
     <item
-        android:id="@+id/navigation_food_diary"
+        android:id="@+id/navigation_diary_food"
         android:title="@string/title_food_diary" />
 </menu>

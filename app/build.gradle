@@ -38,7 +38,7 @@ android {
 ext {
     // Network && Threads
     // Coil
-    coilVersion = '1.2.0'
+    coilVersion = '1.2.1'
     // Chucker
     chuckerVersion = "3.4.0"
     // Retrofit

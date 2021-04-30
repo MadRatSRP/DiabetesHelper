@@ -5,11 +5,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
     app:startDestination="@id/navigation_home">
-
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.madrat.diabeteshelper.ui.home.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" >
     </fragment>
+    <fragment
+        android:id="@+id/navigation_diary_diabetes"
+        android:name="com.madrat.diabeteshelper.ui.diarydiabetes.FragmentDiaryDiabetes"
+        android:label="@string/title_diabetes_diary"
+        tools:layout="@layout/fragment_diary_diabetes"/>
 </navigation>
