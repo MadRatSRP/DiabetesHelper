@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.DialogAddDiabetesNoteBinding
+import com.madrat.diabeteshelper.databinding.DialogEditDiabetesNoteBinding
 import com.madrat.diabeteshelper.databinding.FragmentDiabetesDiaryBinding
 import com.madrat.diabeteshelper.logic.util.linearManager
 
@@ -21,7 +22,9 @@ class FragmentDiabetesDiary: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         nullableBinding = FragmentDiabetesDiaryBinding.inflate(inflater, container, false)
-        adapter = DiabetesNotesAdapter()
+        adapter = DiabetesNotesAdapter {
+            note: DiabetesNote -> showEditNoteDialog(note)
+        }
         with(binding) {
             recyclerView.adapter = adapter
             recyclerView.linearManager()
@@ -40,10 +43,10 @@ class FragmentDiabetesDiary: Fragment() {
         currentNoteId = listOfDiabetesNotes.size
         updateListOfDiabetesNotes(listOfDiabetesNotes)
         binding.buttonAddNote.setOnClickListener {
-            handleAddNote(view.context)
+            showAddNoteDialog(view.context)
         }
     }
-    private fun handleAddNote(context: Context) {
+    private fun showAddNoteDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
         val dialogLayoutBinding = DialogAddDiabetesNoteBinding.inflate(LayoutInflater.from(context))
         val dialog: AlertDialog = builder.create()
@@ -62,6 +65,34 @@ class FragmentDiabetesDiary: Fragment() {
             setView(dialogLayoutBinding.root)
             show()
         }
+    }
+    fun showEditNoteDialog(diabetesNote: DiabetesNote) {
+        val builder = context?.let { AlertDialog.Builder(it) }
+        val dialogLayoutBinding = DialogEditDiabetesNoteBinding.inflate(LayoutInflater.from(context))
+        val dialog: AlertDialog? = builder?.create()
+        with(dialogLayoutBinding) {
+            editSugarLevel.setText(diabetesNote.sugarLevel.toString())
+            buttonSave.setOnClickListener {
+                updateDiabetesNoteValue(
+                    DiabetesNote(
+                        diabetesNote.noteId, editSugarLevel.text.toString().toDouble()
+                    )
+                )
+                dialog?.dismiss()
+            }
+            buttonCancel.setOnClickListener {
+                dialog?.dismiss()
+            }
+        }
+        with(dialog) {
+            this?.window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            this?.setView(dialogLayoutBinding.root)
+            this?.show()
+        }
+    }
+    private fun updateDiabetesNoteValue(diabetesNote: DiabetesNote) {
+        adapter?.updateDiabetesNote(diabetesNote)
+        binding.recyclerView.adapter = adapter
     }
     private fun addDiabetesNoteToList(currentSugarLevel: Double) {
         adapter?.addDiabetesNote(
