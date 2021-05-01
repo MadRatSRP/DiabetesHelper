@@ -13,7 +13,7 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_diary_diabetes"
-        android:name="com.madrat.diabeteshelper.ui.diarydiabetes.FragmentDiaryDiabetes"
+        android:name="com.madrat.diabeteshelper.ui.diabetesdiary.FragmentDiabetesDiary"
         android:label="@string/title_diabetes_diary"
-        tools:layout="@layout/fragment_diary_diabetes"/>
+        tools:layout="@layout/fragment_diabetes_diary"/>
 </navigation>

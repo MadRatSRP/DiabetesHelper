@@ -42,8 +42,11 @@
     <string name="title_home">Главный</string>
     <!--Дневник диабетика-->
     <string name="title_diabetes_diary">Дневник диабетика</string>
+    <string name="hint_add_sugar_level">Добавьте значение показателя сахара:</string>
     <!--Дневник питания-->
     <string name="title_food_diary">Дневник питания</string>
     <!--Общее-->
     <string name="button_add_note">Добавить запись</string>
+    <string name="button_add">Добавить</string>
+    <string name="button_cancel">Отмена</string>
 </resources>

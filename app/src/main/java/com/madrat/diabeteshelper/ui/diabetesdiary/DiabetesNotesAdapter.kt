@@ -1,18 +1,21 @@
-package com.madrat.diabeteshelper.ui.diarydiabetes
+package com.madrat.diabeteshelper.ui.diabetesdiary
 
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.ListDiabetesNotesBinding
-import com.madrat.diabeteshelper.databinding.ListOfHomesBinding
-import com.madrat.diabeteshelper.logic.Home
 import com.madrat.diabeteshelper.logic.util.inflate
 import kotlinx.android.extensions.LayoutContainer
 
 class DiabetesNotesAdapter : RecyclerView.Adapter<DiabetesNotesAdapter.DiabetesNotesHolder>() {
     private val listOfDiabetesNotes = ArrayList<DiabetesNote>()
 
+    fun addDiabetesNote(diabetesNote: DiabetesNote) {
+        listOfDiabetesNotes.add(diabetesNote)
+        this.notifyDataSetChanged()
+    }
+    
     fun updateListOfDiabetesNotes(newListOfDiabetesNotes: ArrayList<DiabetesNote>) {
         listOfDiabetesNotes.clear()
         listOfDiabetesNotes.addAll(newListOfDiabetesNotes)
