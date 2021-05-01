@@ -8,10 +8,18 @@ import com.madrat.diabeteshelper.databinding.ListDiabetesNotesBinding
 import com.madrat.diabeteshelper.logic.util.inflate
 import kotlinx.android.extensions.LayoutContainer
 
-class DiabetesNotesAdapter(private val editNoteListener: (DiabetesNote) -> Unit)
-    : RecyclerView.Adapter<DiabetesNotesAdapter.DiabetesNotesHolder>() {
+class DiabetesNotesAdapter(
+    private val editNoteListener: (DiabetesNote) -> Unit,
+    private val removeNoteListener: (DiabetesNote) -> Unit
+): RecyclerView.Adapter<DiabetesNotesAdapter.DiabetesNotesHolder>() {
     private val listOfDiabetesNotes = ArrayList<DiabetesNote>()
 
+    fun removeDiabetesNote(diabetesNote: DiabetesNote) {
+        val noteIndex = diabetesNote.noteId
+        listOfDiabetesNotes.removeAt(noteIndex - 1)
+        this.notifyDataSetChanged()
+    }
+    
     fun updateDiabetesNote(diabetesNote: DiabetesNote) {
         val noteIndex = diabetesNote.noteId
         listOfDiabetesNotes[noteIndex - 1] = diabetesNote
@@ -47,6 +55,9 @@ class DiabetesNotesAdapter(private val editNoteListener: (DiabetesNote) -> Unit)
                 binding.sugarLevel.text = sugarLevel.toString()
                 binding.buttonEditNote.setOnClickListener {
                     editNoteListener(diabetesNote)
+                }
+                binding.buttonRemoveNote.setOnClickListener {
+                    removeNoteListener(diabetesNote)
                 }
             }
         }
