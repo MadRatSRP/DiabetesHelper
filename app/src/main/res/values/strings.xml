@@ -44,7 +44,7 @@
     <string name="title_diabetes_diary">Дневник диабетика</string>
     <string name="hint_add_sugar_level">Добавьте значение показателя сахара:</string>
     <string name="hint_edit_sugar_level">Значение показателя сахара:</string>
-    <string name="hint_remove_sugar_level">Вы уверены в удалении этой записи?</string>
+    <string name="hint_remove_sugar_level">Хотите удалить данную запись?</string>
     <!--Дневник питания-->
     <string name="title_food_diary">Дневник питания</string>
     <!--Общее-->

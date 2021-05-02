@@ -18,14 +18,13 @@ class FragmentDiabetesDiary: Fragment() {
     private var nullableBinding: FragmentDiabetesDiaryBinding? = null
     private val binding get() = nullableBinding!!
     private var adapter: DiabetesNotesAdapter? = null
-    private var currentNoteId = 0
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         nullableBinding = FragmentDiabetesDiaryBinding.inflate(inflater, container, false)
         adapter = DiabetesNotesAdapter (
-            { note: DiabetesNote -> showEditNoteDialog(note) },
-            { note: DiabetesNote -> showRemoveNoteDialog(note)}
+            { position:Int, note: DiabetesNote -> showEditNoteDialog(position, note) },
+            { position:Int -> showRemoveNoteDialog(position)}
         )
         with(binding) {
             recyclerView.adapter = adapter
@@ -36,13 +35,12 @@ class FragmentDiabetesDiary: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val listOfDiabetesNotes = arrayListOf(
-            DiabetesNote(1, 5.46),
-            DiabetesNote(2, 6.66),
-            DiabetesNote(3, 7.77),
-            DiabetesNote(4, 8.88),
-            DiabetesNote(5, 8.89)
+            DiabetesNote(5.46),
+            DiabetesNote(6.66),
+            DiabetesNote(7.77),
+            DiabetesNote(8.88),
+            DiabetesNote(8.89)
         )
-        currentNoteId = listOfDiabetesNotes.size
         updateListOfDiabetesNotes(listOfDiabetesNotes)
         binding.buttonAddNote.setOnClickListener {
             showAddNoteDialog(view.context)
@@ -68,7 +66,7 @@ class FragmentDiabetesDiary: Fragment() {
             show()
         }
     }
-    private fun showEditNoteDialog(diabetesNote: DiabetesNote) {
+    private fun showEditNoteDialog(position: Int, diabetesNote: DiabetesNote) {
         val builder = context?.let { AlertDialog.Builder(it) }
         val dialogLayoutBinding = DialogEditDiabetesNoteBinding.inflate(LayoutInflater.from(context))
         val dialog: AlertDialog? = builder?.create()
@@ -76,8 +74,9 @@ class FragmentDiabetesDiary: Fragment() {
             editSugarLevel.setText(diabetesNote.sugarLevel.toString())
             buttonSave.setOnClickListener {
                 updateDiabetesNoteValue(
+                    position,
                     DiabetesNote(
-                        diabetesNote.noteId, editSugarLevel.text.toString().toDouble()
+                        editSugarLevel.text.toString().toDouble()
                     )
                 )
                 dialog?.dismiss()
@@ -92,13 +91,13 @@ class FragmentDiabetesDiary: Fragment() {
             this?.show()
         }
     }
-    private fun showRemoveNoteDialog(diabetesNote: DiabetesNote) {
+    private fun showRemoveNoteDialog(position: Int) {
         val builder = context?.let { AlertDialog.Builder(it) }
         val dialogLayoutBinding = DialogRemoveDiabetesNoteBinding.inflate(LayoutInflater.from(context))
         val dialog: AlertDialog? = builder?.create()
         with(dialogLayoutBinding) {
             buttonRemoveNote.setOnClickListener {
-                removeDiabetesNoteFromList(diabetesNote)
+                removeDiabetesNoteFromList(position)
                 dialog?.dismiss()
             }
             buttonCancel.setOnClickListener {
@@ -111,18 +110,17 @@ class FragmentDiabetesDiary: Fragment() {
             this?.show()
         }
     }
-    private fun removeDiabetesNoteFromList(diabetesNote: DiabetesNote) {
-        adapter?.removeDiabetesNote(diabetesNote)
+    private fun removeDiabetesNoteFromList(position: Int) {
+        adapter?.removeDiabetesNote(position)
         binding.recyclerView.adapter = adapter
     }
-    private fun updateDiabetesNoteValue(diabetesNote: DiabetesNote) {
-        adapter?.updateDiabetesNote(diabetesNote)
+    private fun updateDiabetesNoteValue(position: Int, diabetesNote: DiabetesNote) {
+        adapter?.updateDiabetesNote(position, diabetesNote)
         binding.recyclerView.adapter = adapter
     }
     private fun addDiabetesNoteToList(currentSugarLevel: Double) {
         adapter?.addDiabetesNote(
             DiabetesNote(
-                currentNoteId++,
                 currentSugarLevel
             )
         )

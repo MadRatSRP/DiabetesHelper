@@ -9,20 +9,18 @@ import com.madrat.diabeteshelper.logic.util.inflate
 import kotlinx.android.extensions.LayoutContainer
 
 class DiabetesNotesAdapter(
-    private val editNoteListener: (DiabetesNote) -> Unit,
-    private val removeNoteListener: (DiabetesNote) -> Unit
+    private val editNoteListener: (Int, DiabetesNote) -> Unit,
+    private val removeNoteListener: (Int) -> Unit
 ): RecyclerView.Adapter<DiabetesNotesAdapter.DiabetesNotesHolder>() {
     private val listOfDiabetesNotes = ArrayList<DiabetesNote>()
 
-    fun removeDiabetesNote(diabetesNote: DiabetesNote) {
-        val noteIndex = diabetesNote.noteId
-        listOfDiabetesNotes.removeAt(noteIndex - 1)
+    fun removeDiabetesNote(position: Int) {
+        listOfDiabetesNotes.removeAt(position)
         this.notifyDataSetChanged()
     }
     
-    fun updateDiabetesNote(diabetesNote: DiabetesNote) {
-        val noteIndex = diabetesNote.noteId
-        listOfDiabetesNotes[noteIndex - 1] = diabetesNote
+    fun updateDiabetesNote(position: Int, diabetesNote: DiabetesNote) {
+        listOfDiabetesNotes[position] = diabetesNote
         this.notifyDataSetChanged()
     }
     
@@ -41,23 +39,23 @@ class DiabetesNotesAdapter(
             = DiabetesNotesHolder(parent.inflate(R.layout.list_diabetes_notes))
 
     override fun onBindViewHolder(holder: DiabetesNotesHolder, position: Int)
-            = holder.bind(listOfDiabetesNotes[position])
+            = holder.bind(listOfDiabetesNotes[position], position)
 
     override fun getItemCount(): Int
             = listOfDiabetesNotes.size
 
     inner class DiabetesNotesHolder internal constructor(override val containerView: View)
         : RecyclerView.ViewHolder(containerView), LayoutContainer {
-        private val binding = ListDiabetesNotesBinding.bind(containerView);
+        private val binding = ListDiabetesNotesBinding.bind(containerView)
 
-        fun bind(diabetesNote: DiabetesNote) {
+        fun bind(diabetesNote: DiabetesNote, position: Int) {
             with(diabetesNote) {
                 binding.sugarLevel.text = sugarLevel.toString()
                 binding.buttonEditNote.setOnClickListener {
-                    editNoteListener(diabetesNote)
+                    editNoteListener(position, diabetesNote)
                 }
                 binding.buttonRemoveNote.setOnClickListener {
-                    removeNoteListener(diabetesNote)
+                    removeNoteListener(position)
                 }
             }
         }
