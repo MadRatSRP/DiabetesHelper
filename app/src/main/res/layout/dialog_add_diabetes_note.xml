@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
-        android:text="@string/hint_add_sugar_level"
+        android:text="@string/diabetes_hint_add_note"
         android:gravity="center"
         android:textStyle="bold"
         android:textSize="16sp"

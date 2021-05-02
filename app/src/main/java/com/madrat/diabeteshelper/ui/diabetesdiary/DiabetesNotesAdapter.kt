@@ -14,22 +14,22 @@ class DiabetesNotesAdapter(
 ): RecyclerView.Adapter<DiabetesNotesAdapter.DiabetesNotesHolder>() {
     private val listOfDiabetesNotes = ArrayList<DiabetesNote>()
 
-    fun removeDiabetesNote(position: Int) {
+    fun removeNote(position: Int) {
         listOfDiabetesNotes.removeAt(position)
         this.notifyDataSetChanged()
     }
     
-    fun updateDiabetesNote(position: Int, diabetesNote: DiabetesNote) {
+    fun updateNote(position: Int, diabetesNote: DiabetesNote) {
         listOfDiabetesNotes[position] = diabetesNote
         this.notifyDataSetChanged()
     }
     
-    fun addDiabetesNote(diabetesNote: DiabetesNote) {
+    fun addNote(diabetesNote: DiabetesNote) {
         listOfDiabetesNotes.add(diabetesNote)
         this.notifyDataSetChanged()
     }
     
-    fun updateListOfDiabetesNotes(newListOfDiabetesNotes: ArrayList<DiabetesNote>) {
+    fun updateList(newListOfDiabetesNotes: ArrayList<DiabetesNote>) {
         listOfDiabetesNotes.clear()
         listOfDiabetesNotes.addAll(newListOfDiabetesNotes)
         this.notifyDataSetChanged()

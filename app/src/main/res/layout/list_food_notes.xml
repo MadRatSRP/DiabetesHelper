@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:background="@drawable/diabetes_note_background"
+    android:layout_marginBottom="25dp"
+    android:layout_width="match_parent"
+    android:layout_height="55dp">
+    <TextView
+        android:id="@+id/meal_name"
+        android:gravity="center"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.73"/>
+    <ImageButton
+        android:id="@+id/button_edit_note"
+        android:src="@drawable/ic_edit"
+        android:background="@drawable/button_background"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.135"/>
+    <ImageButton
+        android:id="@+id/button_remove_note"
+        android:src="@drawable/ic_remove"
+        android:background="@drawable/button_background"
+        android:layout_marginEnd="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.135"/>
+</LinearLayout>

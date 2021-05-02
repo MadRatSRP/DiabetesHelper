@@ -1,4 +1,4 @@
-package com.madrat.diabeteshelper.ui.diabetesdiary
+package com.madrat.diabeteshelper.ui.fooddiary
 
 import android.content.Context
 import android.os.Bundle
@@ -8,22 +8,19 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.madrat.diabeteshelper.R
-import com.madrat.diabeteshelper.databinding.DialogAddDiabetesNoteBinding
-import com.madrat.diabeteshelper.databinding.DialogEditDiabetesNoteBinding
-import com.madrat.diabeteshelper.databinding.DialogRemoveNoteBinding
-import com.madrat.diabeteshelper.databinding.FragmentDiabetesDiaryBinding
+import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.logic.util.linearManager
 
-class FragmentDiabetesDiary: Fragment() {
-    private var nullableBinding: FragmentDiabetesDiaryBinding? = null
+class FragmentFoodDiary: Fragment() {
+    private var nullableBinding: FragmentFoodDiaryBinding? = null
     private val binding get() = nullableBinding!!
-    private var adapter: DiabetesNotesAdapter? = null
+    private var adapter: FoodNotesAdapter? = null
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        nullableBinding = FragmentDiabetesDiaryBinding.inflate(inflater, container, false)
-        adapter = DiabetesNotesAdapter (
-            { position:Int, note: DiabetesNote -> showEditNoteDialog(position, note) },
+        nullableBinding = FragmentFoodDiaryBinding.inflate(inflater, container, false)
+        adapter = FoodNotesAdapter (
+            { position:Int, note: FoodNote -> showEditNoteDialog(position, note) },
             { position:Int -> showRemoveNoteDialog(position)}
         )
         with(binding) {
@@ -34,26 +31,26 @@ class FragmentDiabetesDiary: Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val listOfDiabetesNotes = arrayListOf(
-            DiabetesNote(5.46),
-            DiabetesNote(6.66),
-            DiabetesNote(7.77),
-            DiabetesNote(8.88),
-            DiabetesNote(8.89)
+        val listOfFoodNotes = arrayListOf(
+            FoodNote("борщ"),
+            FoodNote("драники"),
+            FoodNote("омлет"),
+            FoodNote("котлеты"),
+            FoodNote("запеканка")
         )
-        updateListOfDiabetesNotes(listOfDiabetesNotes)
+        updateListOfFoodNotes(listOfFoodNotes)
         binding.buttonAddNote.setOnClickListener {
             showAddNoteDialog(view.context)
         }
     }
     private fun showAddNoteDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
-        val dialogLayoutBinding = DialogAddDiabetesNoteBinding.inflate(LayoutInflater.from(context))
+        val dialogLayoutBinding = DialogAddFoodNoteBinding.inflate(LayoutInflater.from(context))
         val dialog: AlertDialog = builder.create()
         with(dialogLayoutBinding) {
             buttonAdd.setOnClickListener {
-                val currentSugarLevel = editSugarLevel.text.toString().toDouble()
-                addDiabetesNoteToList(currentSugarLevel)
+                val mealName = editSugarLevel.text.toString()
+                addFoodNoteToList(mealName)
                 dialog.dismiss()
             }
             buttonCancel.setOnClickListener {
@@ -66,17 +63,17 @@ class FragmentDiabetesDiary: Fragment() {
             show()
         }
     }
-    private fun showEditNoteDialog(position: Int, diabetesNote: DiabetesNote) {
+    private fun showEditNoteDialog(position: Int, foodNote: FoodNote) {
         val builder = context?.let { AlertDialog.Builder(it) }
         val dialogLayoutBinding = DialogEditDiabetesNoteBinding.inflate(LayoutInflater.from(context))
         val dialog: AlertDialog? = builder?.create()
         with(dialogLayoutBinding) {
-            editSugarLevel.setText(diabetesNote.sugarLevel.toString())
+            editSugarLevel.setText(foodNote.mealName)
             buttonSave.setOnClickListener {
-                updateDiabetesNoteValue(
+                updateFoodNoteValue(
                     position,
-                    DiabetesNote(
-                        editSugarLevel.text.toString().toDouble()
+                    FoodNote(
+                        editSugarLevel.text.toString()
                     )
                 )
                 dialog?.dismiss()
@@ -97,7 +94,7 @@ class FragmentDiabetesDiary: Fragment() {
         val dialog: AlertDialog? = builder?.create()
         with(dialogLayoutBinding) {
             buttonRemoveNote.setOnClickListener {
-                removeDiabetesNoteFromList(position)
+                removeFoodNoteFromList(position)
                 dialog?.dismiss()
             }
             buttonCancel.setOnClickListener {
@@ -110,24 +107,24 @@ class FragmentDiabetesDiary: Fragment() {
             this?.show()
         }
     }
-    private fun removeDiabetesNoteFromList(position: Int) {
+    private fun removeFoodNoteFromList(position: Int) {
         adapter?.removeNote(position)
         binding.recyclerView.adapter = adapter
     }
-    private fun updateDiabetesNoteValue(position: Int, diabetesNote: DiabetesNote) {
-        adapter?.updateNote(position, diabetesNote)
+    private fun updateFoodNoteValue(position: Int, foodNote: FoodNote) {
+        adapter?.updateNote(position, foodNote)
         binding.recyclerView.adapter = adapter
     }
-    private fun addDiabetesNoteToList(currentSugarLevel: Double) {
+    private fun addFoodNoteToList(mealName: String) {
         adapter?.addNote(
-            DiabetesNote(
-                currentSugarLevel
+            FoodNote(
+                mealName
             )
         )
         binding.recyclerView.adapter = adapter
     }
-    private fun updateListOfDiabetesNotes(listOfDiabetesNotes: ArrayList<DiabetesNote>) {
-        adapter?.updateList(listOfDiabetesNotes)
+    private fun updateListOfFoodNotes(listOfFoodNotes: ArrayList<FoodNote>) {
+        adapter?.updateList(listOfFoodNotes)
         binding.recyclerView.adapter = adapter
     }
 }

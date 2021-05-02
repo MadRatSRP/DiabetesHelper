@@ -16,4 +16,9 @@
         android:name="com.madrat.diabeteshelper.ui.diabetesdiary.FragmentDiabetesDiary"
         android:label="@string/title_diabetes_diary"
         tools:layout="@layout/fragment_diabetes_diary"/>
+    <fragment
+        android:id="@+id/navigation_diary_food"
+        android:name="com.madrat.diabeteshelper.ui.fooddiary.FragmentFoodDiary"
+        android:label="@string/title_food_diary"
+        tools:layout="@layout/fragment_food_diary"/>
 </navigation>

@@ -5,23 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
-        android:text="@string/hint_edit_note"
+        android:text="@string/hint_remove_note"
         android:gravity="center"
         android:textStyle="bold"
         android:textSize="16sp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <EditText
-        android:id="@+id/edit_sugar_level"
-        android:gravity="center"
-        android:background="@drawable/rounded_rectangle_white"
-        android:inputType="numberDecimal"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:layout_width="100dp"
         android:layout_height="wrap_content"/>
     <LinearLayout
         android:orientation="horizontal"
@@ -31,8 +21,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
-            android:id="@+id/button_save"
-            android:text="@string/button_save"
+            android:id="@+id/button_remove_note"
+            android:text="@string/button_remove"
             android:layout_marginEnd="10dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

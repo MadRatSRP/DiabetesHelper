@@ -42,15 +42,16 @@
     <string name="title_home">Главный</string>
     <!--Дневник диабетика-->
     <string name="title_diabetes_diary">Дневник диабетика</string>
-    <string name="hint_add_sugar_level">Добавьте значение показателя сахара:</string>
-    <string name="hint_edit_sugar_level">Значение показателя сахара:</string>
-    <string name="hint_remove_sugar_level">Хотите удалить данную запись?</string>
+    <string name="diabetes_hint_add_note">Добавьте новую запись дневника диабетика:</string>
     <!--Дневник питания-->
     <string name="title_food_diary">Дневник питания</string>
+    <string name="food_hint_add_note">Добавьте новую запись дневника питания:</string>
     <!--Общее-->
     <string name="button_add_note">Добавить запись</string>
     <string name="button_add">Добавить</string>
     <string name="button_cancel">Отмена</string>
     <string name="button_save">Сохранить</string>
     <string name="button_remove">Удалить</string>
+    <string name="hint_edit_note">Изменение записи</string>
+    <string name="hint_remove_note">Хотите удалить данную запись?</string>
 </resources>
