@@ -10,7 +10,6 @@ import android.widget.EditText
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
 import com.google.gson.Gson
@@ -34,8 +33,6 @@ class ImportFragment: Fragment(R.layout.fragment_import) {
     private var nullableBinding: FragmentImportBinding? = null
     private val binding get() = nullableBinding!!
 
-    private var client: DbxClientV2? = null
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // ViewBinding initialization
@@ -47,12 +44,6 @@ class ImportFragment: Fragment(R.layout.fragment_import) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.import_title)
-
-        val config = DbxRequestConfig
-            .newBuilder("DiabetesHelper")
-            .build()
-
-        client = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
 
         binding.importFromUserDeviceButton.setOnClickListener {
 
@@ -88,7 +79,7 @@ class ImportFragment: Fragment(R.layout.fragment_import) {
 
         var fileExtension = ""
 
-        radioGroup.setOnCheckedChangeListener { _, radioButtonId ->
+        /*radioGroup.setOnCheckedChangeListener { _, radioButtonId ->
             when(radioButtonId) {
                 R.id.radio_csv -> {
                     fileExtension = ".csv"
@@ -97,66 +88,18 @@ class ImportFragment: Fragment(R.layout.fragment_import) {
                     fileExtension = ".xml"
                 }
                 R.id.radio_json -> {
-                    fileExtension = ".json"
+                    fileExtension =
                 }
             }
-        }
+        }*/
 
         val alertDialog = builder.create()
         alertDialog.show()
 
         setAndSaveButton.setOnClickListener {view->
-            val fileName = view.context.getString(
-                R.string.pattern_filename,
-                editText.text.toString(),
-                fileExtension
-            )
-
-            getFileDisposable(fileName, fileExtension)
 
             alertDialog.dismiss()
         }
-    }
-    private fun getFileDisposable(filePath: String,
-                                  fileExtension: String): Disposable? {
-        return Observable.fromCallable {
-            downloadFileFromServer(filePath)
-        }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe{result ->
-                var listOfHomes: List<Home> = ArrayList()
-
-                when(fileExtension) {
-                    ".csv" -> {
-                        if (result != null) {
-                            listOfHomes = deserializeCsv(result)
-                        }
-                    }
-                    ".xml" -> {
-                        if (result != null) {
-                            listOfHomes = deserializeXml(result)
-                        }
-                    }
-                    ".json" -> {
-                        if (result != null) {
-                            listOfHomes = deserializeJson(result)
-                        }
-                    }
-                }
-
-                /*val action = ImportFragmentDirections.actionImportViewToHomeView(
-                    listOfHomes.toTypedArray()
-                )
-                view?.findNavController()?.navigate(action)*/
-            }
-    }
-    private fun downloadFileFromServer(filePath: String): String {
-        return client!!.files()
-            .download(filePath)
-            .inputStream
-            .bufferedReader()
-            .use(BufferedReader::readText)
     }
     private fun deserializeCsv(csvString: String): List<Home> {
         val list = ArrayList<Home>()
@@ -189,12 +132,5 @@ class ImportFragment: Fragment(R.layout.fragment_import) {
         val xStream = XStream()
 
         return xStream.fromXML(xmlString) as List<Home>
-    }
-    private fun deserializeJson(jsonString: String): List<Home> {
-        val gson = Gson()
-
-        val listType = object : TypeToken<List<Home>>() { }.type
-
-        return gson.fromJson<List<Home>>(jsonString, listType)
     }
 }

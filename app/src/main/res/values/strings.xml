@@ -10,7 +10,6 @@
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
 
-    <string name="dropbox_access_token">cPkFw615PeAAAAAAAAAAZrhhikSwYK5V1TTRSljclTfZsmkOEHYSDgT9CUEUbwMA</string>
     <string name="open">OPEN</string>
     <string name="close">CLOSE</string>
 
@@ -52,6 +51,11 @@
     <string name="button_cancel">Отмена</string>
     <string name="button_save">Сохранить</string>
     <string name="button_remove">Удалить</string>
+    <string name="button_import">Импортировать данные</string>
+    <string name="button_export">Экспортировать данные</string>
     <string name="hint_edit_note">Изменение записи</string>
     <string name="hint_remove_note">Хотите удалить данную запись?</string>
+    <!--Импорт и экспорт-->
+    <string name="dropbox_access_token">cPkFw615PeAAAAAAAAAAZrhhikSwYK5V1TTRSljclTfZsmkOEHYSDgT9CUEUbwMA</string>
+    <string name="hint_import_and_export">Выберите метод работы с данными:</string>
 </resources>

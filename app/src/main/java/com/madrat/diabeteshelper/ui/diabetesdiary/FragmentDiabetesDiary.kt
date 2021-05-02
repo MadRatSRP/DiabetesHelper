@@ -2,26 +2,39 @@ package com.madrat.diabeteshelper.ui.diabetesdiary
 
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import com.dropbox.core.DbxRequestConfig
+import com.dropbox.core.v2.DbxClientV2
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.madrat.diabeteshelper.R
-import com.madrat.diabeteshelper.databinding.DialogAddDiabetesNoteBinding
-import com.madrat.diabeteshelper.databinding.DialogEditDiabetesNoteBinding
-import com.madrat.diabeteshelper.databinding.DialogRemoveNoteBinding
-import com.madrat.diabeteshelper.databinding.FragmentDiabetesDiaryBinding
+import com.madrat.diabeteshelper.databinding.*
+import com.madrat.diabeteshelper.logic.Home
 import com.madrat.diabeteshelper.logic.util.linearManager
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.schedulers.Schedulers
+import java.io.BufferedReader
 
 class FragmentDiabetesDiary: Fragment() {
     private var nullableBinding: FragmentDiabetesDiaryBinding? = null
     private val binding get() = nullableBinding!!
+    private var dropboxClient: DbxClientV2? = null
     private var adapter: DiabetesNotesAdapter? = null
+    private var dialog: AlertDialog? = null
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
+        setHasOptionsMenu(true)
         nullableBinding = FragmentDiabetesDiaryBinding.inflate(inflater, container, false)
+        val config = DbxRequestConfig
+            .newBuilder("DiabetesHelper")
+            .build()
+    
+        dropboxClient = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
         adapter = DiabetesNotesAdapter (
             { position:Int, note: DiabetesNote -> showEditNoteDialog(position, note) },
             { position:Int -> showRemoveNoteDialog(position)}
@@ -46,6 +59,87 @@ class FragmentDiabetesDiary: Fragment() {
             showAddNoteDialog(view.context)
         }
     }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.clear()
+        inflater.inflate(R.menu.button_import_and_export, menu)
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.button_import_and_export -> {
+                showImportAndExportDialog(requireContext())
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+    
+    private fun showImportAndExportDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
+        val dialogLayoutBinding = DialogImportAndExportBinding.inflate(LayoutInflater.from(context))
+        dialog = builder.create()
+        with(dialogLayoutBinding) {
+            buttonImport.setOnClickListener {
+                handleImportFromDropbox("import",".json")
+            }
+            buttonExport.setOnClickListener {
+            
+            }
+            buttonCancel.setOnClickListener {
+                dialog?.dismiss()
+            }
+        }
+        with(dialog) {
+            this?.window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            this?.setView(dialogLayoutBinding.root)
+            this?.show()
+        }
+    }
+    private fun handleImportFromDropbox(fileName: String, extension: String) {
+        val finalFilename = context?.getString(
+            R.string.pattern_filename,
+            fileName,
+            extension
+        )
+    
+        finalFilename?.let { getFileDisposable(it) }
+    }
+    private fun getFileDisposable(filePath: String): Disposable? {
+        return Observable.fromCallable {
+            downloadFileFromServer(filePath)
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe{ result ->
+                handleDropboxImport(result)
+            }
+    }
+    private fun downloadFileFromServer(filePath: String): String {
+        return dropboxClient!!.files()
+            .download(filePath)
+            .inputStream
+            .bufferedReader()
+            .use(BufferedReader::readText)
+    }
+    fun handleDropboxImport(jsonString: String) {
+        var listOfDiabetesNotes: List<DiabetesNote> = ArrayList()
+    
+        listOfDiabetesNotes = deserializeJson(jsonString)
+        
+        val finalList = ArrayList(listOfDiabetesNotes)
+        
+        updateListOfDiabetesNotes(finalList)
+    }
+    private fun deserializeJson(jsonString: String): List<DiabetesNote> {
+        val gson = Gson()
+        
+        val listType = object : TypeToken<List<DiabetesNote>>() { }.type
+        
+        return gson.fromJson(jsonString, listType)
+    }
+    
+    
+    
     private fun showAddNoteDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
         val dialogLayoutBinding = DialogAddDiabetesNoteBinding.inflate(LayoutInflater.from(context))
