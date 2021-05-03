@@ -11,10 +11,9 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
-import com.madrat.diabeteshelper.logic.Home
 import com.madrat.diabeteshelper.logic.util.linearManager
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.BufferedReader
@@ -95,7 +94,10 @@ class FragmentDiabetesDiary: Fragment() {
             this?.show()
         }
     }
+    // Import from Dropbox
     private fun handleImportFromDropbox(fileName: String, extension: String) {
+        dialog?.dismiss()
+    
         val finalFilename = context?.getString(
             R.string.pattern_filename,
             fileName,
@@ -105,40 +107,34 @@ class FragmentDiabetesDiary: Fragment() {
         finalFilename?.let { getFileDisposable(it) }
     }
     private fun getFileDisposable(filePath: String): Disposable? {
-        return Observable.fromCallable {
+        return Single.fromCallable {
             downloadFileFromServer(filePath)
         }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe{ result ->
-                handleDropboxImport(result)
+                result?.let { handleDropboxImport(result) }
             }
     }
-    private fun downloadFileFromServer(filePath: String): String {
-        return dropboxClient!!.files()
-            .download(filePath)
-            .inputStream
-            .bufferedReader()
-            .use(BufferedReader::readText)
+    private fun downloadFileFromServer(filePath: String): String? {
+        return dropboxClient?.files()
+            ?.download(filePath)
+            ?.inputStream
+            ?.bufferedReader()
+            ?.use(BufferedReader::readText)
     }
-    fun handleDropboxImport(jsonString: String) {
-        var listOfDiabetesNotes: List<DiabetesNote> = ArrayList()
-    
-        listOfDiabetesNotes = deserializeJson(jsonString)
-        
-        val finalList = ArrayList(listOfDiabetesNotes)
-        
-        updateListOfDiabetesNotes(finalList)
+    private fun handleDropboxImport(jsonString: String) {
+        updateListOfDiabetesNotes(
+            ArrayList(
+                deserializeJson(jsonString)
+            )
+        )
     }
     private fun deserializeJson(jsonString: String): List<DiabetesNote> {
         val gson = Gson()
-        
         val listType = object : TypeToken<List<DiabetesNote>>() { }.type
-        
         return gson.fromJson(jsonString, listType)
     }
-    
-    
     
     private fun showAddNoteDialog(context: Context) {
         val builder = AlertDialog.Builder(context)

@@ -56,6 +56,6 @@
     <string name="hint_edit_note">Изменение записи</string>
     <string name="hint_remove_note">Хотите удалить данную запись?</string>
     <!--Импорт и экспорт-->
-    <string name="dropbox_access_token">cPkFw615PeAAAAAAAAAAZrhhikSwYK5V1TTRSljclTfZsmkOEHYSDgT9CUEUbwMA</string>
+    <string name="dropbox_access_token">71F23r4NwJwAAAAAAAAAAZRhNfXxRqKUx4qifUV_3Y1ZGtmvxPT-tefbjKBm5FOR</string>
     <string name="hint_import_and_export">Выберите метод работы с данными:</string>
 </resources>
