@@ -76,16 +76,54 @@ class FragmentDiabetesDiary: Fragment() {
     private fun showImportAndExportDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
         val dialogLayoutBinding = DialogImportAndExportBinding.inflate(LayoutInflater.from(context))
-        dialog = builder.create()
+        val dialog = builder.create()
         with(dialogLayoutBinding) {
             buttonImport.setOnClickListener {
-                handleImportFromDropbox("import",".json")
+                dialog.dismiss()
+                showImportFromDropboxDialog()
             }
             buttonExport.setOnClickListener {
             
             }
             buttonCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+        }
+        with(dialog) {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            setView(dialogLayoutBinding.root)
+            show()
+        }
+    }
+    // Import from Dropbox
+    private fun showImportFromDropboxDialog() {
+        val builder = context?.let { AlertDialog.Builder(it) }
+        val dialogLayoutBinding = DialogImportFromDropboxBinding.inflate(LayoutInflater.from(context))
+        val dialog: AlertDialog? = builder?.create()
+        with(dialogLayoutBinding) {
+            lateinit var extensionName: String
+            
+            chipGroup.setOnCheckedChangeListener { _, checkedId ->
+                extensionName = when(checkedId) {
+                    R.id.chip_csv -> {
+                        getString(R.string.extension_csv)
+                    }
+                    R.id.chip_xml -> {
+                        getString(R.string.extension_xml)
+                    }
+                    R.id.chip_json -> {
+                        getString(R.string.extension_json)
+                    }
+                    else -> getString(R.string.extension_json)
+                }
+            }
+            
+            buttonImportFile.setOnClickListener {
                 dialog?.dismiss()
+                handleImportFromDropbox(
+                    editFilename.text.toString(),
+                    extensionName
+                )
             }
         }
         with(dialog) {
@@ -94,10 +132,7 @@ class FragmentDiabetesDiary: Fragment() {
             this?.show()
         }
     }
-    // Import from Dropbox
     private fun handleImportFromDropbox(fileName: String, extension: String) {
-        dialog?.dismiss()
-    
         val finalFilename = context?.getString(
             R.string.pattern_filename,
             fileName,

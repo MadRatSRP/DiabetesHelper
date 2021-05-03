@@ -16,4 +16,23 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="Widget.MyApp.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
+        ...
+        <item name="materialThemeOverlay">@style/ThemeOverlay.MyApp.Chip.Choice</item>
+    </style>
+
+    <!-- Disabling elevation overlays because when chip's default background/surface
+         composite are combined with elevation overlays in a highly elevated dialog,
+         the resulting color becomes too light and causes contrast
+         issues. -->
+    <style name="ThemeOverlay.MyApp.Chip.Choice" parent="">
+        <item name="elevationOverlayEnabled">false</item>
+    </style>
+
+    <style name="DialogTitle" parent="android:Widget.TextView">
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
 </resources>
