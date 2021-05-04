@@ -23,7 +23,6 @@ class FragmentDiabetesDiary: Fragment() {
     private val binding get() = nullableBinding!!
     private var dropboxClient: DbxClientV2? = null
     private var adapter: DiabetesNotesAdapter? = null
-    private var dialog: AlertDialog? = null
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
