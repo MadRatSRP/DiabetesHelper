@@ -17,6 +17,8 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.BufferedReader
+import java.io.File
+import java.io.IOException
 
 class FragmentDiabetesDiary: Fragment() {
     private var nullableBinding: FragmentDiabetesDiaryBinding? = null
@@ -70,104 +72,6 @@ class FragmentDiabetesDiary: Fragment() {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-    
-    private fun showImportAndExportDialog(context: Context) {
-        val builder = AlertDialog.Builder(context)
-        val dialogLayoutBinding = DialogImportAndExportBinding.inflate(LayoutInflater.from(context))
-        val dialog = builder.create()
-        with(dialogLayoutBinding) {
-            buttonImport.setOnClickListener {
-                dialog.dismiss()
-                showImportFromDropboxDialog()
-            }
-            buttonExport.setOnClickListener {
-            
-            }
-            buttonCancel.setOnClickListener {
-                dialog.dismiss()
-            }
-        }
-        with(dialog) {
-            window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
-            setView(dialogLayoutBinding.root)
-            show()
-        }
-    }
-    // Import from Dropbox
-    private fun showImportFromDropboxDialog() {
-        val builder = context?.let { AlertDialog.Builder(it) }
-        val dialogLayoutBinding = DialogImportFromDropboxBinding.inflate(LayoutInflater.from(context))
-        val dialog: AlertDialog? = builder?.create()
-        with(dialogLayoutBinding) {
-            lateinit var extensionName: String
-            
-            chipGroup.setOnCheckedChangeListener { _, checkedId ->
-                extensionName = when(checkedId) {
-                    R.id.chip_csv -> {
-                        getString(R.string.extension_csv)
-                    }
-                    R.id.chip_xml -> {
-                        getString(R.string.extension_xml)
-                    }
-                    R.id.chip_json -> {
-                        getString(R.string.extension_json)
-                    }
-                    else -> getString(R.string.extension_json)
-                }
-            }
-            
-            buttonImportFile.setOnClickListener {
-                dialog?.dismiss()
-                handleImportFromDropbox(
-                    editFilename.text.toString(),
-                    extensionName
-                )
-            }
-        }
-        with(dialog) {
-            this?.window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
-            this?.setView(dialogLayoutBinding.root)
-            this?.show()
-        }
-    }
-    private fun handleImportFromDropbox(fileName: String, extension: String) {
-        val finalFilename = context?.getString(
-            R.string.pattern_filename,
-            fileName,
-            extension
-        )
-    
-        finalFilename?.let { getFileDisposable(it) }
-    }
-    private fun getFileDisposable(filePath: String): Disposable? {
-        return Single.fromCallable {
-            downloadFileFromServer(filePath)
-        }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe{ result ->
-                result?.let { handleDropboxImport(result) }
-            }
-    }
-    private fun downloadFileFromServer(filePath: String): String? {
-        return dropboxClient?.files()
-            ?.download(filePath)
-            ?.inputStream
-            ?.bufferedReader()
-            ?.use(BufferedReader::readText)
-    }
-    private fun handleDropboxImport(jsonString: String) {
-        updateListOfDiabetesNotes(
-            ArrayList(
-                deserializeJson(jsonString)
-            )
-        )
-    }
-    private fun deserializeJson(jsonString: String): List<DiabetesNote> {
-        val gson = Gson()
-        val listType = object : TypeToken<List<DiabetesNote>>() { }.type
-        return gson.fromJson(jsonString, listType)
     }
     
     private fun showAddNoteDialog(context: Context) {
@@ -253,5 +157,202 @@ class FragmentDiabetesDiary: Fragment() {
     private fun updateListOfDiabetesNotes(listOfDiabetesNotes: ArrayList<DiabetesNote>) {
         adapter?.updateList(listOfDiabetesNotes)
         binding.recyclerView.adapter = adapter
+    }
+    
+    // Import and Export
+    private fun showImportAndExportDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
+        val dialogLayoutBinding = DialogImportAndExportBinding.inflate(LayoutInflater.from(context))
+        val dialog = builder.create()
+        with(dialogLayoutBinding) {
+            buttonImport.setOnClickListener {
+                dialog.dismiss()
+                showSelectImportTypeDialog(context)
+            }
+            buttonExport.setOnClickListener {
+            
+            }
+            buttonCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+        }
+        with(dialog) {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            setView(dialogLayoutBinding.root)
+            show()
+        }
+    }
+    private fun showSelectImportTypeDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
+        val dialogLayoutBinding = DialogSelectImportTypeBinding.inflate(LayoutInflater.from(context))
+        val dialog = builder.create()
+        with(dialogLayoutBinding) {
+            buttonImportFromAppDirectory.setOnClickListener {
+                dialog.dismiss()
+                showImportFromAppDirectoryDialog(context)
+            }
+            buttonImportFromDropbox.setOnClickListener {
+                dialog.dismiss()
+                showImportFromDropboxDialog()
+            }
+            buttonCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+        }
+        with(dialog) {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            setView(dialogLayoutBinding.root)
+            show()
+        }
+    }
+    // Import from Dropbox
+    private fun showImportFromAppDirectoryDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
+        val dialogLayoutBinding = DialogImportFileFromSourceBinding.inflate(LayoutInflater.from(context))
+        val dialog: AlertDialog = builder.create()
+        with(dialogLayoutBinding) {
+            lateinit var extensionName: String
+            
+            val pathToDataFolder = context.filesDir.path
+            val pathToAppFiles = "data/com.madrat.diabeteshelper/files/data/"
+            
+            //import.json
+            
+            chipGroup.setOnCheckedChangeListener { _, checkedId ->
+                extensionName = when(checkedId) {
+                    R.id.chip_csv -> {
+                        getString(R.string.extension_csv)
+                    }
+                    R.id.chip_xml -> {
+                        getString(R.string.extension_xml)
+                    }
+                    R.id.chip_json -> {
+                        getString(R.string.extension_json)
+                    }
+                    else -> getString(R.string.extension_json)
+                }
+            }
+            
+            buttonImportFile.setOnClickListener {
+                dialog.dismiss()
+                loadFileFromAppDirectory(
+                    pathToDataFolder + pathToAppFiles,
+                    editFilename.text.toString() + extensionName
+                )
+            }
+        }
+        with(dialog) {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            setView(dialogLayoutBinding.root)
+            show()
+        }
+    }
+    private fun loadFileFromAppDirectory(
+        pathToDir: String,
+        pathToFile: String
+    ): Disposable? {
+        return Single.fromCallable {
+            convertFileIntoString(
+                pathToDir,
+                pathToFile
+            )
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe{ result ->
+                result?.let {
+                    updateListWithDeserializedJson(result)
+                }
+            }
+    }
+    private fun convertFileIntoString(
+        pathToDir: String,
+        pathToFile: String
+    ): String? {
+        return try {
+            val file = File(pathToDir, pathToFile)
+            if (file.exists()) {
+                file.bufferedReader().readText()
+            } else {
+                null
+            }
+        } catch (exception: IOException) {
+            exception.printStackTrace()
+            null
+        }
+    }
+    private fun getFileDisposable(filePath: String): Disposable? {
+        return Single.fromCallable {
+            downloadFileFromServer(filePath)
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe{ result ->
+                result?.let { updateListWithDeserializedJson(result) }
+            }
+    }
+    private fun showImportFromDropboxDialog() {
+        val builder = context?.let { AlertDialog.Builder(it) }
+        val dialogLayoutBinding = DialogImportFileFromSourceBinding.inflate(LayoutInflater.from(context))
+        val dialog: AlertDialog? = builder?.create()
+        with(dialogLayoutBinding) {
+            lateinit var extensionName: String
+            
+            chipGroup.setOnCheckedChangeListener { _, checkedId ->
+                extensionName = when(checkedId) {
+                    R.id.chip_csv -> {
+                        getString(R.string.extension_csv)
+                    }
+                    R.id.chip_xml -> {
+                        getString(R.string.extension_xml)
+                    }
+                    R.id.chip_json -> {
+                        getString(R.string.extension_json)
+                    }
+                    else -> getString(R.string.extension_json)
+                }
+            }
+            
+            buttonImportFile.setOnClickListener {
+                dialog?.dismiss()
+                handleImportFromDropbox(
+                    editFilename.text.toString(),
+                    extensionName
+                )
+            }
+        }
+        with(dialog) {
+            this?.window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            this?.setView(dialogLayoutBinding.root)
+            this?.show()
+        }
+    }
+    private fun handleImportFromDropbox(fileName: String, extension: String) {
+        val finalFilename = context?.getString(
+            R.string.pattern_filename,
+            fileName,
+            extension
+        )
+        
+        finalFilename?.let { getFileDisposable(it) }
+    }
+    private fun downloadFileFromServer(filePath: String): String? {
+        return dropboxClient?.files()
+            ?.download(filePath)
+            ?.inputStream
+            ?.bufferedReader()
+            ?.use(BufferedReader::readText)
+    }
+    private fun updateListWithDeserializedJson(jsonString: String) {
+        updateListOfDiabetesNotes(
+            ArrayList(
+                deserializeJson(jsonString)
+            )
+        )
+    }
+    private fun deserializeJson(jsonString: String): List<DiabetesNote> {
+        val gson = Gson()
+        val listType = object : TypeToken<List<DiabetesNote>>() { }.type
+        return gson.fromJson(jsonString, listType)
     }
 }

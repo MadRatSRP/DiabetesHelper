@@ -37,8 +37,6 @@
 
     <string name="message_hint">Укажите сообщение</string>
 
-    <!--Главный экран-->
-    <string name="title_home">Главный</string>
     <!--Дневник диабетика-->
     <string name="title_diabetes_diary">Дневник диабетика</string>
     <string name="diabetes_hint_add_note">Добавьте новую запись дневника диабетика:</string>
@@ -64,4 +62,7 @@
     <string name="extension_csv">.csv</string>
     <string name="extension_xml">.xml</string>
     <string name="extension_json">.json</string>
+    <string name="hint_select_import_type">Выберите метод импорта:</string>
+    <string name="hint_import_from_app_directory">Из директории приложения</string>
+    <string name="hint_import_from_dropbox">Из Dropbox</string>
 </resources>
