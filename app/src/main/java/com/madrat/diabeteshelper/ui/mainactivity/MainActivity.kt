@@ -22,7 +22,6 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.fragment_container)
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home,
                 R.id.navigation_diary_diabetes,
                 R.id.navigation_diary_food
             )
