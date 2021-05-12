@@ -2,6 +2,7 @@ package com.madrat.diabeteshelper.ui.diabetesdiary
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -213,8 +214,7 @@ class FragmentDiabetesDiary: Fragment() {
         with(dialogLayoutBinding) {
             lateinit var extensionName: String
             
-            val pathToDataFolder = context.filesDir.path
-            val pathToAppFiles = "data/com.madrat.diabeteshelper/files/data/"
+            val pathToDataFolder = context.filesDir.path + "/"
             
             //import.json
             
@@ -236,7 +236,7 @@ class FragmentDiabetesDiary: Fragment() {
             buttonImportFile.setOnClickListener {
                 dialog.dismiss()
                 loadFileFromAppDirectory(
-                    pathToDataFolder + pathToAppFiles,
+                    pathToDataFolder,
                     editFilename.text.toString() + extensionName
                 )
             }
@@ -251,6 +251,7 @@ class FragmentDiabetesDiary: Fragment() {
         pathToDir: String,
         pathToFile: String
     ): Disposable? {
+        Log.d("DASDAD", pathToDir + pathToFile)
         return Single.fromCallable {
             convertFileIntoString(
                 pathToDir,
