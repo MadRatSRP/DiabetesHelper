@@ -2,7 +2,6 @@ package com.madrat.diabeteshelper.ui.diabetesdiary
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -13,13 +12,17 @@ import com.google.gson.reflect.TypeToken
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.logic.util.linearManager
+import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVRecord
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
+import java.io.StringReader
 
 class FragmentDiabetesDiary: Fragment() {
     private var nullableBinding: FragmentDiabetesDiaryBinding? = null
@@ -214,19 +217,22 @@ class FragmentDiabetesDiary: Fragment() {
         with(dialogLayoutBinding) {
             lateinit var extensionName: String
             
-            val pathToDataFolder = context.filesDir.path + "/"
+            lateinit var currentExtension: Extension
             
-            //import.json
+            val pathToDataFolder = context.filesDir.path + "/"
             
             chipGroup.setOnCheckedChangeListener { _, checkedId ->
                 extensionName = when(checkedId) {
                     R.id.chip_csv -> {
+                        currentExtension = Extension.CSV
                         getString(R.string.extension_csv)
                     }
                     R.id.chip_xml -> {
+                        currentExtension = Extension.XML
                         getString(R.string.extension_xml)
                     }
                     R.id.chip_json -> {
+                        currentExtension = Extension.JSON
                         getString(R.string.extension_json)
                     }
                     else -> getString(R.string.extension_json)
@@ -237,7 +243,8 @@ class FragmentDiabetesDiary: Fragment() {
                 dialog.dismiss()
                 loadFileFromAppDirectory(
                     pathToDataFolder,
-                    editFilename.text.toString() + extensionName
+                    editFilename.text.toString() + extensionName,
+                    currentExtension
                 )
             }
         }
@@ -249,9 +256,9 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun loadFileFromAppDirectory(
         pathToDir: String,
-        pathToFile: String
+        pathToFile: String,
+        fileExtension: Extension
     ): Disposable? {
-        Log.d("DASDAD", pathToDir + pathToFile)
         return Single.fromCallable {
             convertFileIntoString(
                 pathToDir,
@@ -260,11 +267,67 @@ class FragmentDiabetesDiary: Fragment() {
         }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe{ result ->
+            .subscribe({ result ->
                 result?.let {
-                    updateListWithDeserializedJson(result)
+                    updateListWithDeserializedValues(result, fileExtension)
                 }
+            }, { throwable ->
+                throwable.printStackTrace()
+            })
+    }
+    private fun updateListWithDeserializedValues(fileAsString: String, fileExtension: Extension) {
+        val deserializedData: List<DiabetesNote> = when(fileExtension) {
+            Extension.CSV -> {
+                deserializeCsv(fileAsString)
             }
+            Extension.XML -> {
+                deserializeXml(fileAsString)
+            }
+            Extension.JSON -> {
+                deserializeJson(fileAsString)
+            }
+        }
+        
+        updateListOfDiabetesNotes(
+            ArrayList(
+                deserializedData
+            )
+        )
+    }
+    private fun deserializeCsv(csvString: String): List<DiabetesNote> {
+        val list = ArrayList<DiabetesNote>()
+        
+        try {
+            val reader = StringReader(csvString)
+            
+            val records: Iterable<CSVRecord> = CSVFormat.DEFAULT.parse(
+                reader
+            )
+            
+            for (record in records) {
+                list.add(
+                    DiabetesNote(
+                        record[0].toDouble()
+                    )
+                )
+            }
+            
+            reader.close()
+        } catch (exception: IOException) {
+            exception.printStackTrace()
+        }
+        
+        return list
+    }
+    private fun deserializeXml(xmlString: String): List<DiabetesNote> {
+        val xStream = XStream()
+        
+        return xStream.fromXML(xmlString) as List<DiabetesNote>
+    }
+    private fun deserializeJson(jsonString: String): List<DiabetesNote> {
+        val gson = Gson()
+        val listType = object : TypeToken<List<DiabetesNote>>() { }.type
+        return gson.fromJson(jsonString, listType)
     }
     private fun convertFileIntoString(
         pathToDir: String,
@@ -282,14 +345,14 @@ class FragmentDiabetesDiary: Fragment() {
             null
         }
     }
-    private fun getFileDisposable(filePath: String): Disposable? {
+    private fun getFileDisposable(filePath: String, fileExtension: Extension): Disposable? {
         return Single.fromCallable {
             downloadFileFromServer(filePath)
         }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe{ result ->
-                result?.let { updateListWithDeserializedJson(result) }
+                result?.let { updateListWithDeserializedValues(result, fileExtension) }
             }
     }
     private fun showImportFromDropboxDialog() {
@@ -298,16 +361,20 @@ class FragmentDiabetesDiary: Fragment() {
         val dialog: AlertDialog? = builder?.create()
         with(dialogLayoutBinding) {
             lateinit var extensionName: String
-            
+            lateinit var currentExtension: Extension
+    
             chipGroup.setOnCheckedChangeListener { _, checkedId ->
                 extensionName = when(checkedId) {
                     R.id.chip_csv -> {
+                        currentExtension = Extension.CSV
                         getString(R.string.extension_csv)
                     }
                     R.id.chip_xml -> {
+                        currentExtension = Extension.XML
                         getString(R.string.extension_xml)
                     }
                     R.id.chip_json -> {
+                        currentExtension = Extension.JSON
                         getString(R.string.extension_json)
                     }
                     else -> getString(R.string.extension_json)
@@ -318,7 +385,8 @@ class FragmentDiabetesDiary: Fragment() {
                 dialog?.dismiss()
                 handleImportFromDropbox(
                     editFilename.text.toString(),
-                    extensionName
+                    extensionName,
+                    currentExtension
                 )
             }
         }
@@ -328,14 +396,14 @@ class FragmentDiabetesDiary: Fragment() {
             this?.show()
         }
     }
-    private fun handleImportFromDropbox(fileName: String, extension: String) {
+    private fun handleImportFromDropbox(fileName: String, extension: String, fileExtension: Extension) {
         val finalFilename = context?.getString(
             R.string.pattern_filename,
             fileName,
             extension
         )
         
-        finalFilename?.let { getFileDisposable(it) }
+        finalFilename?.let { getFileDisposable(it, fileExtension) }
     }
     private fun downloadFileFromServer(filePath: String): String? {
         return dropboxClient?.files()
@@ -343,17 +411,5 @@ class FragmentDiabetesDiary: Fragment() {
             ?.inputStream
             ?.bufferedReader()
             ?.use(BufferedReader::readText)
-    }
-    private fun updateListWithDeserializedJson(jsonString: String) {
-        updateListOfDiabetesNotes(
-            ArrayList(
-                deserializeJson(jsonString)
-            )
-        )
-    }
-    private fun deserializeJson(jsonString: String): List<DiabetesNote> {
-        val gson = Gson()
-        val listType = object : TypeToken<List<DiabetesNote>>() { }.type
-        return gson.fromJson(jsonString, listType)
     }
 }

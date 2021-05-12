@@ -1,6 +1,7 @@
 package com.madrat.diabeteshelper.ui.diabetesdiary
 
-class DiabetesNote(
-    val sugarLevel: Double
-)
-
+enum class Extension {
+    CSV,
+    XML,
+    JSON
+}
