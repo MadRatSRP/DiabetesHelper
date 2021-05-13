@@ -174,7 +174,8 @@ class FragmentDiabetesDiary: Fragment() {
                 showSelectImportTypeDialog(context)
             }
             buttonExport.setOnClickListener {
-            
+                dialog.dismiss()
+                showSelectExportTypeDialog(context)
             }
             buttonCancel.setOnClickListener {
                 dialog.dismiss()
@@ -186,6 +187,7 @@ class FragmentDiabetesDiary: Fragment() {
             show()
         }
     }
+    // Import
     private fun showSelectImportTypeDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
         val dialogLayoutBinding = DialogSelectImportTypeBinding.inflate(LayoutInflater.from(context))
@@ -209,7 +211,6 @@ class FragmentDiabetesDiary: Fragment() {
             show()
         }
     }
-    // Import from Dropbox
     private fun showImportFromAppDirectoryDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
         val dialogLayoutBinding = DialogImportFileFromSourceBinding.inflate(LayoutInflater.from(context))
@@ -362,7 +363,7 @@ class FragmentDiabetesDiary: Fragment() {
         with(dialogLayoutBinding) {
             lateinit var extensionName: String
             lateinit var currentExtension: Extension
-    
+            
             chipGroup.setOnCheckedChangeListener { _, checkedId ->
                 extensionName = when(checkedId) {
                     R.id.chip_csv -> {
@@ -411,5 +412,104 @@ class FragmentDiabetesDiary: Fragment() {
             ?.inputStream
             ?.bufferedReader()
             ?.use(BufferedReader::readText)
+    }
+    // Export
+    private fun showSelectExportTypeDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
+        val dialogLayoutBinding = DialogSelectExportTypeBinding.inflate(LayoutInflater.from(context))
+        val dialog = builder.create()
+        with(dialogLayoutBinding) {
+            buttonExportToAppDirectory.setOnClickListener {
+                dialog.dismiss()
+                showExportToAppDirectoryDialog(context)
+            }
+            buttonExportToDropbox.setOnClickListener {
+                dialog.dismiss()
+            }
+            buttonExportToEmail.setOnClickListener {
+                dialog.dismiss()
+            }
+            buttonCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+        }
+        with(dialog) {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            setView(dialogLayoutBinding.root)
+            show()
+        }
+    }
+    private fun showExportToAppDirectoryDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
+        val dialogLayoutBinding = DialogExportFileToSourceBinding.inflate(LayoutInflater.from(context))
+        val dialog: AlertDialog = builder.create()
+        with(dialogLayoutBinding) {
+            lateinit var extensionName: String
+            
+            lateinit var currentExtension: Extension
+            
+            val pathToDataFolder = context.filesDir.path + "/"
+            
+            chipGroup.setOnCheckedChangeListener { _, checkedId ->
+                extensionName = when(checkedId) {
+                    R.id.chip_csv -> {
+                        currentExtension = Extension.CSV
+                        getString(R.string.extension_csv)
+                    }
+                    R.id.chip_xml -> {
+                        currentExtension = Extension.XML
+                        getString(R.string.extension_xml)
+                    }
+                    R.id.chip_json -> {
+                        currentExtension = Extension.JSON
+                        getString(R.string.extension_json)
+                    }
+                    else -> getString(R.string.extension_json)
+                }
+            }
+            
+            buttonExportFile.setOnClickListener {
+                dialog.dismiss()
+                adapter?.getDiabetesNotes()?.let { diabetesNotes ->
+                    saveFileToAppDirectory(
+                        pathToDataFolder,
+                        editFilename.text.toString() + extensionName,
+                        currentExtension,
+                        diabetesNotes
+                    )
+                }
+            }
+        }
+        with(dialog) {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            setView(dialogLayoutBinding.root)
+            show()
+        }
+    }
+    private fun saveFileToAppDirectory(
+        pathToDir: String,
+        pathToFile: String,
+        fileExtension: Extension,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        lateinit var serializedString: String
+        when(fileExtension) {
+            Extension.CSV -> {
+            
+            }
+            Extension.XML -> {
+            
+            }
+            Extension.JSON -> {
+                serializedString = serializeJson(diabetesNotes)
+            }
+        }
+        context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
+            it?.write(serializedString.toByteArray())
+        }
+    }
+    private fun serializeJson(diabetesNotes: ArrayList<DiabetesNote>): String {
+        val gson = Gson()
+        return gson.toJson(diabetesNotes)
     }
 }

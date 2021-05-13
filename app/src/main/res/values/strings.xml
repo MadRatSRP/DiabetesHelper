@@ -57,12 +57,18 @@
     <!--Импорт и экспорт-->
     <string name="dropbox_access_token">71F23r4NwJwAAAAAAAAAAZRhNfXxRqKUx4qifUV_3Y1ZGtmvxPT-tefbjKBm5FOR</string>
     <string name="hint_import_and_export">Выберите метод работы с данными:</string>
-    <string name="hint_type_in_filename">Введите название импортируемого с Dropbox файла:</string>
+    <string name="hint_import_type_in_filename">Введите название импортируемого с Dropbox файла:</string>
     <string name="hint_import_select_file_extension">Выберите расширение импортируемого файла:</string>
     <string name="extension_csv">.csv</string>
     <string name="extension_xml">.xml</string>
     <string name="extension_json">.json</string>
     <string name="hint_select_import_type">Выберите метод импорта:</string>
+    <string name="hint_select_export_type">Выберите метод экспорта:</string>
     <string name="hint_import_from_app_directory">Из директории приложения</string>
     <string name="hint_import_from_dropbox">Из Dropbox</string>
+    <string name="hint_export_to_app_directory">Сохранить в директории приложения</string>
+    <string name="hint_export_to_dropbox">Сохранить в Dropbox</string>
+    <string name="hint_export_to_email">Отправить по почте</string>
+    <string name="hint_export_type_in_filename">Введите название экспортируемого на Dropbox файла:</string>
+    <string name="hint_export_select_file_extension">Выберите расширение экспортируемого файла:</string>
 </resources>
