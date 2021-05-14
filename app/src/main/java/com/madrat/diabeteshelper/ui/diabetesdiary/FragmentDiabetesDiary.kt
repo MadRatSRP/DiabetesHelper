@@ -7,16 +7,17 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.v2.DbxClientV2
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
-import com.madrat.diabeteshelper.logic.util.linearManager
+import com.madrat.diabeteshelper.linearManager
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVRecord
 import java.io.BufferedReader
@@ -326,9 +327,7 @@ class FragmentDiabetesDiary: Fragment() {
         return xStream.fromXML(xmlString) as List<DiabetesNote>
     }
     private fun deserializeJson(jsonString: String): List<DiabetesNote> {
-        val gson = Gson()
-        val listType = object : TypeToken<List<DiabetesNote>>() { }.type
-        return gson.fromJson(jsonString, listType)
+        return Json.decodeFromString(jsonString)
     }
     private fun convertFileIntoString(
         pathToDir: String,
@@ -509,7 +508,6 @@ class FragmentDiabetesDiary: Fragment() {
         }
     }
     private fun serializeJson(diabetesNotes: ArrayList<DiabetesNote>): String {
-        val gson = Gson()
-        return gson.toJson(diabetesNotes)
+        return Json.encodeToString(diabetesNotes)
     }
 }

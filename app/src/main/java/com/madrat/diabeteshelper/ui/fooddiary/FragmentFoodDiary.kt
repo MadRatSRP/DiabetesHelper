@@ -9,7 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
-import com.madrat.diabeteshelper.logic.util.linearManager
+import com.madrat.diabeteshelper.linearManager
 
 class FragmentFoodDiary: Fragment() {
     private var nullableBinding: FragmentFoodDiaryBinding? = null

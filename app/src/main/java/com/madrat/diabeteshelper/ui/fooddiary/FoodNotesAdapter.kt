@@ -1,12 +1,9 @@
 package com.madrat.diabeteshelper.ui.fooddiary
 
-import android.view.View
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.ListFoodNotesBinding
-import com.madrat.diabeteshelper.logic.util.inflate
-import kotlinx.android.extensions.LayoutContainer
 
 class FoodNotesAdapter(
     private val editNoteListener: (Int, FoodNote) -> Unit,
@@ -35,8 +32,12 @@ class FoodNotesAdapter(
         this.notifyDataSetChanged()
     }
     
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FoodNotesHolder
-        = FoodNotesHolder(parent.inflate(R.layout.list_food_notes))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FoodNotesHolder {
+        val binding = ListFoodNotesBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
+        return FoodNotesHolder(binding)
+    }
     
     override fun onBindViewHolder(holder: FoodNotesHolder, position: Int)
         = holder.bind(listOfFoodNotes[position], position)
@@ -44,10 +45,8 @@ class FoodNotesAdapter(
     override fun getItemCount(): Int
         = listOfFoodNotes.size
     
-    inner class FoodNotesHolder internal constructor(override val containerView: View)
-        : RecyclerView.ViewHolder(containerView), LayoutContainer {
-        private val binding = ListFoodNotesBinding.bind(containerView)
-        
+    inner class FoodNotesHolder(private val binding: ListFoodNotesBinding)
+        : RecyclerView.ViewHolder(binding.root) {
         fun bind(foodNote: FoodNote, position: Int) {
             with(foodNote) {
                 binding.mealName.text = mealName

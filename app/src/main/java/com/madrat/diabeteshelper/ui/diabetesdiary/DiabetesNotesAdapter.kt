@@ -1,12 +1,9 @@
 package com.madrat.diabeteshelper.ui.diabetesdiary
 
-import android.view.View
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.ListDiabetesNotesBinding
-import com.madrat.diabeteshelper.logic.util.inflate
-import kotlinx.android.extensions.LayoutContainer
 
 class DiabetesNotesAdapter(
     private val editNoteListener: (Int, DiabetesNote) -> Unit,
@@ -38,8 +35,12 @@ class DiabetesNotesAdapter(
         this.notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DiabetesNotesHolder
-            = DiabetesNotesHolder(parent.inflate(R.layout.list_diabetes_notes))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DiabetesNotesHolder {
+        val binding = ListDiabetesNotesBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
+        return DiabetesNotesHolder(binding)
+    }
 
     override fun onBindViewHolder(holder: DiabetesNotesHolder, position: Int)
             = holder.bind(listOfDiabetesNotes[position], position)
@@ -47,10 +48,8 @@ class DiabetesNotesAdapter(
     override fun getItemCount(): Int
             = listOfDiabetesNotes.size
 
-    inner class DiabetesNotesHolder internal constructor(override val containerView: View)
-        : RecyclerView.ViewHolder(containerView), LayoutContainer {
-        private val binding = ListDiabetesNotesBinding.bind(containerView)
-
+    inner class DiabetesNotesHolder(private val binding: ListDiabetesNotesBinding)
+        : RecyclerView.ViewHolder(binding.root) {
         fun bind(diabetesNote: DiabetesNote, position: Int) {
             with(diabetesNote) {
                 binding.sugarLevel.text = sugarLevel.toString()

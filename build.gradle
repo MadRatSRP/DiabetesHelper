@@ -2,9 +2,9 @@
 buildscript {
     ext {
         // Android Gradle
-        gradleVersion = '4.2.0'
+        gradleVersion = '4.2.1'
 
-        // Kotlin for Android
+        // Kotlin
         kotlinVersion = '1.5.0'
 
         // Jetpack Navigation
@@ -19,8 +19,11 @@ buildscript {
         // Android Gradle
         classpath "com.android.tools.build:gradle:${gradleVersion}"
 
-        // Kotlin for Android
+        // Kotlin
+        // Gradle plugin
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        // JSON Serialization
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
 
         // Jetpack Navigation
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion"

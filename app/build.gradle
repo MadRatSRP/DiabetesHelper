@@ -1,7 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-
+apply plugin: 'kotlinx-serialization'
 apply plugin: "androidx.navigation.safeargs.kotlin"
 
 android {
@@ -65,14 +64,16 @@ ext {
     ktxNavigationVersion = '2.3.5'
 
     // Other
-    // Google Gson
-    gsonVersion = "2.8.6"
     // XStream
     xStreamVersion = '1.4.16'
     // Apache Common CSV
     csvVersion = "1.8"
     // Dropbox Java SDK
     dropboxVersion = '4.0.0'
+
+    // Kotlin
+    // JSON Serialization
+    kotlinJsonVersion = "1.2.1"
 }
 
 dependencies {
@@ -106,17 +107,20 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$ktxNavigationVersion"
 
     // Other
-    // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-    // Google Gson
-    implementation "com.google.code.gson:gson:$gsonVersion"
     // XStream
     implementation "com.thoughtworks.xstream:xstream:$xStreamVersion"
     // Apache Common CSV
     implementation "org.apache.commons:commons-csv:$csvVersion"
     // Dropbox Java SDK
     implementation "com.dropbox.core:dropbox-core-sdk:$dropboxVersion"
+
+    // Kotlin
+    // JVM
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    // JSON Serialization
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinJsonVersion"
 }
+
 repositories {
     // Coil, Chucker
     mavenCentral()
