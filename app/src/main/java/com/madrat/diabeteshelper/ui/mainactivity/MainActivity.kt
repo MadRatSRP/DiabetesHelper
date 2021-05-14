@@ -1,6 +1,10 @@
 package com.madrat.diabeteshelper.ui.mainactivity
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.View
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -28,5 +32,23 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.bottomNavigationView.setupWithNavController(navController)
+    }
+    
+    fun showMessage(@StringRes messageRes: Int, isSuccess: Boolean = true) {
+        with(binding) {
+            with(statusMessage) {
+                setText(messageRes)
+                setBackgroundResource(
+                    if (isSuccess)
+                        R.color.success_message
+                    else
+                        R.color.unsuccess_message
+                )
+                visibility = View.VISIBLE
+                Handler(Looper.getMainLooper()).postDelayed({
+                    visibility = View.GONE
+                }, 4000)
+            }
+        }
     }
 }

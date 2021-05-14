@@ -6,4 +6,7 @@
     <color name="light_gray">#C0C0C0</color>
     <color name="black">#000000</color>
     <color name="white">#ffffff</color>
+    <color name="success_message">#2A92DB</color>
+    <color name="unsuccess_message">#878F93</color>
+    <color name="mostly_white_gray_second">#FCFCFC</color>
 </resources>

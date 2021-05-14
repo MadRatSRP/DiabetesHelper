@@ -3,6 +3,7 @@ package com.madrat.diabeteshelper.ui.diabetesdiary
 import android.content.Context
 import android.os.Bundle
 import android.view.*
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.dropbox.core.DbxRequestConfig
@@ -10,8 +11,10 @@ import com.dropbox.core.v2.DbxClientV2
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.linearManager
+import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -270,10 +273,20 @@ class FragmentDiabetesDiary: Fragment() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ result ->
+                showStatusMessage(
+                    R.string.message_successful_file_loaded_from_directory
+                )
                 result?.let {
-                    updateListWithDeserializedValues(result, fileExtension)
+                    updateListWithDeserializedValues(
+                        result,
+                        fileExtension
+                    )
                 }
             }, { throwable ->
+                showStatusMessage(
+                    R.string.message_error_file_loaded_from_directory,
+                    false
+                )
                 throwable.printStackTrace()
             })
     }
@@ -490,7 +503,27 @@ class FragmentDiabetesDiary: Fragment() {
         pathToFile: String,
         fileExtension: Extension,
         diabetesNotes: ArrayList<DiabetesNote>
-    ) {
+    ): Disposable {
+        return Single.fromCallable {
+            val serializedString = serializeContentIntoString(
+                fileExtension,
+                diabetesNotes
+            )
+            context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
+                it?.write(serializedString.toByteArray())
+            }
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+               showStatusMessage(R.string.message_successful_file_saved_into_directory)
+            }, { throwable ->
+                throwable.printStackTrace()
+                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
+            })
+    }
+    fun serializeContentIntoString(fileExtension: Extension,
+                                   diabetesNotes: ArrayList<DiabetesNote>): String {
         lateinit var serializedString: String
         when(fileExtension) {
             Extension.CSV -> {
@@ -503,11 +536,14 @@ class FragmentDiabetesDiary: Fragment() {
                 serializedString = serializeJson(diabetesNotes)
             }
         }
-        context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
-            it?.write(serializedString.toByteArray())
-        }
+        return serializedString
     }
     private fun serializeJson(diabetesNotes: ArrayList<DiabetesNote>): String {
         return Json.encodeToString(diabetesNotes)
+    }
+    private fun showStatusMessage(@StringRes messageRes: Int, isSuccess: Boolean = true) {
+        (activity as? MainActivity)?.showMessage(
+            messageRes, isSuccess
+        )
     }
 }

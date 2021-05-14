@@ -71,4 +71,8 @@
     <string name="hint_export_to_email">Отправить по почте</string>
     <string name="hint_export_type_in_filename">Введите название экспортируемого на Dropbox файла:</string>
     <string name="hint_export_select_file_extension">Выберите расширение экспортируемого файла:</string>
+    <string name="message_successful_file_loaded_from_directory">Файл был успешно загружен из директории приложения</string>
+    <string name="message_error_file_loaded_from_directory">Произошла ошибка при загрузке файла из директории приложения</string>
+    <string name="message_successful_file_saved_into_directory">Файл был успешно сохранён в директорию приложения</string>
+    <string name="message_error_file_saved_into_directory">Произошла ошибка при сохранении файла в директорию приложения</string>
 </resources>
