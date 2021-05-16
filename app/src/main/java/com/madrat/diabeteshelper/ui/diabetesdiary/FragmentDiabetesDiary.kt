@@ -6,8 +6,13 @@ import android.view.*
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import com.dropbox.core.DbxException
 import com.dropbox.core.DbxRequestConfig
+import com.dropbox.core.util.IOUtil
 import com.dropbox.core.v2.DbxClientV2
+import com.dropbox.core.v2.files.FileMetadata
+import com.dropbox.core.v2.files.UploadErrorException
+import com.dropbox.core.v2.files.WriteMode
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.linearManager
@@ -23,12 +28,13 @@ import kotlinx.serialization.json.Json
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import org.apache.commons.csv.CSVRecord
-import java.io.BufferedReader
-import java.io.File
-import java.io.IOException
-import java.io.StringReader
+import java.io.*
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.system.exitProcess
+
 
 class FragmentDiabetesDiary: Fragment() {
     private var nullableBinding: FragmentDiabetesDiaryBinding? = null
@@ -43,7 +49,7 @@ class FragmentDiabetesDiary: Fragment() {
         val config = DbxRequestConfig
             .newBuilder("DiabetesHelper")
             .build()
-    
+        
         dropboxClient = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
         adapter = DiabetesNotesAdapter (
             { position:Int, note: DiabetesNote -> showEditNoteDialog(position, note) },
@@ -441,6 +447,7 @@ class FragmentDiabetesDiary: Fragment() {
             }
             buttonExportToDropbox.setOnClickListener {
                 dialog.dismiss()
+                showExportToDropboxDialog(context)
             }
             buttonExportToEmail.setOnClickListener {
                 dialog.dismiss()
@@ -502,7 +509,7 @@ class FragmentDiabetesDiary: Fragment() {
             show()
         }
     }
-    fun handleSaveToDirectory(
+    private fun handleSaveToDirectory(
         fileName: String,
         finalPathToFile: String,
         fileExtension: Extension,
@@ -510,38 +517,134 @@ class FragmentDiabetesDiary: Fragment() {
     ) {
         when(fileExtension) {
             Extension.CSV -> {
-                serializeCsvAndSaveToFile(
+                tryToSerializeCsvAndSaveToFile(
                     finalPathToFile,
                     diabetesNotes
                 )
             }
             Extension.XML -> {
-                serializeXmlAndSaveToFile(
+                tryToSerializeXmlAndSaveToFile(
                     fileName,
                     diabetesNotes
                 )
             }
             Extension.JSON -> {
-                serializeJsonAndSaveToFile(
+                tryToSerializeJsonAndSaveToFile(
                     fileName,
                     diabetesNotes
                 )
             }
         }
     }
-    fun serializeCsvAndSaveToFile(
-        pathToFile: String,
+    private fun showExportToDropboxDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
+        val dialogLayoutBinding = DialogExportFileToSourceBinding.inflate(LayoutInflater.from(context))
+        val dialog: AlertDialog = builder.create()
+        with(dialogLayoutBinding) {
+            lateinit var extensionName: String
+            
+            lateinit var currentExtension: Extension
+            
+            val pathToDataFolder = context.filesDir.path + "/"
+            
+            chipGroup.setOnCheckedChangeListener { _, checkedId ->
+                extensionName = when(checkedId) {
+                    R.id.chip_csv -> {
+                        currentExtension = Extension.CSV
+                        getString(R.string.extension_csv)
+                    }
+                    R.id.chip_xml -> {
+                        currentExtension = Extension.XML
+                        getString(R.string.extension_xml)
+                    }
+                    R.id.chip_json -> {
+                        currentExtension = Extension.JSON
+                        getString(R.string.extension_json)
+                    }
+                    else -> getString(R.string.extension_json)
+                }
+            }
+            
+            buttonExportFile.setOnClickListener {
+                dialog.dismiss()
+                adapter?.getDiabetesNotes()?.let { diabetesNotes ->
+                    handleSaveToDropbox(
+                        editFilename.text.toString() + extensionName,
+                        pathToDataFolder + editFilename.text.toString() + extensionName,
+                        currentExtension,
+                        diabetesNotes
+                    )
+                }
+            }
+        }
+        with(dialog) {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            setView(dialogLayoutBinding.root)
+            show()
+        }
+    }
+    private fun handleSaveToDropbox(
+        fileName: String,
+        pathToFileWithFilename: String,
+        fileExtension: Extension,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        when(fileExtension) {
+            Extension.CSV -> {
+                tryToUploadCSVToDropbox(
+                    fileName,
+                    pathToFileWithFilename,
+                    diabetesNotes
+                )
+            }
+            Extension.XML -> {
+                tryToUploadXMLToDropbox(
+                    fileName,
+                    pathToFileWithFilename,
+                    diabetesNotes
+                )
+            }
+            Extension.JSON -> {
+                tryToUploadJSONToDropbox(
+                    fileName,
+                    pathToFileWithFilename,
+                    diabetesNotes
+                )
+            }
+        }
+    }
+    fun uploadFileToDropbox(
+        fileName: String,
+        pathToFileWithFilename: String
+    ) {
+        val file = File(pathToFileWithFilename)
+        dropboxClient?.let { client ->
+            uploadFile(
+                client,
+                file,
+                "/$fileName"
+            )
+        }
+        // Remove file after uploading
+        file.delete()
+    }
+    private fun tryToUploadCSVToDropbox(
+        fileName: String,
+        pathToFileWithFilename: String,
         diabetesNotes: ArrayList<DiabetesNote>
     ) {
         Single
             .fromCallable {
-                val writer = Files.newBufferedWriter(Paths.get(pathToFile))
-                val csvPrinter = CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("SugarLevel"))
-                diabetesNotes.forEach { note ->
-                    csvPrinter.printRecord(note.sugarLevel)
-                }
-                csvPrinter.flush()
-                csvPrinter.close()
+                // save file to user directory
+                serializeCSV(
+                    pathToFileWithFilename,
+                    diabetesNotes
+                )
+                // upload file to dropbox
+                uploadFileToDropbox(
+                    fileName,
+                    pathToFileWithFilename
+                )
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -552,16 +655,23 @@ class FragmentDiabetesDiary: Fragment() {
                 showStatusMessage(R.string.message_error_file_saved_into_directory, false)
             })
     }
-    private fun serializeXmlAndSaveToFile(
-        pathToFile: String,
+    private fun tryToUploadXMLToDropbox(
+        fileName: String,
+        pathToFileWithFilename: String,
         diabetesNotes: ArrayList<DiabetesNote>
     ) {
         Single
             .fromCallable {
-                val serializedString = XStream().toXML(diabetesNotes)
-                context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
-                    it?.write(serializedString.toByteArray())
-                }
+                // save file to user directory
+                serializeXML(
+                    fileName,
+                    diabetesNotes
+                )
+                // upload file to dropbox
+                uploadFileToDropbox(
+                    fileName,
+                    pathToFileWithFilename
+                )
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -572,16 +682,113 @@ class FragmentDiabetesDiary: Fragment() {
                 showStatusMessage(R.string.message_error_file_saved_into_directory, false)
             })
     }
-    private fun serializeJsonAndSaveToFile(
+    private fun tryToUploadJSONToDropbox(
+        fileName: String,
+        pathToFileWithFilename: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        Single
+            .fromCallable {
+                // save file to user directory
+                serializeJSON(
+                    fileName,
+                    diabetesNotes
+                )
+                // upload file to dropbox
+                uploadFileToDropbox(
+                    fileName,
+                    pathToFileWithFilename
+                )
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                showStatusMessage(R.string.message_successful_file_saved_into_directory)
+            }, { throwable ->
+                throwable.printStackTrace()
+                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
+            })
+    }
+    fun serializeCSV(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        val writer = Files.newBufferedWriter(Paths.get(pathToFile))
+        val csvPrinter = CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("SugarLevel"))
+        diabetesNotes.forEach { note ->
+            csvPrinter.printRecord(note.sugarLevel)
+        }
+        csvPrinter.flush()
+        csvPrinter.close()
+    }
+    private fun tryToSerializeCsvAndSaveToFile(
         pathToFile: String,
         diabetesNotes: ArrayList<DiabetesNote>
     ) {
         Single
             .fromCallable {
-                val serializedString = Json.encodeToString(diabetesNotes)
-                context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
-                    it?.write(serializedString.toByteArray())
-                }
+                serializeCSV(
+                    pathToFile,
+                    diabetesNotes
+                )
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                showStatusMessage(R.string.message_successful_file_saved_into_directory)
+            }, { throwable ->
+                throwable.printStackTrace()
+                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
+            })
+    }
+    fun serializeXML(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        val serializedString = XStream().toXML(diabetesNotes)
+        context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
+            it?.write(serializedString.toByteArray())
+        }
+    }
+    private fun tryToSerializeXmlAndSaveToFile(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        Single
+            .fromCallable {
+                serializeXML(
+                    pathToFile,
+                    diabetesNotes
+                )
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                showStatusMessage(R.string.message_successful_file_saved_into_directory)
+            }, { throwable ->
+                throwable.printStackTrace()
+                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
+            })
+    }
+    fun serializeJSON(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        val serializedString = Json.encodeToString(diabetesNotes)
+        context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
+            it?.write(serializedString.toByteArray())
+        }
+    }
+    private fun tryToSerializeJsonAndSaveToFile(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        Single
+            .fromCallable {
+                serializeJSON(
+                    pathToFile,
+                    diabetesNotes
+                )
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -595,6 +802,38 @@ class FragmentDiabetesDiary: Fragment() {
     private fun showStatusMessage(@StringRes messageRes: Int, isSuccess: Boolean = true) {
         (activity as? MainActivity)?.showMessage(
             messageRes, isSuccess
+        )
+    }
+    
+    private fun uploadFile(dbxClient: DbxClientV2, localFile: File, dropboxPath: String) {
+        try {
+            FileInputStream(localFile).use { stream ->
+                val progressListener =
+                    IOUtil.ProgressListener { l -> printProgress(l, localFile.length()) }
+                val metadata: FileMetadata = dbxClient.files().uploadBuilder(dropboxPath)
+                    .withMode(WriteMode.ADD)
+                    .withClientModified(Date(localFile.lastModified()))
+                    .uploadAndFinish(stream, progressListener)
+                println(metadata.toStringMultiline())
+            }
+        } catch (exception: UploadErrorException) {
+            System.err.println("Error uploading to Dropbox: " + exception.message)
+            exitProcess(1)
+        } catch (exception: DbxException) {
+            System.err.println("Error uploading to Dropbox: " + exception.message)
+            exitProcess(1)
+        } catch (exception: IOException) {
+            System.err.println("Error reading from file \"" + localFile + "\": " + exception.message)
+            exitProcess(1)
+        }
+    }
+    
+    private fun printProgress(uploaded: Long, size: Long) {
+        System.out.printf(
+            "Uploaded %12d / %12d bytes (%5.2f%%)\n",
+            uploaded,
+            size,
+            100 * (uploaded / size.toDouble())
         )
     }
 }
