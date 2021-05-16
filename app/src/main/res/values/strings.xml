@@ -49,6 +49,7 @@
     <string name="button_cancel">Отмена</string>
     <string name="button_save">Сохранить</string>
     <string name="button_remove">Удалить</string>
+    <string name="button_continue">Продолжить</string>
     <string name="button_import">Импортировать данные</string>
     <string name="button_import_file">Импортировать файл</string>
     <string name="button_export">Экспортировать данные</string>

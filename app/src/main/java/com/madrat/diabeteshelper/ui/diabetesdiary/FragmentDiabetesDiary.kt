@@ -33,6 +33,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.exp
 import kotlin.system.exitProcess
 
 
@@ -441,25 +442,45 @@ class FragmentDiabetesDiary: Fragment() {
         val dialogLayoutBinding = DialogSelectExportTypeBinding.inflate(LayoutInflater.from(context))
         val dialog = builder.create()
         with(dialogLayoutBinding) {
-            buttonExportToAppDirectory.setOnClickListener {
-                dialog.dismiss()
-                showExportToAppDirectoryDialog(context)
-            }
-            buttonExportToDropbox.setOnClickListener {
-                dialog.dismiss()
-                showExportToDropboxDialog(context)
-            }
-            buttonExportToEmail.setOnClickListener {
-                dialog.dismiss()
+            lateinit var exportType: ExportType
+            radioGroup.setOnCheckedChangeListener { _, checkedId ->
+                when(checkedId) {
+                    R.id.radio_export_to_app_directory -> {
+                        exportType = ExportType.APP_DIRECTORY
+                    }
+                    R.id.radio_export_to_dropbox -> {
+                        exportType = ExportType.DROPBOX
+                    }
+                    R.id.radio_export_to_email -> {
+                        exportType = ExportType.EMAIL
+                    }
+                }
             }
             buttonCancel.setOnClickListener {
                 dialog.dismiss()
+            }
+            buttonContinue.setOnClickListener {
+                dialog.dismiss()
+                doExportOperationByExportType(exportType)
             }
         }
         with(dialog) {
             window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
             setView(dialogLayoutBinding.root)
             show()
+        }
+    }
+    fun doExportOperationByExportType(exportType: ExportType) {
+        when(exportType) {
+            ExportType.APP_DIRECTORY -> {
+                context?.let { showExportToAppDirectoryDialog(it) }
+            }
+            ExportType.DROPBOX -> {
+                context?.let { showExportToDropboxDialog(it) }
+            }
+            ExportType.EMAIL -> {
+            
+            }
         }
     }
     private fun showExportToAppDirectoryDialog(context: Context) {

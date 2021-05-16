@@ -65,7 +65,7 @@ ext {
 
     // Other
     // XStream
-    xStreamVersion = '1.4.16'
+    xStreamVersion = '1.4.17'
     // Apache Common CSV
     csvVersion = "1.8"
     // Dropbox Java SDK
