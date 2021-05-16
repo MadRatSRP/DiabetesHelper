@@ -14,7 +14,6 @@ import com.madrat.diabeteshelper.linearManager
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -311,14 +310,14 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun deserializeCsv(csvString: String): List<DiabetesNote> {
         val list = ArrayList<DiabetesNote>()
-        
+    
         try {
             val reader = StringReader(csvString)
-            
+        
             val records: Iterable<CSVRecord> = CSVFormat.DEFAULT.parse(
                 reader
             )
-            
+        
             for (record in records) {
                 list.add(
                     DiabetesNote(
@@ -326,12 +325,12 @@ class FragmentDiabetesDiary: Fragment() {
                     )
                 )
             }
-            
+        
             reader.close()
         } catch (exception: IOException) {
             exception.printStackTrace()
         }
-        
+    
         return list
     }
     private fun deserializeXml(xmlString: String): List<DiabetesNote> {
@@ -483,7 +482,7 @@ class FragmentDiabetesDiary: Fragment() {
             buttonExportFile.setOnClickListener {
                 dialog.dismiss()
                 adapter?.getDiabetesNotes()?.let { diabetesNotes ->
-                    saveFileToAppDirectory(
+                    handleSaveToDirectory(
                         pathToDataFolder,
                         editFilename.text.toString() + extensionName,
                         currentExtension,
@@ -498,48 +497,72 @@ class FragmentDiabetesDiary: Fragment() {
             show()
         }
     }
-    private fun saveFileToAppDirectory(
+    fun handleSaveToDirectory(
         pathToDir: String,
         pathToFile: String,
         fileExtension: Extension,
         diabetesNotes: ArrayList<DiabetesNote>
-    ): Disposable {
-        return Single.fromCallable {
-            val serializedString = serializeContentIntoString(
-                fileExtension,
-                diabetesNotes
-            )
-            context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
-                it?.write(serializedString.toByteArray())
-            }
-        }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-               showStatusMessage(R.string.message_successful_file_saved_into_directory)
-            }, { throwable ->
-                throwable.printStackTrace()
-                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
-            })
-    }
-    fun serializeContentIntoString(fileExtension: Extension,
-                                   diabetesNotes: ArrayList<DiabetesNote>): String {
-        lateinit var serializedString: String
+    ) {
         when(fileExtension) {
             Extension.CSV -> {
             
             }
             Extension.XML -> {
-            
+                serializeXmlAndSaveToFile(
+                    pathToFile,
+                    diabetesNotes
+                )
             }
             Extension.JSON -> {
-                serializedString = serializeJson(diabetesNotes)
+                serializeJsonAndSaveToFile(
+                    pathToFile,
+                    diabetesNotes
+                )
             }
         }
-        return serializedString
     }
-    private fun serializeJson(diabetesNotes: ArrayList<DiabetesNote>): String {
-        return Json.encodeToString(diabetesNotes)
+    fun serializeCsv(diabetesNotes: ArrayList<DiabetesNote>) {
+    
+    }
+    private fun serializeXmlAndSaveToFile(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        Single
+            .fromCallable {
+                val serializedString = XStream().toXML(diabetesNotes)
+                context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
+                    it?.write(serializedString.toByteArray())
+                }
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                showStatusMessage(R.string.message_successful_file_saved_into_directory)
+            }, { throwable ->
+                throwable.printStackTrace()
+                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
+            })
+    }
+    private fun serializeJsonAndSaveToFile(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        Single
+            .fromCallable {
+                val serializedString = Json.encodeToString(diabetesNotes)
+                context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
+                    it?.write(serializedString.toByteArray())
+                }
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                showStatusMessage(R.string.message_successful_file_saved_into_directory)
+            }, { throwable ->
+                throwable.printStackTrace()
+                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
+            })
     }
     private fun showStatusMessage(@StringRes messageRes: Int, isSuccess: Boolean = true) {
         (activity as? MainActivity)?.showMessage(
