@@ -21,11 +21,14 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVPrinter
 import org.apache.commons.csv.CSVRecord
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
 import java.io.StringReader
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class FragmentDiabetesDiary: Fragment() {
     private var nullableBinding: FragmentDiabetesDiaryBinding? = null
@@ -314,9 +317,11 @@ class FragmentDiabetesDiary: Fragment() {
         try {
             val reader = StringReader(csvString)
         
-            val records: Iterable<CSVRecord> = CSVFormat.DEFAULT.parse(
-                reader
-            )
+            val records: Iterable<CSVRecord> = CSVFormat.DEFAULT
+                .withHeader("SugarLevel")
+                .parse(
+                    reader
+                )
         
             for (record in records) {
                 list.add(
@@ -483,8 +488,8 @@ class FragmentDiabetesDiary: Fragment() {
                 dialog.dismiss()
                 adapter?.getDiabetesNotes()?.let { diabetesNotes ->
                     handleSaveToDirectory(
-                        pathToDataFolder,
                         editFilename.text.toString() + extensionName,
+                        pathToDataFolder + editFilename.text.toString() + extensionName,
                         currentExtension,
                         diabetesNotes
                     )
@@ -498,31 +503,54 @@ class FragmentDiabetesDiary: Fragment() {
         }
     }
     fun handleSaveToDirectory(
-        pathToDir: String,
-        pathToFile: String,
+        fileName: String,
+        finalPathToFile: String,
         fileExtension: Extension,
         diabetesNotes: ArrayList<DiabetesNote>
     ) {
         when(fileExtension) {
             Extension.CSV -> {
-            
+                serializeCsvAndSaveToFile(
+                    finalPathToFile,
+                    diabetesNotes
+                )
             }
             Extension.XML -> {
                 serializeXmlAndSaveToFile(
-                    pathToFile,
+                    fileName,
                     diabetesNotes
                 )
             }
             Extension.JSON -> {
                 serializeJsonAndSaveToFile(
-                    pathToFile,
+                    fileName,
                     diabetesNotes
                 )
             }
         }
     }
-    fun serializeCsv(diabetesNotes: ArrayList<DiabetesNote>) {
-    
+    fun serializeCsvAndSaveToFile(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        Single
+            .fromCallable {
+                val writer = Files.newBufferedWriter(Paths.get(pathToFile))
+                val csvPrinter = CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("SugarLevel"))
+                diabetesNotes.forEach { note ->
+                    csvPrinter.printRecord(note.sugarLevel)
+                }
+                csvPrinter.flush()
+                csvPrinter.close()
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                showStatusMessage(R.string.message_successful_file_saved_into_directory)
+            }, { throwable ->
+                throwable.printStackTrace()
+                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
+            })
     }
     private fun serializeXmlAndSaveToFile(
         pathToFile: String,
