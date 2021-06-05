@@ -33,7 +33,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.exp
 import kotlin.system.exitProcess
 
 
@@ -470,7 +469,7 @@ class FragmentDiabetesDiary: Fragment() {
             show()
         }
     }
-    fun doExportOperationByExportType(exportType: ExportType) {
+    private fun doExportOperationByExportType(exportType: ExportType) {
         when(exportType) {
             ExportType.APP_DIRECTORY -> {
                 context?.let { showExportToAppDirectoryDialog(it) }
@@ -479,7 +478,7 @@ class FragmentDiabetesDiary: Fragment() {
                 context?.let { showExportToDropboxDialog(it) }
             }
             ExportType.EMAIL -> {
-            
+                //context?.let { showExportToEmailDialog(context) }
             }
         }
     }
@@ -493,7 +492,9 @@ class FragmentDiabetesDiary: Fragment() {
             lateinit var currentExtension: Extension
             
             val pathToDataFolder = context.filesDir.path + "/"
-            
+    
+            title.setText(R.string.hint_export_to_app_directory_type_in_filename)
+    
             chipGroup.setOnCheckedChangeListener { _, checkedId ->
                 extensionName = when(checkedId) {
                     R.id.chip_csv -> {
@@ -568,6 +569,8 @@ class FragmentDiabetesDiary: Fragment() {
             
             val pathToDataFolder = context.filesDir.path + "/"
             
+            title.setText(R.string.hint_export_to_dropbox_type_in_filename)
+            
             chipGroup.setOnCheckedChangeListener { _, checkedId ->
                 extensionName = when(checkedId) {
                     R.id.chip_csv -> {
@@ -634,7 +637,7 @@ class FragmentDiabetesDiary: Fragment() {
             }
         }
     }
-    fun uploadFileToDropbox(
+    private fun uploadFileToDropbox(
         fileName: String,
         pathToFileWithFilename: String
     ) {
@@ -730,7 +733,7 @@ class FragmentDiabetesDiary: Fragment() {
                 showStatusMessage(R.string.message_error_file_saved_into_directory, false)
             })
     }
-    fun serializeCSV(
+    private fun serializeCSV(
         pathToFile: String,
         diabetesNotes: ArrayList<DiabetesNote>
     ) {
@@ -746,23 +749,18 @@ class FragmentDiabetesDiary: Fragment() {
         pathToFile: String,
         diabetesNotes: ArrayList<DiabetesNote>
     ) {
-        Single
-            .fromCallable {
+        tryToDoBackgroundSerializationAndSavingToFile(
+            { filePath: String, notes: ArrayList<DiabetesNote> ->
                 serializeCSV(
-                    pathToFile,
-                    diabetesNotes
+                    filePath,
+                    notes
                 )
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                showStatusMessage(R.string.message_successful_file_saved_into_directory)
-            }, { throwable ->
-                throwable.printStackTrace()
-                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
-            })
+            },
+            pathToFile,
+            diabetesNotes
+        )
     }
-    fun serializeXML(
+    private fun serializeXML(
         pathToFile: String,
         diabetesNotes: ArrayList<DiabetesNote>
     ) {
@@ -775,23 +773,18 @@ class FragmentDiabetesDiary: Fragment() {
         pathToFile: String,
         diabetesNotes: ArrayList<DiabetesNote>
     ) {
-        Single
-            .fromCallable {
+        tryToDoBackgroundSerializationAndSavingToFile(
+            { filePath: String, notes: ArrayList<DiabetesNote> ->
                 serializeXML(
-                    pathToFile,
-                    diabetesNotes
+                    filePath,
+                    notes
                 )
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                showStatusMessage(R.string.message_successful_file_saved_into_directory)
-            }, { throwable ->
-                throwable.printStackTrace()
-                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
-            })
+            },
+            pathToFile,
+            diabetesNotes
+        )
     }
-    fun serializeJSON(
+    private fun serializeJSON(
         pathToFile: String,
         diabetesNotes: ArrayList<DiabetesNote>
     ) {
@@ -804,9 +797,26 @@ class FragmentDiabetesDiary: Fragment() {
         pathToFile: String,
         diabetesNotes: ArrayList<DiabetesNote>
     ) {
+        tryToDoBackgroundSerializationAndSavingToFile(
+            { filePath: String, notes: ArrayList<DiabetesNote> ->
+                serializeJSON(
+                    filePath,
+                    notes
+                )
+            },
+            pathToFile,
+            diabetesNotes
+        )
+    }
+    
+    private fun tryToDoBackgroundSerializationAndSavingToFile(
+        backgroundTaskListener: (String, ArrayList<DiabetesNote>) -> Unit,
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
         Single
             .fromCallable {
-                serializeJSON(
+                backgroundTaskListener(
                     pathToFile,
                     diabetesNotes
                 )
@@ -820,6 +830,7 @@ class FragmentDiabetesDiary: Fragment() {
                 showStatusMessage(R.string.message_error_file_saved_into_directory, false)
             })
     }
+    
     private fun showStatusMessage(@StringRes messageRes: Int, isSuccess: Boolean = true) {
         (activity as? MainActivity)?.showMessage(
             messageRes, isSuccess
@@ -846,6 +857,42 @@ class FragmentDiabetesDiary: Fragment() {
         } catch (exception: IOException) {
             System.err.println("Error reading from file \"" + localFile + "\": " + exception.message)
             exitProcess(1)
+        }
+    }
+    
+    fun showExportToEmailDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
+        val dialogLayoutBinding = DialogSendEmailBinding.inflate(LayoutInflater.from(context))
+        val dialog = builder.create()
+        with(dialogLayoutBinding) {
+            lateinit var extensionName: String
+    
+            lateinit var currentExtension: Extension
+    
+            val pathToDataFolder = context.filesDir.path + "/"
+            
+            chipGroup.setOnCheckedChangeListener { _, checkedId ->
+                extensionName = when(checkedId) {
+                    R.id.chip_csv -> {
+                        currentExtension = Extension.CSV
+                        getString(R.string.extension_csv)
+                    }
+                    R.id.chip_xml -> {
+                        currentExtension = Extension.XML
+                        getString(R.string.extension_xml)
+                    }
+                    R.id.chip_json -> {
+                        currentExtension = Extension.JSON
+                        getString(R.string.extension_json)
+                    }
+                    else -> getString(R.string.extension_json)
+                }
+            }
+        }
+        with(dialog) {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            setView(dialogLayoutBinding.root)
+            show()
         }
     }
     

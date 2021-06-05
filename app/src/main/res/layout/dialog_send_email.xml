@@ -1,57 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:focusable="true"
     android:focusableInTouchMode="true"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView
+        android:id="@+id/title"
+        style="@style/DialogTitle"
+        android:text="@string/hint_export_to_email_type_in_filename"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:id="@+id/edit_filename"
+        android:gravity="center"
+        android:background="@drawable/rounded_rectangle_white"
+        android:inputType="text"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:text="@string/hint_export_to_email_file_extension"
+        style="@style/DialogTitle"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content">
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_csv"
+            android:textAllCaps="true"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/extension_csv"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_xml"
+            android:textAllCaps="true"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/extension_xml"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_json"
+            android:textAllCaps="true"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/extension_json"/>
+    </com.google.android.material.chip.ChipGroup>
+
     <EditText
         android:id="@+id/setup_receiver_email"
         android:hint="@string/receiver_hint"
-        android:inputType="text"
+        android:inputType="textEmailAddress"
         android:imeOptions="actionDone"
         android:gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:layout_height="wrap_content" />
 
     <EditText
-        android:id="@+id/setup_email_topic"
+        android:id="@+id/setup_topic"
         android:hint="@string/topic_hint"
         android:inputType="text"
         android:imeOptions="actionDone"
         android:gravity="center"
         android:layout_marginTop="25dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/setup_receiver_email"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:layout_height="wrap_content" />
 
     <EditText
-        android:id="@+id/setup_email_message"
+        android:id="@+id/setup_message"
         android:hint="@string/message_hint"
         android:inputType="text"
         android:imeOptions="actionDone"
         android:gravity="center"
         android:layout_marginTop="25dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/setup_email_topic"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:layout_height="wrap_content" />
 
     <Button
-        android:id="@+id/send_message_to_email_button"
-        android:text="Отправить сообщение по почте"
+        android:id="@+id/button_send_message"
+        android:text="@string/button_send_email"
         android:layout_marginTop="30dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/setup_email_message"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="wrap_content" />
+</LinearLayout>

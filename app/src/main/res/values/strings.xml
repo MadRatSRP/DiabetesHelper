@@ -53,6 +53,7 @@
     <string name="button_import">Импортировать данные</string>
     <string name="button_import_file">Импортировать файл</string>
     <string name="button_export">Экспортировать данные</string>
+    <string name="button_send_email">Отправить письмо</string>
     <string name="hint_edit_note">Изменение записи</string>
     <string name="hint_remove_note">Хотите удалить данную запись?</string>
     <!--Импорт и экспорт-->
@@ -70,7 +71,10 @@
     <string name="hint_export_to_app_directory">Сохранить в директории приложения</string>
     <string name="hint_export_to_dropbox">Сохранить в Dropbox</string>
     <string name="hint_export_to_email">Отправить по почте</string>
-    <string name="hint_export_type_in_filename">Введите название экспортируемого на Dropbox файла:</string>
+    <string name="hint_export_to_email_type_in_filename">Введите название экспортируемого по почте файла:</string>
+    <string name="hint_export_to_email_file_extension">Выберите расширение экспортируемого по почте файла:</string>
+    <string name="hint_export_to_dropbox_type_in_filename">Введите название экспортируемого на Dropbox файла:</string>
+    <string name="hint_export_to_app_directory_type_in_filename">Введите название экспортируемого в директорию приложения файла:</string>
     <string name="hint_export_select_file_extension">Выберите расширение экспортируемого файла:</string>
     <string name="message_successful_file_loaded_from_directory">Файл был успешно загружен из директории приложения</string>
     <string name="message_error_file_loaded_from_directory">Произошла ошибка при загрузке файла из директории приложения</string>
