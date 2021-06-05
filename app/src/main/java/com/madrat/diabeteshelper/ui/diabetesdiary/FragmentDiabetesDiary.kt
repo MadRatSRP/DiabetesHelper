@@ -13,6 +13,7 @@ import com.dropbox.core.v2.DbxClientV2
 import com.dropbox.core.v2.files.FileMetadata
 import com.dropbox.core.v2.files.UploadErrorException
 import com.dropbox.core.v2.files.WriteMode
+import com.madrat.diabeteshelper.NetworkClient
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.linearManager
@@ -21,6 +22,7 @@ import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.observers.DisposableSingleObserver
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -63,18 +65,40 @@ class FragmentDiabetesDiary: Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val listOfDiabetesNotes = arrayListOf(
+        /*val listOfDiabetesNotes = arrayListOf(
             DiabetesNote(5.46),
             DiabetesNote(6.66),
             DiabetesNote(7.77),
             DiabetesNote(8.88),
             DiabetesNote(8.89)
         )
-        updateListOfDiabetesNotes(listOfDiabetesNotes)
+        updateListOfDiabetesNotes(listOfDiabetesNotes)*/
+        loadNotesFromServer()
         binding.buttonAddNote.setOnClickListener {
             showAddNoteDialog(view.context)
         }
     }
+    
+    private fun loadNotesFromServer() {
+        val diabetesNotesResponse = context?.let {
+            NetworkClient.getService(it).getDiabetesNotes().apply {
+                subscribeOn(Schedulers.io())
+                observeOn(AndroidSchedulers.mainThread())
+            }
+        }
+        diabetesNotesResponse?.subscribeWith(object : DisposableSingleObserver<ArrayList<DiabetesNote>>() {
+            override fun onSuccess(list: ArrayList<DiabetesNote>?) {
+                activity?.runOnUiThread {
+                    list?.let { updateListOfDiabetesNotes(it) }
+                }
+            }
+            override fun onError(throwable: Throwable?) {
+                throwable?.printStackTrace()
+            }
+        })
+        //disposable?.dispose()
+    }
+    
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
