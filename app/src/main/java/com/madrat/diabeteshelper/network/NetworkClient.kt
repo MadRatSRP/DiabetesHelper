@@ -1,8 +1,9 @@
-package com.madrat.diabeteshelper
+package com.madrat.diabeteshelper.network
 
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.madrat.diabeteshelper.R
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
@@ -11,7 +12,6 @@ import java.io.InputStream
 import java.security.KeyStore
 import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManagerFactory

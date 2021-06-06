@@ -4,13 +4,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.madrat.diabeteshelper.databinding.ListDiabetesNotesBinding
+import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
 
 class DiabetesNotesAdapter(
     private val editNoteListener: (Int, DiabetesNote) -> Unit,
     private val removeNoteListener: (Int) -> Unit
 ): RecyclerView.Adapter<DiabetesNotesAdapter.DiabetesNotesHolder>() {
     private val listOfDiabetesNotes = ArrayList<DiabetesNote>()
-
+    
     fun getDiabetesNotes()
         = listOfDiabetesNotes
     
@@ -51,12 +52,12 @@ class DiabetesNotesAdapter(
     inner class DiabetesNotesHolder(private val binding: ListDiabetesNotesBinding)
         : RecyclerView.ViewHolder(binding.root) {
         fun bind(diabetesNote: DiabetesNote, position: Int) {
-            with(diabetesNote) {
-                binding.sugarLevel.text = sugarLevel.toString()
-                binding.buttonEditNote.setOnClickListener {
+            with(binding) {
+                sugarLevel.text = diabetesNote.sugarLevel.toString()
+                buttonEditNote.setOnClickListener {
                     editNoteListener(position, diabetesNote)
                 }
-                binding.buttonRemoveNote.setOnClickListener {
+                buttonRemoveNote.setOnClickListener {
                     removeNoteListener(position)
                 }
             }

@@ -1,10 +1,12 @@
 package com.madrat.diabeteshelper.ui.diabetesdiary
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.dropbox.core.DbxException
 import com.dropbox.core.DbxRequestConfig
@@ -13,10 +15,11 @@ import com.dropbox.core.v2.DbxClientV2
 import com.dropbox.core.v2.files.FileMetadata
 import com.dropbox.core.v2.files.UploadErrorException
 import com.dropbox.core.v2.files.WriteMode
-import com.madrat.diabeteshelper.NetworkClient
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.linearManager
+import com.madrat.diabeteshelper.network.NetworkClient
+import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -30,6 +33,9 @@ import kotlinx.serialization.json.Json
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import org.apache.commons.csv.CSVRecord
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -65,18 +71,24 @@ class FragmentDiabetesDiary: Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        /*val listOfDiabetesNotes = arrayListOf(
-            DiabetesNote(5.46),
-            DiabetesNote(6.66),
-            DiabetesNote(7.77),
-            DiabetesNote(8.88),
-            DiabetesNote(8.89)
-        )
-        updateListOfDiabetesNotes(listOfDiabetesNotes)*/
         loadNotesFromServer()
         binding.buttonAddNote.setOnClickListener {
             showAddNoteDialog(view.context)
         }
+    }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.clear()
+        inflater.inflate(R.menu.button_import_and_export, menu)
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.button_import_and_export -> {
+                showImportAndExportDialog(requireContext())
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
     
     private fun loadNotesFromServer() {
@@ -98,31 +110,15 @@ class FragmentDiabetesDiary: Fragment() {
         })
         //disposable?.dispose()
     }
-    
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        menu.clear()
-        inflater.inflate(R.menu.button_import_and_export, menu)
-    }
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.button_import_and_export -> {
-                showImportAndExportDialog(requireContext())
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-    
     private fun showAddNoteDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
         val dialogLayoutBinding = DialogAddDiabetesNoteBinding.inflate(LayoutInflater.from(context))
         val dialog: AlertDialog = builder.create()
         with(dialogLayoutBinding) {
             buttonAdd.setOnClickListener {
-                val currentSugarLevel = editSugarLevel.text.toString().toDouble()
-                addDiabetesNoteToList(currentSugarLevel)
                 dialog.dismiss()
+                val currentSugarLevel = editSugarLevel.text.toString().toDouble()
+                uploadDiabetesNoteDataToServer(currentSugarLevel)
             }
             buttonCancel.setOnClickListener {
                 dialog.dismiss()
@@ -134,6 +130,26 @@ class FragmentDiabetesDiary: Fragment() {
             show()
         }
     }
+    private fun uploadDiabetesNoteDataToServer(sugarLevel: Double) {
+        val response = context?.let {
+            NetworkClient.getService(it).addDiabetesNote(
+                sugarLevel
+            )
+        }
+        response?.enqueue(object : Callback<DiabetesNote> {
+            override fun onResponse(call: Call<DiabetesNote>, response: Response<DiabetesNote>) {
+                val diabetesNote: DiabetesNote? = response.body()
+                diabetesNote?.let { addDiabetesNoteToList(it) }
+            }
+            override fun onFailure(call: Call<DiabetesNote>, throwable: Throwable) {
+                throwable.printStackTrace()
+            }
+        })
+    }
+    private fun addDiabetesNoteToList(diabetesNote: DiabetesNote) {
+        adapter?.addNote(diabetesNote)
+        binding.recyclerView.adapter = adapter
+    }
     private fun showEditNoteDialog(position: Int, diabetesNote: DiabetesNote) {
         val builder = context?.let { AlertDialog.Builder(it) }
         val dialogLayoutBinding = DialogEditDiabetesNoteBinding.inflate(LayoutInflater.from(context))
@@ -144,6 +160,7 @@ class FragmentDiabetesDiary: Fragment() {
                 updateDiabetesNoteValue(
                     position,
                     DiabetesNote(
+                        diabetesNote.noteId,
                         editSugarLevel.text.toString().toDouble()
                     )
                 )
@@ -184,14 +201,6 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun updateDiabetesNoteValue(position: Int, diabetesNote: DiabetesNote) {
         adapter?.updateNote(position, diabetesNote)
-        binding.recyclerView.adapter = adapter
-    }
-    private fun addDiabetesNoteToList(currentSugarLevel: Double) {
-        adapter?.addNote(
-            DiabetesNote(
-                currentSugarLevel
-            )
-        )
         binding.recyclerView.adapter = adapter
     }
     private fun updateListOfDiabetesNotes(listOfDiabetesNotes: ArrayList<DiabetesNote>) {
@@ -356,7 +365,8 @@ class FragmentDiabetesDiary: Fragment() {
             for (record in records) {
                 list.add(
                     DiabetesNote(
-                        record[0].toDouble()
+                        record[0].toInt(),
+                        record[1].toDouble()
                     )
                 )
             }
@@ -502,7 +512,7 @@ class FragmentDiabetesDiary: Fragment() {
                 context?.let { showExportToDropboxDialog(it) }
             }
             ExportType.EMAIL -> {
-                //context?.let { showExportToEmailDialog(context) }
+                context?.let { showExportToEmailDialog(it) }
             }
         }
     }
@@ -553,33 +563,6 @@ class FragmentDiabetesDiary: Fragment() {
             window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
             setView(dialogLayoutBinding.root)
             show()
-        }
-    }
-    private fun handleSaveToDirectory(
-        fileName: String,
-        finalPathToFile: String,
-        fileExtension: Extension,
-        diabetesNotes: ArrayList<DiabetesNote>
-    ) {
-        when(fileExtension) {
-            Extension.CSV -> {
-                tryToSerializeCsvAndSaveToFile(
-                    finalPathToFile,
-                    diabetesNotes
-                )
-            }
-            Extension.XML -> {
-                tryToSerializeXmlAndSaveToFile(
-                    fileName,
-                    diabetesNotes
-                )
-            }
-            Extension.JSON -> {
-                tryToSerializeJsonAndSaveToFile(
-                    fileName,
-                    diabetesNotes
-                )
-            }
         }
     }
     private fun showExportToDropboxDialog(context: Context) {
@@ -757,103 +740,6 @@ class FragmentDiabetesDiary: Fragment() {
                 showStatusMessage(R.string.message_error_file_saved_into_directory, false)
             })
     }
-    private fun serializeCSV(
-        pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
-    ) {
-        val writer = Files.newBufferedWriter(Paths.get(pathToFile))
-        val csvPrinter = CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("SugarLevel"))
-        diabetesNotes.forEach { note ->
-            csvPrinter.printRecord(note.sugarLevel)
-        }
-        csvPrinter.flush()
-        csvPrinter.close()
-    }
-    private fun tryToSerializeCsvAndSaveToFile(
-        pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
-    ) {
-        tryToDoBackgroundSerializationAndSavingToFile(
-            { filePath: String, notes: ArrayList<DiabetesNote> ->
-                serializeCSV(
-                    filePath,
-                    notes
-                )
-            },
-            pathToFile,
-            diabetesNotes
-        )
-    }
-    private fun serializeXML(
-        pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
-    ) {
-        val serializedString = XStream().toXML(diabetesNotes)
-        context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
-            it?.write(serializedString.toByteArray())
-        }
-    }
-    private fun tryToSerializeXmlAndSaveToFile(
-        pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
-    ) {
-        tryToDoBackgroundSerializationAndSavingToFile(
-            { filePath: String, notes: ArrayList<DiabetesNote> ->
-                serializeXML(
-                    filePath,
-                    notes
-                )
-            },
-            pathToFile,
-            diabetesNotes
-        )
-    }
-    private fun serializeJSON(
-        pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
-    ) {
-        val serializedString = Json.encodeToString(diabetesNotes)
-        context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
-            it?.write(serializedString.toByteArray())
-        }
-    }
-    private fun tryToSerializeJsonAndSaveToFile(
-        pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
-    ) {
-        tryToDoBackgroundSerializationAndSavingToFile(
-            { filePath: String, notes: ArrayList<DiabetesNote> ->
-                serializeJSON(
-                    filePath,
-                    notes
-                )
-            },
-            pathToFile,
-            diabetesNotes
-        )
-    }
-    
-    private fun tryToDoBackgroundSerializationAndSavingToFile(
-        backgroundTaskListener: (String, ArrayList<DiabetesNote>) -> Unit,
-        pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
-    ) {
-        Single
-            .fromCallable {
-                backgroundTaskListener(
-                    pathToFile,
-                    diabetesNotes
-                )
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                showStatusMessage(R.string.message_successful_file_saved_into_directory)
-            }, { throwable ->
-                throwable.printStackTrace()
-                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
-            })
-    }
     
     private fun showStatusMessage(@StringRes messageRes: Int, isSuccess: Boolean = true) {
         (activity as? MainActivity)?.showMessage(
@@ -884,7 +770,7 @@ class FragmentDiabetesDiary: Fragment() {
         }
     }
     
-    fun showExportToEmailDialog(context: Context) {
+    private fun showExportToEmailDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
         val dialogLayoutBinding = DialogSendEmailBinding.inflate(LayoutInflater.from(context))
         val dialog = builder.create()
@@ -912,6 +798,24 @@ class FragmentDiabetesDiary: Fragment() {
                     else -> getString(R.string.extension_json)
                 }
             }
+            buttonSendMessage.setOnClickListener {
+                dialog.dismiss()
+                val pathToFile = pathToDataFolder + editFilename.text.toString() + extensionName
+                adapter?.getDiabetesNotes()?.let { diabetesNotes ->
+                    handleSaveToDirectory(
+                        editFilename.text.toString() + extensionName,
+                        pathToFile,
+                        currentExtension,
+                        diabetesNotes
+                    )
+                }
+                sendFileToEmail(
+                    pathToFile,
+                    setupReceiverEmail.text.toString(),
+                    setupTopic.text.toString(),
+                    setupMessage.text.toString()
+                )
+            }
         }
         with(dialog) {
             window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
@@ -919,7 +823,155 @@ class FragmentDiabetesDiary: Fragment() {
             show()
         }
     }
-    
+    fun sendFileToEmail(
+        pathToFile: String,
+        emailReceiver: String,
+        emailTopic: String,
+        emailMessage: String
+    ) {
+        val file = File(pathToFile)
+        val filePathUri = FileProvider.getUriForFile(
+            requireContext(),
+            "your.application.package.fileprovider",
+            file
+        )
+        
+        val emailIntent = Intent(Intent.ACTION_SEND)
+        // set the type to 'email'
+        // set the type to 'email'
+        emailIntent.type = "vnd.android.cursor.dir/email"
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, emailReceiver)
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, emailTopic)
+        emailIntent.putExtra(Intent.EXTRA_TEXT, emailMessage)
+        emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        // the attachment
+        // the attachment
+        emailIntent.putExtra(Intent.EXTRA_STREAM, filePathUri)
+        requireContext().startActivity(Intent.createChooser(emailIntent, "Send mail..."))
+    }
+    private fun handleSaveToDirectory(
+        fileName: String,
+        finalPathToFile: String,
+        fileExtension: Extension,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        when(fileExtension) {
+            Extension.CSV -> {
+                tryToSerializeCsvAndSaveToFile(
+                    finalPathToFile,
+                    diabetesNotes
+                )
+            }
+            Extension.XML -> {
+                tryToSerializeXmlAndSaveToFile(
+                    fileName,
+                    diabetesNotes
+                )
+            }
+            Extension.JSON -> {
+                tryToSerializeJsonAndSaveToFile(
+                    fileName,
+                    diabetesNotes
+                )
+            }
+        }
+    }
+    private fun tryToDoBackgroundSerializationAndSavingToFile(
+        backgroundTaskListener: (String, ArrayList<DiabetesNote>) -> Unit,
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        Single
+            .fromCallable {
+                backgroundTaskListener(
+                    pathToFile,
+                    diabetesNotes
+                )
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                showStatusMessage(R.string.message_successful_file_saved_into_directory)
+            }, { throwable ->
+                throwable.printStackTrace()
+                showStatusMessage(R.string.message_error_file_saved_into_directory, false)
+            })
+    }
+    private fun tryToSerializeCsvAndSaveToFile(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        tryToDoBackgroundSerializationAndSavingToFile(
+            { filePath: String, notes: ArrayList<DiabetesNote> ->
+                serializeCSV(
+                    filePath,
+                    notes
+                )
+            },
+            pathToFile,
+            diabetesNotes
+        )
+    }
+    private fun tryToSerializeXmlAndSaveToFile(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        tryToDoBackgroundSerializationAndSavingToFile(
+            { filePath: String, notes: ArrayList<DiabetesNote> ->
+                serializeXML(
+                    filePath,
+                    notes
+                )
+            },
+            pathToFile,
+            diabetesNotes
+        )
+    }
+    private fun tryToSerializeJsonAndSaveToFile(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        tryToDoBackgroundSerializationAndSavingToFile(
+            { filePath: String, notes: ArrayList<DiabetesNote> ->
+                serializeJSON(
+                    filePath,
+                    notes
+                )
+            },
+            pathToFile,
+            diabetesNotes
+        )
+    }
+    private fun serializeCSV(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        val writer = Files.newBufferedWriter(Paths.get(pathToFile))
+        val csvPrinter = CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("SugarLevel"))
+        diabetesNotes.forEach { note ->
+            csvPrinter.printRecord(note.sugarLevel)
+        }
+        csvPrinter.flush()
+        csvPrinter.close()
+    }
+    private fun serializeXML(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        val serializedString = XStream().toXML(diabetesNotes)
+        context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
+            it?.write(serializedString.toByteArray())
+        }
+    }
+    private fun serializeJSON(
+        pathToFile: String,
+        diabetesNotes: ArrayList<DiabetesNote>
+    ) {
+        val serializedString = Json.encodeToString(diabetesNotes)
+        context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
+            it?.write(serializedString.toByteArray())
+        }
+    }
     private fun printProgress(uploaded: Long, size: Long) {
         System.out.printf(
             "Uploaded %12d / %12d bytes (%5.2f%%)\n",
