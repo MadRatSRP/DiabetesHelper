@@ -1,5 +1,5 @@
 package com.madrat.diabeteshelper.ui.diabetesdiary.model
 
-class RequestAddDiabetesNote(
+data class RequestAddDiabetesNote(
     val sugarLevel: Double
 )

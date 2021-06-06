@@ -20,6 +20,8 @@ import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.linearManager
 import com.madrat.diabeteshelper.network.NetworkClient
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
+import com.madrat.diabeteshelper.ui.diabetesdiary.model.RequestAddDiabetesNote
+import com.madrat.diabeteshelper.ui.diabetesdiary.model.ResponseAddDiabetesNote
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -131,17 +133,25 @@ class FragmentDiabetesDiary: Fragment() {
         }
     }
     private fun uploadDiabetesNoteDataToServer(sugarLevel: Double) {
-        val response = context?.let {
+        val response: Call<ResponseAddDiabetesNote>? = context?.let {
             NetworkClient.getService(it).addDiabetesNote(
-                sugarLevel
+                RequestAddDiabetesNote(
+                    sugarLevel
+                )
             )
         }
-        response?.enqueue(object : Callback<DiabetesNote> {
-            override fun onResponse(call: Call<DiabetesNote>, response: Response<DiabetesNote>) {
-                val diabetesNote: DiabetesNote? = response.body()
+        response?.enqueue(object : Callback<ResponseAddDiabetesNote> {
+            override fun onResponse(
+                call: Call<ResponseAddDiabetesNote>,
+                response: Response<ResponseAddDiabetesNote>
+            ) {
+                val diabetesNote: DiabetesNote? = response.body()?.diabetesNote
                 diabetesNote?.let { addDiabetesNoteToList(it) }
             }
-            override fun onFailure(call: Call<DiabetesNote>, throwable: Throwable) {
+            override fun onFailure(
+                call: Call<ResponseAddDiabetesNote>,
+                throwable: Throwable
+            ) {
                 throwable.printStackTrace()
             }
         })

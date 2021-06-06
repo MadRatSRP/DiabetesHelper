@@ -5,16 +5,16 @@ import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.madrat.diabeteshelper.R
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.InputStream
 import java.security.KeyStore
 import java.security.SecureRandom
+import java.util.*
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.KeyManagerFactory
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.*
 
 
 object NetworkClient {
@@ -49,28 +49,41 @@ object NetworkClient {
             TrustManagerFactory.getDefaultAlgorithm()
         )
         trustManagerFactory.init(keyStore)
+    
+        val trustManagers = trustManagerFactory.trustManagers
+        check(!(trustManagers.size != 1 || trustManagers[0] !is X509TrustManager)) {
+            "Unexpected default trust managers:" + Arrays.toString(
+                trustManagers
+            )
+        }
+        val trustManager = trustManagers[0] as X509TrustManager
+    
         val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
         keyManagerFactory.init(keyStore, keystorePass.toCharArray())
         sslContext.init(
             keyManagerFactory.keyManagers,
-            trustManagerFactory.trustManagers,
+            trustManagers,
             SecureRandom()
         )
         
+        val loggingInterceptor = HttpLoggingInterceptor()
+            .setLevel(HttpLoggingInterceptor.Level.HEADERS)
+        
         val client = OkHttpClient.Builder().apply {
             hostnameVerifier { _, _ -> true }
-            sslSocketFactory(sslContext.socketFactory)
+            sslSocketFactory(sslContext.socketFactory, trustManager)
             connectTimeout(10, TimeUnit.SECONDS)
             writeTimeout(10, TimeUnit.SECONDS)
             readTimeout(30, TimeUnit.SECONDS)
-            addInterceptor(
+            /*addInterceptor(
                 ChuckerInterceptor.Builder(context).apply {
                     collector(ChuckerCollector(context))
                     maxContentLength(250000L)
                     redactHeaders(emptySet())
                     alwaysReadResponseBody(false)
                 }.build()
-            )
+            )*/
+            addInterceptor(loggingInterceptor)
         }.build()
         
         val rxJava3Adapter = RxJava3CallAdapterFactory.create()
