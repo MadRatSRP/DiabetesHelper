@@ -4,26 +4,39 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.madrat.diabeteshelper.databinding.ListFoodNotesBinding
+import com.madrat.diabeteshelper.ui.fooddiary.model.FoodNote
 
 class FoodNotesAdapter(
-    private val editNoteListener: (Int, FoodNote) -> Unit,
+    private val editNoteListener: (FoodNote) -> Unit,
     private val removeNoteListener: (Int) -> Unit
 ): RecyclerView.Adapter<FoodNotesAdapter.FoodNotesHolder>() {
     private val listOfFoodNotes = ArrayList<FoodNote>()
     
-    fun removeNote(position: Int) {
-        listOfFoodNotes.removeAt(position)
-        this.notifyDataSetChanged()
+    fun getNotes()
+        = listOfFoodNotes
+    
+    fun updateNote(foodNote: FoodNote) {
+        val previousNote = listOfFoodNotes.find {
+            it.noteId == foodNote.noteId
+        }
+        
+        val position = listOfFoodNotes.indexOf(previousNote)
+        
+        listOfFoodNotes[position] = foodNote
+        
+        notifyDataSetChanged()
     }
     
-    fun updateNote(position: Int, foodNote: FoodNote) {
-        listOfFoodNotes[position] = foodNote
-        this.notifyDataSetChanged()
+    fun removeNote(noteId: Int) {
+        listOfFoodNotes.removeIf {
+            it.noteId == noteId
+        }
+        notifyDataSetChanged()
     }
     
     fun addNote(foodNote: FoodNote) {
         listOfFoodNotes.add(foodNote)
-        this.notifyDataSetChanged()
+        notifyDataSetChanged()
     }
     
     fun updateList(newListOfFoodNotes: ArrayList<FoodNote>) {
@@ -40,21 +53,21 @@ class FoodNotesAdapter(
     }
     
     override fun onBindViewHolder(holder: FoodNotesHolder, position: Int)
-        = holder.bind(listOfFoodNotes[position], position)
+        = holder.bind(listOfFoodNotes[position])
     
     override fun getItemCount(): Int
         = listOfFoodNotes.size
     
     inner class FoodNotesHolder(private val binding: ListFoodNotesBinding)
         : RecyclerView.ViewHolder(binding.root) {
-        fun bind(foodNote: FoodNote, position: Int) {
-            with(foodNote) {
-                binding.mealName.text = mealName
-                binding.buttonEditNote.setOnClickListener {
-                    editNoteListener(position, foodNote)
+        fun bind(foodNote: FoodNote) {
+            with(binding) {
+                mealName.text = foodNote.foodName
+                buttonEditNote.setOnClickListener {
+                    editNoteListener(foodNote)
                 }
-                binding.buttonRemoveNote.setOnClickListener {
-                    removeNoteListener(position)
+                buttonRemoveNote.setOnClickListener {
+                    removeNoteListener(foodNote.noteId)
                 }
             }
         }

@@ -18,7 +18,6 @@ import com.dropbox.core.v2.files.WriteMode
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.linearManager
-import com.madrat.diabeteshelper.network.DiabetesNotesNetworkInterface
 import com.madrat.diabeteshelper.network.NetworkClient
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
@@ -99,7 +98,7 @@ class FragmentDiabetesDiary: Fragment() {
     
     private fun loadNotesFromServer() {
         val diabetesNotesResponse = context?.let {
-            networkService?.getDiabetesNotes()?.apply {
+            networkService?.getNotes()?.apply {
                 subscribeOn(Schedulers.io())
                 observeOn(AndroidSchedulers.mainThread())
             }
@@ -137,7 +136,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun uploadDiabetesNoteDataToServer(sugarLevel: Double) {
         val response = context?.let {
-            networkService?.addDiabetesNote(
+            networkService?.addNote(
                 DiabetesNote(
                     0,
                     sugarLevel
@@ -191,7 +190,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun updateDiabetesNoteOnServer(diabetesNote: DiabetesNote) {
         val response = context?.let {
-            networkService?.updateDiabetesNote(
+            networkService?.updateNote(
                 diabetesNote.noteId,
                 diabetesNote
             )
@@ -244,7 +243,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun removeDiabetesNoteFromServer(noteId: Int) {
         val response = context?.let {
-            networkService?.deleteDiabetesNote(
+            networkService?.deleteNote(
                 noteId
             )
         }
@@ -609,7 +608,7 @@ class FragmentDiabetesDiary: Fragment() {
             
             buttonExportFile.setOnClickListener {
                 dialog.dismiss()
-                adapter?.getDiabetesNotes()?.let { diabetesNotes ->
+                adapter?.getNotes()?.let { diabetesNotes ->
                     handleSaveToDirectory(
                         editFilename.text.toString() + extensionName,
                         pathToDataFolder + editFilename.text.toString() + extensionName,
@@ -658,7 +657,7 @@ class FragmentDiabetesDiary: Fragment() {
             
             buttonExportFile.setOnClickListener {
                 dialog.dismiss()
-                adapter?.getDiabetesNotes()?.let { diabetesNotes ->
+                adapter?.getNotes()?.let { diabetesNotes ->
                     handleSaveToDropbox(
                         editFilename.text.toString() + extensionName,
                         pathToDataFolder + editFilename.text.toString() + extensionName,
@@ -861,7 +860,7 @@ class FragmentDiabetesDiary: Fragment() {
             buttonSendMessage.setOnClickListener {
                 dialog.dismiss()
                 val pathToFile = pathToDataFolder + editFilename.text.toString() + extensionName
-                adapter?.getDiabetesNotes()?.let { diabetesNotes ->
+                adapter?.getNotes()?.let { diabetesNotes ->
                     handleSaveToDirectory(
                         editFilename.text.toString() + extensionName,
                         pathToFile,

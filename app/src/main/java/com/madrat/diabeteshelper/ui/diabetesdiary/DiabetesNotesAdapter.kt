@@ -12,7 +12,7 @@ class DiabetesNotesAdapter(
 ): RecyclerView.Adapter<DiabetesNotesAdapter.DiabetesNotesHolder>() {
     private val listOfDiabetesNotes = ArrayList<DiabetesNote>()
     
-    fun getDiabetesNotes()
+    fun getNotes()
         = listOfDiabetesNotes
     
     fun updateNote(diabetesNote: DiabetesNote) {

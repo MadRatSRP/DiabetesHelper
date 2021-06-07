@@ -1,4 +1,4 @@
-package com.madrat.diabeteshelper.network
+package com.madrat.diabeteshelper.ui.diabetesdiary
 
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.RequestAddDiabetesNote
@@ -8,33 +8,23 @@ import retrofit2.Call
 import retrofit2.http.*
 
 interface DiabetesNotesNetworkInterface {
-    // https://193.38.235.203:8443/dh_server/ diabetesNotes/notes
-    
     @GET("diabetesNotes/notes")
-    fun getDiabetesNotes()
+    fun getNotes()
         : Single<ArrayList<DiabetesNote>>
     
     @POST("diabetesNotes/addNote")
-    fun addDiabetesNote(
+    fun addNote(
         @Body diabetesNote: DiabetesNote
     ): Call<DiabetesNote>
     
     @DELETE("diabetesNotes/notes/{noteId}")
-    fun deleteDiabetesNote(
+    fun deleteNote(
         @Path("noteId") noteId: Int
     ): Call<Int>
     
     @PUT("diabetesNotes/notes/{noteId}")
-    fun updateDiabetesNote(
+    fun updateNote(
         @Path("noteId") noteId: Int,
         @Body diabetesNote: DiabetesNote
     ): Call<DiabetesNote>
-    
-    /*
-        @PutMapping("/notes/{noteId}")
-    public DiabetesNote updateDiabetesNote(
-            @PathVariable Integer noteId,
-            @RequestBody DiabetesNote diabetesNote
-    ) {
-     */
 }
