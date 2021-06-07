@@ -7,7 +7,7 @@ import io.reactivex.rxjava3.core.Single
 import retrofit2.Call
 import retrofit2.http.*
 
-interface NetworkInterface {
+interface DiabetesNotesNetworkInterface {
     // https://193.38.235.203:8443/dh_server/ diabetesNotes/notes
     
     @GET("diabetesNotes/notes")

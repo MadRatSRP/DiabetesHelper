@@ -18,6 +18,7 @@ import com.dropbox.core.v2.files.WriteMode
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.linearManager
+import com.madrat.diabeteshelper.network.DiabetesNotesNetworkInterface
 import com.madrat.diabeteshelper.network.NetworkClient
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
@@ -49,6 +50,11 @@ class FragmentDiabetesDiary: Fragment() {
     private val binding get() = nullableBinding!!
     private var dropboxClient: DbxClientV2? = null
     private var adapter: DiabetesNotesAdapter? = null
+    private val networkService = context?.let {
+        NetworkClient
+            .getRetrofit(it)
+            .create(DiabetesNotesNetworkInterface::class.java)
+    }
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -93,7 +99,7 @@ class FragmentDiabetesDiary: Fragment() {
     
     private fun loadNotesFromServer() {
         val diabetesNotesResponse = context?.let {
-            NetworkClient.getService(it).getDiabetesNotes().apply {
+            networkService?.getDiabetesNotes()?.apply {
                 subscribeOn(Schedulers.io())
                 observeOn(AndroidSchedulers.mainThread())
             }
@@ -108,7 +114,6 @@ class FragmentDiabetesDiary: Fragment() {
                 throwable?.printStackTrace()
             }
         })
-        //disposable?.dispose()
     }
     private fun showAddNoteDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
@@ -132,7 +137,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun uploadDiabetesNoteDataToServer(sugarLevel: Double) {
         val response = context?.let {
-            NetworkClient.getService(it).addDiabetesNote(
+            networkService?.addDiabetesNote(
                 DiabetesNote(
                     0,
                     sugarLevel
@@ -186,7 +191,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun updateDiabetesNoteOnServer(diabetesNote: DiabetesNote) {
         val response = context?.let {
-            NetworkClient.getService(it).updateDiabetesNote(
+            networkService?.updateDiabetesNote(
                 diabetesNote.noteId,
                 diabetesNote
             )
@@ -239,7 +244,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun removeDiabetesNoteFromServer(noteId: Int) {
         val response = context?.let {
-            NetworkClient.getService(it).deleteDiabetesNote(
+            networkService?.deleteDiabetesNote(
                 noteId
             )
         }
@@ -878,7 +883,7 @@ class FragmentDiabetesDiary: Fragment() {
             show()
         }
     }
-    fun sendFileToEmail(
+    private fun sendFileToEmail(
         pathToFile: String,
         emailReceiver: String,
         emailTopic: String,

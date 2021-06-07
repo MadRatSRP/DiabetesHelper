@@ -95,10 +95,4 @@ object NetworkClient {
             client(client)
         }.build()
     }
-    
-    fun getService(context: Context): NetworkInterface {
-        return getRetrofit(context).create(NetworkInterface::class.java)
-    }
-    
-    //fun getChuckerCollector(): ChuckerCollector = ChuckerCollector(context)
 }
