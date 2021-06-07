@@ -14,10 +14,13 @@ interface NetworkInterface {
     fun getDiabetesNotes()
         : Single<ArrayList<DiabetesNote>>
     
-    /*@FormUrlEncoded
-    @Headers("Content-Type: application/json")*/
     @POST("diabetesNotes/addNote")
     fun addDiabetesNote(
         @Body diabetesNote: DiabetesNote
     ): Call<DiabetesNote>
+    
+    @DELETE("diabetesNotes/notes/{noteId}")
+    fun deleteDiabetesNote(
+        @Path("noteId") noteId: Int
+    ): Call<Int>
 }

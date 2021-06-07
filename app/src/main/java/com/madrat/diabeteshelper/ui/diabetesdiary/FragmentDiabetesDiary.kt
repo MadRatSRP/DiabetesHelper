@@ -20,8 +20,6 @@ import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.linearManager
 import com.madrat.diabeteshelper.network.NetworkClient
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
-import com.madrat.diabeteshelper.ui.diabetesdiary.model.RequestAddDiabetesNote
-import com.madrat.diabeteshelper.ui.diabetesdiary.model.ResponseAddDiabetesNote
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -63,7 +61,7 @@ class FragmentDiabetesDiary: Fragment() {
         dropboxClient = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
         adapter = DiabetesNotesAdapter (
             { position:Int, note: DiabetesNote -> showEditNoteDialog(position, note) },
-            { position:Int -> showRemoveNoteDialog(position)}
+            { noteId:Int -> showRemoveNoteDialog(noteId)}
         )
         with(binding) {
             recyclerView.adapter = adapter
@@ -187,14 +185,14 @@ class FragmentDiabetesDiary: Fragment() {
             this?.show()
         }
     }
-    private fun showRemoveNoteDialog(position: Int) {
+    private fun showRemoveNoteDialog(noteId: Int) {
         val builder = context?.let { AlertDialog.Builder(it) }
         val dialogLayoutBinding = DialogRemoveNoteBinding.inflate(LayoutInflater.from(context))
         val dialog: AlertDialog? = builder?.create()
         with(dialogLayoutBinding) {
             buttonRemoveNote.setOnClickListener {
-                removeDiabetesNoteFromList(position)
                 dialog?.dismiss()
+                removeDiabetesNoteFromServer(noteId)
             }
             buttonCancel.setOnClickListener {
                 dialog?.dismiss()
@@ -205,6 +203,28 @@ class FragmentDiabetesDiary: Fragment() {
             this?.setView(dialogLayoutBinding.root)
             this?.show()
         }
+    }
+    private fun removeDiabetesNoteFromServer(noteId: Int) {
+        val response = context?.let {
+            NetworkClient.getService(it).deleteDiabetesNote(
+                noteId
+            )
+        }
+        response?.enqueue(object : Callback<Int> {
+            override fun onResponse(
+                call: Call<Int>,
+                response: Response<Int>
+            ) {
+                val responseNoteId: Int? = response.body()
+                responseNoteId?.let { removeDiabetesNoteFromList(it) }
+            }
+            override fun onFailure(
+                call: Call<Int>,
+                throwable: Throwable
+            ) {
+                throwable.printStackTrace()
+            }
+        })
     }
     private fun removeDiabetesNoteFromList(position: Int) {
         adapter?.removeNote(position)

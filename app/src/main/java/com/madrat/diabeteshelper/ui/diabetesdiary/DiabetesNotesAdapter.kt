@@ -15,14 +15,16 @@ class DiabetesNotesAdapter(
     fun getDiabetesNotes()
         = listOfDiabetesNotes
     
-    fun removeNote(position: Int) {
-        listOfDiabetesNotes.removeAt(position)
-        this.notifyDataSetChanged()
-    }
-    
     fun updateNote(position: Int, diabetesNote: DiabetesNote) {
         listOfDiabetesNotes[position] = diabetesNote
         this.notifyDataSetChanged()
+    }
+    
+    fun removeNote(noteId: Int) {
+        listOfDiabetesNotes.removeIf {
+            it.noteId == noteId
+        }
+        notifyDataSetChanged()
     }
     
     fun addNote(diabetesNote: DiabetesNote) {
@@ -58,7 +60,7 @@ class DiabetesNotesAdapter(
                     editNoteListener(position, diabetesNote)
                 }
                 buttonRemoveNote.setOnClickListener {
-                    removeNoteListener(position)
+                    removeNoteListener(diabetesNote.noteId)
                 }
             }
         }
