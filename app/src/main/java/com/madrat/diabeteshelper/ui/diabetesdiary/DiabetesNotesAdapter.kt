@@ -27,7 +27,7 @@ class DiabetesNotesAdapter(
     
     fun addNote(diabetesNote: DiabetesNote) {
         listOfDiabetesNotes.add(diabetesNote)
-        this.notifyDataSetChanged()
+        notifyDataSetChanged()
     }
     
     fun updateList(newListOfDiabetesNotes: ArrayList<DiabetesNote>) {

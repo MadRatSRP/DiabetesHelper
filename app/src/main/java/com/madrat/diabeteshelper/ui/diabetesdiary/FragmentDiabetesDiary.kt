@@ -133,23 +133,24 @@ class FragmentDiabetesDiary: Fragment() {
         }
     }
     private fun uploadDiabetesNoteDataToServer(sugarLevel: Double) {
-        val response: Call<ResponseAddDiabetesNote>? = context?.let {
+        val response = context?.let {
             NetworkClient.getService(it).addDiabetesNote(
-                RequestAddDiabetesNote(
+                DiabetesNote(
+                    0,
                     sugarLevel
                 )
             )
         }
-        response?.enqueue(object : Callback<ResponseAddDiabetesNote> {
+        response?.enqueue(object : Callback<DiabetesNote> {
             override fun onResponse(
-                call: Call<ResponseAddDiabetesNote>,
-                response: Response<ResponseAddDiabetesNote>
+                call: Call<DiabetesNote>,
+                response: Response<DiabetesNote>
             ) {
-                val diabetesNote: DiabetesNote? = response.body()?.diabetesNote
+                val diabetesNote: DiabetesNote? = response.body()
                 diabetesNote?.let { addDiabetesNoteToList(it) }
             }
             override fun onFailure(
-                call: Call<ResponseAddDiabetesNote>,
+                call: Call<DiabetesNote>,
                 throwable: Throwable
             ) {
                 throwable.printStackTrace()

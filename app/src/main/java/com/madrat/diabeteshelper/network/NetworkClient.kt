@@ -75,14 +75,14 @@ object NetworkClient {
             connectTimeout(10, TimeUnit.SECONDS)
             writeTimeout(10, TimeUnit.SECONDS)
             readTimeout(30, TimeUnit.SECONDS)
-            /*addInterceptor(
+            addInterceptor(
                 ChuckerInterceptor.Builder(context).apply {
                     collector(ChuckerCollector(context))
                     maxContentLength(250000L)
                     redactHeaders(emptySet())
                     alwaysReadResponseBody(false)
                 }.build()
-            )*/
+            )
             addInterceptor(loggingInterceptor)
         }.build()
         
