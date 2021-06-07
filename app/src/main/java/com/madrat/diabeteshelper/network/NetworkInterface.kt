@@ -23,4 +23,18 @@ interface NetworkInterface {
     fun deleteDiabetesNote(
         @Path("noteId") noteId: Int
     ): Call<Int>
+    
+    @PUT("diabetesNotes/notes/{noteId}")
+    fun updateDiabetesNote(
+        @Path("noteId") noteId: Int,
+        @Body diabetesNote: DiabetesNote
+    ): Call<DiabetesNote>
+    
+    /*
+        @PutMapping("/notes/{noteId}")
+    public DiabetesNote updateDiabetesNote(
+            @PathVariable Integer noteId,
+            @RequestBody DiabetesNote diabetesNote
+    ) {
+     */
 }

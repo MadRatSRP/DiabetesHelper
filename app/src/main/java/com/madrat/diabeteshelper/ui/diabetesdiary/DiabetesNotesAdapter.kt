@@ -7,7 +7,7 @@ import com.madrat.diabeteshelper.databinding.ListDiabetesNotesBinding
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
 
 class DiabetesNotesAdapter(
-    private val editNoteListener: (Int, DiabetesNote) -> Unit,
+    private val editNoteListener: (DiabetesNote) -> Unit,
     private val removeNoteListener: (Int) -> Unit
 ): RecyclerView.Adapter<DiabetesNotesAdapter.DiabetesNotesHolder>() {
     private val listOfDiabetesNotes = ArrayList<DiabetesNote>()
@@ -15,9 +15,16 @@ class DiabetesNotesAdapter(
     fun getDiabetesNotes()
         = listOfDiabetesNotes
     
-    fun updateNote(position: Int, diabetesNote: DiabetesNote) {
+    fun updateNote(diabetesNote: DiabetesNote) {
+        val previousNote = listOfDiabetesNotes.find {
+            it.noteId == diabetesNote.noteId
+        }
+        
+        val position = listOfDiabetesNotes.indexOf(previousNote)
+        
         listOfDiabetesNotes[position] = diabetesNote
-        this.notifyDataSetChanged()
+        
+        notifyDataSetChanged()
     }
     
     fun removeNote(noteId: Int) {
@@ -57,7 +64,7 @@ class DiabetesNotesAdapter(
             with(binding) {
                 sugarLevel.text = diabetesNote.sugarLevel.toString()
                 buttonEditNote.setOnClickListener {
-                    editNoteListener(position, diabetesNote)
+                    editNoteListener(diabetesNote)
                 }
                 buttonRemoveNote.setOnClickListener {
                     removeNoteListener(diabetesNote.noteId)

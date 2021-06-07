@@ -60,7 +60,7 @@ class FragmentDiabetesDiary: Fragment() {
         
         dropboxClient = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
         adapter = DiabetesNotesAdapter (
-            { position:Int, note: DiabetesNote -> showEditNoteDialog(position, note) },
+            { note: DiabetesNote -> showEditNoteDialog(note) },
             { noteId:Int -> showRemoveNoteDialog(noteId)}
         )
         with(binding) {
@@ -159,21 +159,20 @@ class FragmentDiabetesDiary: Fragment() {
         adapter?.addNote(diabetesNote)
         binding.recyclerView.adapter = adapter
     }
-    private fun showEditNoteDialog(position: Int, diabetesNote: DiabetesNote) {
+    private fun showEditNoteDialog(diabetesNote: DiabetesNote) {
         val builder = context?.let { AlertDialog.Builder(it) }
         val dialogLayoutBinding = DialogEditDiabetesNoteBinding.inflate(LayoutInflater.from(context))
         val dialog: AlertDialog? = builder?.create()
         with(dialogLayoutBinding) {
             editSugarLevel.setText(diabetesNote.sugarLevel.toString())
             buttonSave.setOnClickListener {
-                updateDiabetesNoteValue(
-                    position,
+                dialog?.dismiss()
+                updateDiabetesNoteOnServer(
                     DiabetesNote(
                         diabetesNote.noteId,
                         editSugarLevel.text.toString().toDouble()
                     )
                 )
-                dialog?.dismiss()
             }
             buttonCancel.setOnClickListener {
                 dialog?.dismiss()
@@ -184,6 +183,40 @@ class FragmentDiabetesDiary: Fragment() {
             this?.setView(dialogLayoutBinding.root)
             this?.show()
         }
+    }
+    private fun updateDiabetesNoteOnServer(diabetesNote: DiabetesNote) {
+        val response = context?.let {
+            NetworkClient.getService(it).updateDiabetesNote(
+                diabetesNote.noteId,
+                diabetesNote
+            )
+        }
+        response?.enqueue(object : Callback<DiabetesNote> {
+            override fun onResponse(
+                call: Call<DiabetesNote>,
+                response: Response<DiabetesNote>
+            ) {
+                response.body()?.let { note->
+                    updateDiabetesNoteInList(
+                        note
+                    )
+                }
+            }
+            override fun onFailure(
+                call: Call<DiabetesNote>,
+                throwable: Throwable
+            ) {
+                throwable.printStackTrace()
+            }
+        })
+    }
+    fun updateDiabetesNoteInList(diabetesNote: DiabetesNote) {
+        adapter?.updateNote(diabetesNote)
+        binding.recyclerView.adapter = adapter
+    }
+    private fun updateListOfDiabetesNotes(listOfDiabetesNotes: ArrayList<DiabetesNote>) {
+        adapter?.updateList(listOfDiabetesNotes)
+        binding.recyclerView.adapter = adapter
     }
     private fun showRemoveNoteDialog(noteId: Int) {
         val builder = context?.let { AlertDialog.Builder(it) }
@@ -230,15 +263,6 @@ class FragmentDiabetesDiary: Fragment() {
         adapter?.removeNote(position)
         binding.recyclerView.adapter = adapter
     }
-    private fun updateDiabetesNoteValue(position: Int, diabetesNote: DiabetesNote) {
-        adapter?.updateNote(position, diabetesNote)
-        binding.recyclerView.adapter = adapter
-    }
-    private fun updateListOfDiabetesNotes(listOfDiabetesNotes: ArrayList<DiabetesNote>) {
-        adapter?.updateList(listOfDiabetesNotes)
-        binding.recyclerView.adapter = adapter
-    }
-    
     // Import and Export
     private fun showImportAndExportDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
