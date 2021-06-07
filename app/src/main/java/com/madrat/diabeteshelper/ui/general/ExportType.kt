@@ -1,4 +1,4 @@
-package com.madrat.diabeteshelper.ui.diabetesdiary
+package com.madrat.diabeteshelper.ui.general
 
 enum class ExportType {
     APP_DIRECTORY,

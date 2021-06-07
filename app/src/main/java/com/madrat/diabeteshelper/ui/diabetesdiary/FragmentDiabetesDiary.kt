@@ -20,6 +20,8 @@ import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.linearManager
 import com.madrat.diabeteshelper.network.NetworkClient
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
+import com.madrat.diabeteshelper.ui.general.ExportType
+import com.madrat.diabeteshelper.ui.general.Extension
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers

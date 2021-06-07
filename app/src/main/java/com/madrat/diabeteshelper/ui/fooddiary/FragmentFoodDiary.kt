@@ -19,11 +19,9 @@ import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
 import com.madrat.diabeteshelper.linearManager
 import com.madrat.diabeteshelper.network.NetworkClient
-import com.madrat.diabeteshelper.ui.diabetesdiary.DiabetesNotesNetworkInterface
-import com.madrat.diabeteshelper.ui.diabetesdiary.ExportType
-import com.madrat.diabeteshelper.ui.diabetesdiary.Extension
-import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
 import com.madrat.diabeteshelper.ui.fooddiary.model.FoodNote
+import com.madrat.diabeteshelper.ui.general.ExportType
+import com.madrat.diabeteshelper.ui.general.Extension
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
 import com.thoughtworks.xstream.XStream
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -100,16 +98,16 @@ class FragmentFoodDiary: Fragment() {
     }
     
     private fun loadNotesFromServer() {
-        val diabetesNotesResponse = context?.let {
+        val foodNotesResponse = context?.let {
             networkService?.getNotes()?.apply {
                 subscribeOn(Schedulers.io())
                 observeOn(AndroidSchedulers.mainThread())
             }
         }
-        diabetesNotesResponse?.subscribeWith(object : DisposableSingleObserver<ArrayList<DiabetesNote>>() {
-            override fun onSuccess(list: ArrayList<DiabetesNote>?) {
+        foodNotesResponse?.subscribeWith(object : DisposableSingleObserver<ArrayList<FoodNote>>() {
+            override fun onSuccess(list: ArrayList<FoodNote>?) {
                 activity?.runOnUiThread {
-                    list?.let { updateListOfDiabetesNotes(it) }
+                    list?.let { updateListOfFoodNotes(it) }
                 }
             }
             override fun onError(throwable: Throwable?) {
@@ -119,13 +117,15 @@ class FragmentFoodDiary: Fragment() {
     }
     private fun showAddNoteDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
-        val dialogLayoutBinding = DialogAddDiabetesNoteBinding.inflate(LayoutInflater.from(context))
+        val dialogLayoutBinding = DialogAddFoodNoteBinding.inflate(
+            LayoutInflater.from(context)
+        )
         val dialog: AlertDialog = builder.create()
         with(dialogLayoutBinding) {
             buttonAdd.setOnClickListener {
                 dialog.dismiss()
-                val currentSugarLevel = editSugarLevel.text.toString().toDouble()
-                uploadDiabetesNoteDataToServer(currentSugarLevel)
+                val foodName = editFoodName.text.toString()
+                uploadFoodNoteDataToServer(foodName)
             }
             buttonCancel.setOnClickListener {
                 dialog.dismiss()
@@ -137,33 +137,33 @@ class FragmentFoodDiary: Fragment() {
             show()
         }
     }
-    private fun uploadDiabetesNoteDataToServer(sugarLevel: Double) {
+    private fun uploadFoodNoteDataToServer(foodName: String) {
         val response = context?.let {
             networkService?.addNote(
-                DiabetesNote(
+                FoodNote(
                     0,
-                    sugarLevel
+                    foodName
                 )
             )
         }
-        response?.enqueue(object : Callback<DiabetesNote> {
+        response?.enqueue(object : Callback<FoodNote> {
             override fun onResponse(
-                call: Call<DiabetesNote>,
-                response: Response<DiabetesNote>
+                call: Call<FoodNote>,
+                response: Response<FoodNote>
             ) {
-                val diabetesNote: DiabetesNote? = response.body()
-                diabetesNote?.let { addDiabetesNoteToList(it) }
+                val foodNote: FoodNote? = response.body()
+                foodNote?.let { addFoodNoteToList(it) }
             }
             override fun onFailure(
-                call: Call<DiabetesNote>,
+                call: Call<FoodNote>,
                 throwable: Throwable
             ) {
                 throwable.printStackTrace()
             }
         })
     }
-    private fun addDiabetesNoteToList(diabetesNote: DiabetesNote) {
-        adapter?.addNote(diabetesNote)
+    private fun addFoodNoteToList(foodNote: FoodNote) {
+        adapter?.addNote(foodNote)
         binding.recyclerView.adapter = adapter
     }
     private fun showEditNoteDialog(foodNote: FoodNote) {
@@ -176,10 +176,10 @@ class FragmentFoodDiary: Fragment() {
             editFoodName.setText(foodNote.foodName)
             buttonSave.setOnClickListener {
                 dialog?.dismiss()
-                updateDiabetesNoteOnServer(
-                    DiabetesNote(
-                        diabetesNote.noteId,
-                        editSugarLevel.text.toString().toDouble()
+                updateFoodNoteOnServer(
+                    FoodNote(
+                        foodNote.noteId,
+                        editFoodName.text.toString()
                     )
                 )
             }
@@ -193,38 +193,38 @@ class FragmentFoodDiary: Fragment() {
             this?.show()
         }
     }
-    private fun updateDiabetesNoteOnServer(diabetesNote: DiabetesNote) {
+    private fun updateFoodNoteOnServer(foodNote: FoodNote) {
         val response = context?.let {
             networkService?.updateNote(
-                diabetesNote.noteId,
-                diabetesNote
+                foodNote.noteId,
+                foodNote
             )
         }
-        response?.enqueue(object : Callback<DiabetesNote> {
+        response?.enqueue(object : Callback<FoodNote> {
             override fun onResponse(
-                call: Call<DiabetesNote>,
-                response: Response<DiabetesNote>
+                call: Call<FoodNote>,
+                response: Response<FoodNote>
             ) {
                 response.body()?.let { note->
-                    updateDiabetesNoteInList(
+                    updateFoodNoteInList(
                         note
                     )
                 }
             }
             override fun onFailure(
-                call: Call<DiabetesNote>,
+                call: Call<FoodNote>,
                 throwable: Throwable
             ) {
                 throwable.printStackTrace()
             }
         })
     }
-    fun updateDiabetesNoteInList(diabetesNote: DiabetesNote) {
-        adapter?.updateNote(diabetesNote)
+    fun updateFoodNoteInList(foodNote: FoodNote) {
+        adapter?.updateNote(foodNote)
         binding.recyclerView.adapter = adapter
     }
-    private fun updateListOfDiabetesNotes(listOfDiabetesNotes: ArrayList<DiabetesNote>) {
-        adapter?.updateList(listOfDiabetesNotes)
+    private fun updateListOfFoodNotes(listOfFoodNotes: ArrayList<FoodNote>) {
+        adapter?.updateList(listOfFoodNotes)
         binding.recyclerView.adapter = adapter
     }
     private fun showRemoveNoteDialog(noteId: Int) {
@@ -234,7 +234,7 @@ class FragmentFoodDiary: Fragment() {
         with(dialogLayoutBinding) {
             buttonRemoveNote.setOnClickListener {
                 dialog?.dismiss()
-                removeDiabetesNoteFromServer(noteId)
+                removeFoodNoteFromServer(noteId)
             }
             buttonCancel.setOnClickListener {
                 dialog?.dismiss()
@@ -246,7 +246,7 @@ class FragmentFoodDiary: Fragment() {
             this?.show()
         }
     }
-    private fun removeDiabetesNoteFromServer(noteId: Int) {
+    private fun removeFoodNoteFromServer(noteId: Int) {
         val response = context?.let {
             networkService?.deleteNote(
                 noteId
@@ -258,7 +258,7 @@ class FragmentFoodDiary: Fragment() {
                 response: Response<Int>
             ) {
                 val responseNoteId: Int? = response.body()
-                responseNoteId?.let { removeDiabetesNoteFromList(it) }
+                responseNoteId?.let { removeFoodNoteFromList(it) }
             }
             override fun onFailure(
                 call: Call<Int>,
@@ -268,7 +268,7 @@ class FragmentFoodDiary: Fragment() {
             }
         })
     }
-    private fun removeDiabetesNoteFromList(position: Int) {
+    private fun removeFoodNoteFromList(position: Int) {
         adapter?.removeNote(position)
         binding.recyclerView.adapter = adapter
     }
@@ -396,7 +396,7 @@ class FragmentFoodDiary: Fragment() {
             })
     }
     private fun updateListWithDeserializedValues(fileAsString: String, fileExtension: Extension) {
-        val deserializedData: List<DiabetesNote> = when(fileExtension) {
+        val deserializedData: List<FoodNote> = when(fileExtension) {
             Extension.CSV -> {
                 deserializeCsv(fileAsString)
             }
@@ -408,29 +408,29 @@ class FragmentFoodDiary: Fragment() {
             }
         }
         
-        updateListOfDiabetesNotes(
+        updateListOfFoodNotes(
             ArrayList(
                 deserializedData
             )
         )
     }
-    private fun deserializeCsv(csvString: String): List<DiabetesNote> {
-        val list = ArrayList<DiabetesNote>()
+    private fun deserializeCsv(csvString: String): List<FoodNote> {
+        val list = ArrayList<FoodNote>()
         
         try {
             val reader = StringReader(csvString)
             
             val records: Iterable<CSVRecord> = CSVFormat.DEFAULT
-                .withHeader("SugarLevel")
+                .withHeader("FoodName")
                 .parse(
                     reader
                 )
             
             for (record in records) {
                 list.add(
-                    DiabetesNote(
+                    FoodNote(
                         record[0].toInt(),
-                        record[1].toDouble()
+                        record[1]
                     )
                 )
             }
@@ -442,12 +442,12 @@ class FragmentFoodDiary: Fragment() {
         
         return list
     }
-    private fun deserializeXml(xmlString: String): List<DiabetesNote> {
+    private fun deserializeXml(xmlString: String): List<FoodNote> {
         val xStream = XStream()
         
-        return xStream.fromXML(xmlString) as List<DiabetesNote>
+        return xStream.fromXML(xmlString) as List<FoodNote>
     }
-    private fun deserializeJson(jsonString: String): List<DiabetesNote> {
+    private fun deserializeJson(jsonString: String): List<FoodNote> {
         return Json.decodeFromString(jsonString)
     }
     private fun convertFileIntoString(
@@ -613,12 +613,12 @@ class FragmentFoodDiary: Fragment() {
             
             buttonExportFile.setOnClickListener {
                 dialog.dismiss()
-                adapter?.getNotes()?.let { diabetesNotes ->
+                adapter?.getNotes()?.let { foodNotes ->
                     handleSaveToDirectory(
                         editFilename.text.toString() + extensionName,
                         pathToDataFolder + editFilename.text.toString() + extensionName,
                         currentExtension,
-                        diabetesNotes
+                        foodNotes
                     )
                 }
             }
@@ -662,12 +662,12 @@ class FragmentFoodDiary: Fragment() {
             
             buttonExportFile.setOnClickListener {
                 dialog.dismiss()
-                adapter?.getNotes()?.let { diabetesNotes ->
+                adapter?.getNotes()?.let { foodNotes ->
                     handleSaveToDropbox(
                         editFilename.text.toString() + extensionName,
                         pathToDataFolder + editFilename.text.toString() + extensionName,
                         currentExtension,
-                        diabetesNotes
+                        foodNotes
                     )
                 }
             }
@@ -682,28 +682,28 @@ class FragmentFoodDiary: Fragment() {
         fileName: String,
         pathToFileWithFilename: String,
         fileExtension: Extension,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
         when(fileExtension) {
             Extension.CSV -> {
                 tryToUploadCSVToDropbox(
                     fileName,
                     pathToFileWithFilename,
-                    diabetesNotes
+                    foodNotes
                 )
             }
             Extension.XML -> {
                 tryToUploadXMLToDropbox(
                     fileName,
                     pathToFileWithFilename,
-                    diabetesNotes
+                    foodNotes
                 )
             }
             Extension.JSON -> {
                 tryToUploadJSONToDropbox(
                     fileName,
                     pathToFileWithFilename,
-                    diabetesNotes
+                    foodNotes
                 )
             }
         }
@@ -726,14 +726,14 @@ class FragmentFoodDiary: Fragment() {
     private fun tryToUploadCSVToDropbox(
         fileName: String,
         pathToFileWithFilename: String,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
         Single
             .fromCallable {
                 // save file to user directory
                 serializeCSV(
                     pathToFileWithFilename,
-                    diabetesNotes
+                    foodNotes
                 )
                 // upload file to dropbox
                 uploadFileToDropbox(
@@ -753,14 +753,14 @@ class FragmentFoodDiary: Fragment() {
     private fun tryToUploadXMLToDropbox(
         fileName: String,
         pathToFileWithFilename: String,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
         Single
             .fromCallable {
                 // save file to user directory
                 serializeXML(
                     fileName,
-                    diabetesNotes
+                    foodNotes
                 )
                 // upload file to dropbox
                 uploadFileToDropbox(
@@ -780,14 +780,14 @@ class FragmentFoodDiary: Fragment() {
     private fun tryToUploadJSONToDropbox(
         fileName: String,
         pathToFileWithFilename: String,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
         Single
             .fromCallable {
                 // save file to user directory
                 serializeJSON(
                     fileName,
-                    diabetesNotes
+                    foodNotes
                 )
                 // upload file to dropbox
                 uploadFileToDropbox(
@@ -865,12 +865,12 @@ class FragmentFoodDiary: Fragment() {
             buttonSendMessage.setOnClickListener {
                 dialog.dismiss()
                 val pathToFile = pathToDataFolder + editFilename.text.toString() + extensionName
-                adapter?.getNotes()?.let { diabetesNotes ->
+                adapter?.getNotes()?.let { foodNotes ->
                     handleSaveToDirectory(
                         editFilename.text.toString() + extensionName,
                         pathToFile,
                         currentExtension,
-                        diabetesNotes
+                        foodNotes
                     )
                 }
                 sendFileToEmail(
@@ -917,39 +917,39 @@ class FragmentFoodDiary: Fragment() {
         fileName: String,
         finalPathToFile: String,
         fileExtension: Extension,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
         when(fileExtension) {
             Extension.CSV -> {
                 tryToSerializeCsvAndSaveToFile(
                     finalPathToFile,
-                    diabetesNotes
+                    foodNotes
                 )
             }
             Extension.XML -> {
                 tryToSerializeXmlAndSaveToFile(
                     fileName,
-                    diabetesNotes
+                    foodNotes
                 )
             }
             Extension.JSON -> {
                 tryToSerializeJsonAndSaveToFile(
                     fileName,
-                    diabetesNotes
+                    foodNotes
                 )
             }
         }
     }
     private fun tryToDoBackgroundSerializationAndSavingToFile(
-        backgroundTaskListener: (String, ArrayList<DiabetesNote>) -> Unit,
+        backgroundTaskListener: (String, ArrayList<FoodNote>) -> Unit,
         pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
         Single
             .fromCallable {
                 backgroundTaskListener(
                     pathToFile,
-                    diabetesNotes
+                    foodNotes
                 )
             }
             .subscribeOn(Schedulers.io())
@@ -963,75 +963,76 @@ class FragmentFoodDiary: Fragment() {
     }
     private fun tryToSerializeCsvAndSaveToFile(
         pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
         tryToDoBackgroundSerializationAndSavingToFile(
-            { filePath: String, notes: ArrayList<DiabetesNote> ->
+            { filePath: String, notes: ArrayList<FoodNote> ->
                 serializeCSV(
                     filePath,
                     notes
                 )
             },
             pathToFile,
-            diabetesNotes
+            foodNotes
         )
     }
     private fun tryToSerializeXmlAndSaveToFile(
         pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
         tryToDoBackgroundSerializationAndSavingToFile(
-            { filePath: String, notes: ArrayList<DiabetesNote> ->
+            { filePath: String, notes: ArrayList<FoodNote> ->
                 serializeXML(
                     filePath,
                     notes
                 )
             },
             pathToFile,
-            diabetesNotes
+            foodNotes
         )
     }
     private fun tryToSerializeJsonAndSaveToFile(
         pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
         tryToDoBackgroundSerializationAndSavingToFile(
-            { filePath: String, notes: ArrayList<DiabetesNote> ->
+            { filePath: String, notes: ArrayList<FoodNote> ->
                 serializeJSON(
                     filePath,
                     notes
                 )
             },
             pathToFile,
-            diabetesNotes
+            foodNotes
         )
     }
     private fun serializeCSV(
         pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
         val writer = Files.newBufferedWriter(Paths.get(pathToFile))
         val csvPrinter = CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("SugarLevel"))
-        diabetesNotes.forEach { note ->
-            csvPrinter.printRecord(note.sugarLevel)
+        foodNotes.forEach { note ->
+            csvPrinter.printRecord(note.foodName)
         }
         csvPrinter.flush()
         csvPrinter.close()
     }
     private fun serializeXML(
         pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
-        val serializedString = XStream().toXML(diabetesNotes)
+        val serializedString = XStream()
+            .toXML(foodNotes)
         context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
             it?.write(serializedString.toByteArray())
         }
     }
     private fun serializeJSON(
         pathToFile: String,
-        diabetesNotes: ArrayList<DiabetesNote>
+        foodNotes: ArrayList<FoodNote>
     ) {
-        val serializedString = Json.encodeToString(diabetesNotes)
+        val serializedString = Json.encodeToString(foodNotes)
         context?.openFileOutput(pathToFile, Context.MODE_PRIVATE).use {
             it?.write(serializedString.toByteArray())
         }
