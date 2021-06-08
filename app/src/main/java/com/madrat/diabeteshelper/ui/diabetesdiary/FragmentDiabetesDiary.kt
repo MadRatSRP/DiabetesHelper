@@ -51,11 +51,6 @@ class FragmentDiabetesDiary: Fragment() {
     private val binding get() = nullableBinding!!
     private var dropboxClient: DbxClientV2? = null
     private var adapter: DiabetesNotesAdapter? = null
-    private val networkService = context?.let {
-        NetworkClient
-            .getRetrofit(it)
-            .create(DiabetesNotesNetworkInterface::class.java)
-    }
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -100,7 +95,7 @@ class FragmentDiabetesDiary: Fragment() {
     
     private fun loadNotesFromServer() {
         val diabetesNotesResponse = context?.let {
-            networkService?.getNotes()?.apply {
+            NetworkClient.getDiabetesNotesService(it).getNotes().apply {
                 subscribeOn(Schedulers.io())
                 observeOn(AndroidSchedulers.mainThread())
             }
@@ -138,7 +133,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun uploadDiabetesNoteDataToServer(sugarLevel: Double) {
         val response = context?.let {
-            networkService?.addNote(
+            NetworkClient.getDiabetesNotesService(it).addNote(
                 DiabetesNote(
                     0,
                     sugarLevel
@@ -192,7 +187,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun updateDiabetesNoteOnServer(diabetesNote: DiabetesNote) {
         val response = context?.let {
-            networkService?.updateNote(
+            NetworkClient.getDiabetesNotesService(it).updateNote(
                 diabetesNote.noteId,
                 diabetesNote
             )
@@ -245,7 +240,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun removeDiabetesNoteFromServer(noteId: Int) {
         val response = context?.let {
-            networkService?.deleteNote(
+            NetworkClient.getDiabetesNotesService(it).deleteNote(
                 noteId
             )
         }

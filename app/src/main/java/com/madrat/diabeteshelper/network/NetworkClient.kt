@@ -4,12 +4,15 @@ import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.madrat.diabeteshelper.R
+import com.madrat.diabeteshelper.ui.diabetesdiary.DiabetesNotesNetworkInterface
+import com.madrat.diabeteshelper.ui.fooddiary.FoodNotesNetworkInterface
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.InputStream
+import java.net.NetworkInterface
 import java.security.KeyStore
 import java.security.SecureRandom
 import java.util.*
@@ -21,7 +24,7 @@ object NetworkClient {
     private const val serverUrl = "https://193.38.235.203:8443/dh_server/"
     private const val keystorePass = "123456"
     
-    fun readKeyStore(context: Context): KeyStore? {
+    private fun readKeyStore(context: Context): KeyStore? {
         val keyStore = KeyStore.getInstance(
             //KeyStore.getDefaultType()
             //
@@ -94,5 +97,12 @@ object NetworkClient {
             addCallAdapterFactory(rxJava3Adapter)
             client(client)
         }.build()
+    }
+    
+    fun getDiabetesNotesService(context: Context): DiabetesNotesNetworkInterface {
+        return getRetrofit(context).create(DiabetesNotesNetworkInterface::class.java)
+    }
+    fun getFoodNotesService(context: Context): FoodNotesNetworkInterface {
+        return getRetrofit(context).create(FoodNotesNetworkInterface::class.java)
     }
 }
