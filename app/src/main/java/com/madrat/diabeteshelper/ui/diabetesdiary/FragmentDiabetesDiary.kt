@@ -418,7 +418,10 @@ class FragmentDiabetesDiary: Fragment() {
             val reader = StringReader(csvString)
         
             val records: Iterable<CSVRecord> = CSVFormat.DEFAULT
-                .withHeader("SugarLevel")
+                .withHeader(
+                    "NoteId",
+                    "SugarLevel"
+                )
                 .parse(
                     reader
                 )
@@ -1008,9 +1011,19 @@ class FragmentDiabetesDiary: Fragment() {
         diabetesNotes: ArrayList<DiabetesNote>
     ) {
         val writer = Files.newBufferedWriter(Paths.get(pathToFile))
-        val csvPrinter = CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("SugarLevel"))
-        diabetesNotes.forEach { note ->
-            csvPrinter.printRecord(note.sugarLevel)
+        val csvPrinter = CSVPrinter(
+            writer,
+            CSVFormat.DEFAULT.withHeader(
+                "NoteId",
+                "SugarLevel"
+            )
+        )
+        for (note in diabetesNotes) {
+            val data = listOf(
+                note.noteId,
+                note.sugarLevel
+            )
+            csvPrinter.printRecord(data)
         }
         csvPrinter.flush()
         csvPrinter.close()

@@ -421,7 +421,10 @@ class FragmentFoodDiary: Fragment() {
             val reader = StringReader(csvString)
             
             val records: Iterable<CSVRecord> = CSVFormat.DEFAULT
-                .withHeader("FoodName")
+                .withHeader(
+                    "NoteId",
+                    "FoodName"
+                )
                 .parse(
                     reader
                 )
@@ -1011,9 +1014,19 @@ class FragmentFoodDiary: Fragment() {
         foodNotes: ArrayList<FoodNote>
     ) {
         val writer = Files.newBufferedWriter(Paths.get(pathToFile))
-        val csvPrinter = CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("SugarLevel"))
-        foodNotes.forEach { note ->
-            csvPrinter.printRecord(note.foodName)
+        val csvPrinter = CSVPrinter(
+            writer,
+            CSVFormat.DEFAULT.withHeader(
+                "NoteId",
+                "FoodName"
+            )
+        )
+        for (note in foodNotes) {
+            val data = listOf(
+                note.noteId,
+                note.foodName
+            )
+            csvPrinter.printRecord(data)
         }
         csvPrinter.flush()
         csvPrinter.close()
