@@ -98,11 +98,4 @@ object NetworkClient {
             client(client)
         }.build()
     }
-    
-    fun getDiabetesNotesService(context: Context): DiabetesNotesNetworkInterface {
-        return getRetrofit(context).create(DiabetesNotesNetworkInterface::class.java)
-    }
-    fun getFoodNotesService(context: Context): FoodNotesNetworkInterface {
-        return getRetrofit(context).create(FoodNotesNetworkInterface::class.java)
-    }
 }

@@ -50,20 +50,25 @@ class FragmentFoodDiary: Fragment() {
     private val binding get() = nullableBinding!!
     private var adapter: FoodNotesAdapter? = null
     private var dropboxClient: DbxClientV2? = null
+    private var networkService: FoodNotesNetworkInterface? = null
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         setHasOptionsMenu(true)
         nullableBinding = FragmentFoodDiaryBinding.inflate(inflater, container, false)
+        val config = DbxRequestConfig
+            .newBuilder("DiabetesHelper")
+            .build()
+        dropboxClient = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
         adapter = FoodNotesAdapter (
             { note: FoodNote -> showEditNoteDialog(note) },
             { noteId: Int -> showRemoveNoteDialog(noteId)}
         )
-        val config = DbxRequestConfig
-            .newBuilder("DiabetesHelper")
-            .build()
-    
-        dropboxClient = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
+        networkService = context?.let {
+            NetworkClient
+                .getRetrofit(it)
+                .create(FoodNotesNetworkInterface::class.java)
+        }
         with(binding) {
             recyclerView.adapter = adapter
             recyclerView.linearManager()
@@ -94,7 +99,7 @@ class FragmentFoodDiary: Fragment() {
     
     private fun loadNotesFromServer() {
         val foodNotesResponse = context?.let {
-            NetworkClient.getFoodNotesService(it).getNotes().apply {
+            networkService?.getNotes()?.apply {
                 subscribeOn(Schedulers.io())
                 observeOn(AndroidSchedulers.mainThread())
             }
@@ -134,7 +139,7 @@ class FragmentFoodDiary: Fragment() {
     }
     private fun uploadFoodNoteDataToServer(foodName: String) {
         val response = context?.let {
-            NetworkClient.getFoodNotesService(it).addNote(
+            networkService?.addNote(
                 FoodNote(
                     0,
                     foodName
@@ -190,7 +195,7 @@ class FragmentFoodDiary: Fragment() {
     }
     private fun updateFoodNoteOnServer(foodNote: FoodNote) {
         val response = context?.let {
-            NetworkClient.getFoodNotesService(it).updateNote(
+            networkService?.updateNote(
                 foodNote.noteId,
                 foodNote
             )
@@ -243,7 +248,7 @@ class FragmentFoodDiary: Fragment() {
     }
     private fun removeFoodNoteFromServer(noteId: Int) {
         val response = context?.let {
-            NetworkClient.getFoodNotesService(it).deleteNote(
+            networkService?.deleteNote(
                 noteId
             )
         }

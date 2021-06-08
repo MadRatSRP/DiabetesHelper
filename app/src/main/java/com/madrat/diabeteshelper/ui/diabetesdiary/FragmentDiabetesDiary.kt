@@ -51,6 +51,7 @@ class FragmentDiabetesDiary: Fragment() {
     private val binding get() = nullableBinding!!
     private var dropboxClient: DbxClientV2? = null
     private var adapter: DiabetesNotesAdapter? = null
+    private var networkService: DiabetesNotesNetworkInterface? = null
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -59,12 +60,16 @@ class FragmentDiabetesDiary: Fragment() {
         val config = DbxRequestConfig
             .newBuilder("DiabetesHelper")
             .build()
-        
         dropboxClient = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
         adapter = DiabetesNotesAdapter (
             { note: DiabetesNote -> showEditNoteDialog(note) },
             { noteId:Int -> showRemoveNoteDialog(noteId)}
         )
+        networkService = context?.let {
+            NetworkClient
+                .getRetrofit(it)
+                .create(DiabetesNotesNetworkInterface::class.java)
+        }
         with(binding) {
             recyclerView.adapter = adapter
             recyclerView.linearManager()
@@ -95,7 +100,7 @@ class FragmentDiabetesDiary: Fragment() {
     
     private fun loadNotesFromServer() {
         val diabetesNotesResponse = context?.let {
-            NetworkClient.getDiabetesNotesService(it).getNotes().apply {
+            networkService?.getNotes()?.apply {
                 subscribeOn(Schedulers.io())
                 observeOn(AndroidSchedulers.mainThread())
             }
@@ -133,7 +138,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun uploadDiabetesNoteDataToServer(sugarLevel: Double) {
         val response = context?.let {
-            NetworkClient.getDiabetesNotesService(it).addNote(
+            networkService?.addNote(
                 DiabetesNote(
                     0,
                     sugarLevel
@@ -187,7 +192,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun updateDiabetesNoteOnServer(diabetesNote: DiabetesNote) {
         val response = context?.let {
-            NetworkClient.getDiabetesNotesService(it).updateNote(
+            networkService?.updateNote(
                 diabetesNote.noteId,
                 diabetesNote
             )
@@ -240,7 +245,7 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun removeDiabetesNoteFromServer(noteId: Int) {
         val response = context?.let {
-            NetworkClient.getDiabetesNotesService(it).deleteNote(
+            networkService?.deleteNote(
                 noteId
             )
         }
