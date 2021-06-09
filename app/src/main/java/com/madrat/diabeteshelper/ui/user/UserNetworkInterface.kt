@@ -1,19 +1,19 @@
 package com.madrat.diabeteshelper.ui.user
 
+import com.madrat.diabeteshelper.ui.user.model.RequestAuthorizeUser
 import com.madrat.diabeteshelper.ui.user.model.RequestRegisterUser
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface UserNetworkInterface {
-    @POST("users/register")
+    @POST("users/registerUser")
     fun registerUser(
         @Body requestRegisterUser: RequestRegisterUser
     ): Call<Int>
     
-    @POST("users/authorize")
+    @POST("users/authorizeUser")
     fun authorizeUser(
-        @Body emailOrPhoneNumber: String,
-        @Body password: String
+        @Body requestAuthorizeUser: RequestAuthorizeUser
     ): Call<User>
 }

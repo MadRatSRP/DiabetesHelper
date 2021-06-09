@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.madrat.diabeteshelper.databinding.FragmentUserBinding
 import com.madrat.diabeteshelper.network.NetworkClient
-import com.madrat.diabeteshelper.ui.fooddiary.model.FoodNote
+import com.madrat.diabeteshelper.ui.user.model.RequestAuthorizeUser
 import com.madrat.diabeteshelper.ui.user.model.RequestRegisterUser
 import retrofit2.Call
 import retrofit2.Callback
@@ -17,6 +17,7 @@ class FragmentUser: Fragment() {
     private var nullableBinding: FragmentUserBinding? = null
     private val binding get() = nullableBinding!!
     private var networkService: UserNetworkInterface? = null
+    private var isRegistered = false
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,10 +41,18 @@ class FragmentUser: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         with(binding) {
             button.setOnClickListener {
-                registerUser(
-                    setupLogin.text.toString(),
-                    setupPassword.text.toString()
-                )
+                if (!isRegistered) {
+                    registerUser(
+                        setupLogin.text.toString(),
+                        setupPassword.text.toString()
+                    )
+                    isRegistered = true
+                } else {
+                    authorizeUser(
+                        setupLogin.text.toString(),
+                        setupPassword.text.toString()
+                    )
+                }
             }
         }
     }
@@ -69,6 +78,34 @@ class FragmentUser: Fragment() {
             }
             override fun onFailure(
                 call: Call<Int>,
+                throwable: Throwable
+            ) {
+                throwable.printStackTrace()
+            }
+        })
+    }
+    private fun authorizeUser(
+        emailOrUserPassword: String,
+        password: String
+    ) {
+        val response = context?.let {
+            networkService?.authorizeUser(
+                RequestAuthorizeUser(
+                    emailOrUserPassword,
+                    password
+                )
+            )
+        }
+        response?.enqueue(object : Callback<User> {
+            override fun onResponse(
+                call: Call<User>,
+                response: Response<User>
+            ) {
+                val userBody: User? = response.body()
+                print(userBody)
+            }
+            override fun onFailure(
+                call: Call<User>,
                 throwable: Throwable
             ) {
                 throwable.printStackTrace()
