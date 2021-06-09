@@ -4,7 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/navigation_diary_diabetes">
+    app:startDestination="@id/navigation_user">
+    <fragment
+        android:id="@+id/navigation_user"
+        android:name="com.madrat.diabeteshelper.ui.user.FragmentUser"
+        android:label="@string/user_title"
+        tools:layout="@layout/fragment_user"/>
     <fragment
         android:id="@+id/navigation_diary_diabetes"
         android:name="com.madrat.diabeteshelper.ui.diabetesdiary.FragmentDiabetesDiary"
