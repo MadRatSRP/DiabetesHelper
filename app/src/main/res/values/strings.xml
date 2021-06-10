@@ -44,6 +44,7 @@
     <string name="title_food_diary">Дневник питания</string>
     <string name="food_hint_add_note">Добавьте новую запись дневника питания:</string>
     <!--Общее-->
+    <string name="key_user_hashcode">User\'s hashcode</string>
     <string name="button_add_note">Добавить запись</string>
     <string name="button_add">Добавить</string>
     <string name="button_cancel">Отмена</string>
@@ -82,4 +83,9 @@
     <string name="message_error_file_saved_into_directory">Произошла ошибка при сохранении файла в директорию приложения</string>
     <!--Экран пользователя-->
     <string name="user_title">Пользователь</string>
+    <!--Экран продуктов-->
+    <string name="product_title">Продукты</string>
+
+    <string name="title_unathorized">Вы не авторизованы</string>
+    <string name="message_unathorized">Нажмите "ОК" для перехода на главный экран для авторизации</string>
 </resources>

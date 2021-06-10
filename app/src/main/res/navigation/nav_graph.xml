@@ -14,10 +14,26 @@
         android:id="@+id/navigation_diary_diabetes"
         android:name="com.madrat.diabeteshelper.ui.diabetesdiary.FragmentDiabetesDiary"
         android:label="@string/title_diabetes_diary"
-        tools:layout="@layout/fragment_diabetes_diary"/>
+        tools:layout="@layout/fragment_diabetes_diary">
+        <action
+            android:id="@+id/action_navigation_diary_diabetes_to_navigation_user"
+            app:destination="@id/navigation_user" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_diary_food"
         android:name="com.madrat.diabeteshelper.ui.fooddiary.FragmentFoodDiary"
         android:label="@string/title_food_diary"
-        tools:layout="@layout/fragment_food_diary"/>
+        tools:layout="@layout/fragment_food_diary">
+        <action
+            android:id="@+id/action_navigation_diary_food_to_navigation_products"
+            app:destination="@id/navigation_products" />
+        <action
+            android:id="@+id/action_navigation_diary_food_to_navigation_user"
+            app:destination="@id/navigation_user" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_products"
+        android:name="com.madrat.diabeteshelper.ui.product.FragmentProduct"
+        android:label="@string/product_title"
+        tools:layout="@layout/fragment_product"/>
 </navigation>

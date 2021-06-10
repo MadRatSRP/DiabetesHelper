@@ -2,11 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/navigation_user"
+        android:icon="@drawable/ic_home"
         android:title="@string/user_title"/>
     <item
         android:id="@+id/navigation_diary_diabetes"
+        android:icon="@drawable/ic_diabetes_diary"
         android:title="@string/title_diabetes_diary" />
     <item
         android:id="@+id/navigation_diary_food"
+        android:icon="@drawable/ic_food_diary"
         android:title="@string/title_food_diary" />
 </menu>

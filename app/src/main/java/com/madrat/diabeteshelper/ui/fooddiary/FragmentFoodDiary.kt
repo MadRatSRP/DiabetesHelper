@@ -8,6 +8,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.dropbox.core.DbxException
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.util.IOUtil
@@ -17,6 +18,7 @@ import com.dropbox.core.v2.files.UploadErrorException
 import com.dropbox.core.v2.files.WriteMode
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.*
+import com.madrat.diabeteshelper.getHashcodeFromPreferences
 import com.madrat.diabeteshelper.linearManager
 import com.madrat.diabeteshelper.network.NetworkClient
 import com.madrat.diabeteshelper.ui.fooddiary.model.FoodNote
@@ -54,33 +56,62 @@ class FragmentFoodDiary: Fragment() {
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        setHasOptionsMenu(true)
         nullableBinding = FragmentFoodDiaryBinding.inflate(inflater, container, false)
-        val config = DbxRequestConfig
-            .newBuilder("DiabetesHelper")
-            .build()
-        dropboxClient = DbxClientV2(config, context?.getString(R.string.dropbox_access_token))
-        adapter = FoodNotesAdapter (
-            { note: FoodNote -> showEditNoteDialog(note) },
-            { noteId: Int -> showRemoveNoteDialog(noteId)}
-        )
-        networkService = context?.let {
-            NetworkClient
-                .getRetrofit(it)
-                .create(FoodNotesNetworkInterface::class.java)
-        }
-        with(binding) {
-            recyclerView.adapter = adapter
-            recyclerView.linearManager()
-        }
         return binding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loadNotesFromServer()
-        binding.buttonAddNote.setOnClickListener {
-            showAddNoteDialog(view.context)
+        val userHashCode: String? = getHashcodeFromPreferences()
+        if (userHashCode == null) {
+            showUnauthorizedUserDialog(view.context)
+        } else {
+            initializeDependencies(view.context)
+            loadNotesFromServer()
         }
+    }
+    fun initializeDependencies(context: Context) {
+        setHasOptionsMenu(true)
+        val config = DbxRequestConfig
+            .newBuilder("DiabetesHelper")
+            .build()
+        dropboxClient = DbxClientV2(
+            config,
+            context.getString(R.string.dropbox_access_token)
+        )
+        adapter = FoodNotesAdapter (
+            { note: FoodNote -> showEditNoteDialog(note) },
+            { noteId: Int -> showRemoveNoteDialog(noteId)}
+        )
+        networkService = NetworkClient
+                .getRetrofit(context)
+                .create(FoodNotesNetworkInterface::class.java)
+        with(binding) {
+            recyclerView.adapter = adapter
+            recyclerView.linearManager()
+            buttonAddNote.setOnClickListener {
+                //showAddNoteDialog(view.context)
+                moveToProductScreen()
+            }
+        }
+    }
+    private fun showUnauthorizedUserDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
+        builder.setCancelable(false)
+        builder.setTitle(R.string.title_unathorized)
+        builder.setMessage(R.string.message_unathorized)
+        builder.setPositiveButton("ОК") {
+                dialogInterface, _ ->
+            dialogInterface.dismiss()
+            findNavController().navigate(R.id.action_navigation_diary_food_to_navigation_user)
+        }
+        val dialog: AlertDialog = builder.create()
+        with(dialog) {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_rectrangle_gray)
+            show()
+        }
+    }
+    private fun moveToProductScreen() {
+        findNavController().navigate(R.id.action_navigation_diary_food_to_navigation_products)
     }
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
