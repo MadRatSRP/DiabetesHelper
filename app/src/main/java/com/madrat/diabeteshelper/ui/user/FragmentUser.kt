@@ -1,11 +1,13 @@
 package com.madrat.diabeteshelper.ui.user
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.madrat.diabeteshelper.databinding.FragmentUserBinding
+import com.madrat.diabeteshelper.getIsRegisteredFromPreferences
 import com.madrat.diabeteshelper.network.NetworkClient
 import com.madrat.diabeteshelper.ui.user.model.RequestAuthorizeUser
 import com.madrat.diabeteshelper.ui.user.model.RequestRegisterUser
@@ -17,7 +19,6 @@ class FragmentUser: Fragment() {
     private var nullableBinding: FragmentUserBinding? = null
     private val binding get() = nullableBinding!!
     private var networkService: UserNetworkInterface? = null
-    private var isRegistered = false
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,32 +30,41 @@ class FragmentUser: Fragment() {
             container,
             false
         )
-        val view = binding.root
-        networkService = context?.let {
-            NetworkClient
-                .getRetrofit(it)
-                .create(UserNetworkInterface::class.java)
-        }
-        return view
+        return binding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        with(binding) {
-            button.setOnClickListener {
-                if (!isRegistered) {
-                    registerUser(
-                        setupLogin.text.toString(),
-                        setupPassword.text.toString()
-                    )
-                    isRegistered = true
-                } else {
-                    authorizeUser(
-                        setupLogin.text.toString(),
-                        setupPassword.text.toString()
-                    )
+        initializeDependencies(view.context)
+        val isRegistered = getIsRegisteredFromPreferences()
+        isRegistered?.let {
+            /*with(binding) {
+                button.setOnClickListener {
+                    if (!isRegistered) {
+                        registerUser(
+                            setupLogin.text.toString(),
+                            setupPassword.text.toString()
+                        )
+                        isRegistered = true
+                    } else {
+                        authorizeUser(
+                            setupLogin.text.toString(),
+                            setupPassword.text.toString()
+                        )
+                    }
                 }
+            }*/
+            with(binding) {
+                registerUser(
+                    setupLogin.text.toString(),
+                    setupPassword.text.toString()
+                )
             }
         }
+    }
+    fun initializeDependencies(context: Context) {
+        networkService = NetworkClient
+                .getRetrofit(context)
+                .create(UserNetworkInterface::class.java)
     }
     private fun registerUser(
         emailOrUserPassword: String,

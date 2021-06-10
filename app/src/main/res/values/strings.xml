@@ -44,6 +44,7 @@
     <string name="title_food_diary">Дневник питания</string>
     <string name="food_hint_add_note">Добавьте новую запись дневника питания:</string>
     <!--Общее-->
+    <string name="key_user_is_registered">Is user registered</string>
     <string name="key_user_hashcode">User\'s hashcode</string>
     <string name="button_add_note">Добавить запись</string>
     <string name="button_add">Добавить</string>
@@ -88,4 +89,9 @@
 
     <string name="title_unathorized">Вы не авторизованы</string>
     <string name="message_unathorized">Нажмите "ОК" для перехода на главный экран для авторизации</string>
+
+    <string name="title_registration">Регистрация</string>
+    <string name="hint_phone_number_or_email">Номер или логин:</string>
+    <string name="hint_password">Пароль:</string>
+    <string name="button_register_user">Зарегистрироваться</string>
 </resources>

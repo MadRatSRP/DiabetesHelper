@@ -9,4 +9,5 @@
     <color name="success_message">#2A92DB</color>
     <color name="unsuccess_message">#878F93</color>
     <color name="mostly_white_gray_second">#FCFCFC</color>
+    <color name="very_dark_blue">#121214</color>
 </resources>

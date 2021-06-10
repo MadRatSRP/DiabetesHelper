@@ -25,15 +25,6 @@ fun Fragment.getHashcodeFromPreferences(): String? {
     )
 }
 
-fun AppCompatActivity.getHashcodeFromPreferences(): String? {
-    val preferences = getPreferences(Context.MODE_PRIVATE)
-    
-    return preferences?.getString(
-        getString(R.string.key_user_hashcode),
-        null
-    )
-}
-
 fun Fragment.saveHashcodeToPreferences(hashcode: String?) {
     val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
     with(sharedPref.edit()) {
@@ -44,4 +35,26 @@ fun Fragment.saveHashcodeToPreferences(hashcode: String?) {
         commit()
     }
 }
+
+fun Fragment.saveIsRegisteredToPreferences(isRegistered: Boolean) {
+    val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+    with(sharedPref.edit()) {
+        putBoolean(
+            getString(R.string.key_user_is_registered),
+            isRegistered
+        )
+        commit()
+    }
+}
+
+fun Fragment.getIsRegisteredFromPreferences(): Boolean? {
+    val preferences = activity?.getPreferences(Context.MODE_PRIVATE)
+    
+    return preferences?.getBoolean(
+        getString(R.string.key_user_is_registered),
+        false
+    )
+}
+
+
 
