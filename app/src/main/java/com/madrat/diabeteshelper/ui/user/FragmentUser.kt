@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
+import com.madrat.diabeteshelper.*
 import com.madrat.diabeteshelper.databinding.FragmentUserBinding
-import com.madrat.diabeteshelper.getIsRegisteredFromPreferences
 import com.madrat.diabeteshelper.network.NetworkClient
+import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
 import com.madrat.diabeteshelper.ui.user.model.RequestAuthorizeUser
 import com.madrat.diabeteshelper.ui.user.model.RequestRegisterUser
 import retrofit2.Call
@@ -36,28 +38,22 @@ class FragmentUser: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initializeDependencies(view.context)
         val isRegistered = getIsRegisteredFromPreferences()
+        val userHashcode = getHashcodeFromPreferences()
         isRegistered?.let {
-            /*with(binding) {
-                button.setOnClickListener {
-                    if (!isRegistered) {
-                        registerUser(
-                            setupLogin.text.toString(),
-                            setupPassword.text.toString()
-                        )
-                        isRegistered = true
-                    } else {
-                        authorizeUser(
-                            setupLogin.text.toString(),
-                            setupPassword.text.toString()
-                        )
-                    }
+            if (!isRegistered) {
+                with(binding) {
+                    registrationLayout.visibility = View.VISIBLE
+                    registerUser(
+                        setupRegistrationLogin.text.toString(),
+                        setupRegistrationPassword.text.toString()
+                    )
                 }
-            }*/
-            with(binding) {
-                registerUser(
-                    setupLogin.text.toString(),
-                    setupPassword.text.toString()
-                )
+            } else {
+                if (userHashcode == null) {
+                    updateAuthorizationLayout()
+                } else {
+                
+                }
             }
         }
     }
@@ -83,8 +79,11 @@ class FragmentUser: Fragment() {
                 call: Call<Int>,
                 response: Response<Int>
             ) {
-                val hashCode: Int? = response.body()
-                print(hashCode)
+                if (response.isSuccessful) {
+                    doOnUserRegisteredSuccess()
+                } else {
+                    doOnUserRegisteredError()
+                }
             }
             override fun onFailure(
                 call: Call<Int>,
@@ -94,6 +93,35 @@ class FragmentUser: Fragment() {
             }
         })
     }
+    fun doOnUserRegisteredSuccess() {
+        showStatusMessage(R.string.message_successful_user_registered)
+        
+        binding.registrationLayout.visibility = View.GONE
+        
+        updateAuthorizationLayout()
+        
+        saveIsRegisteredToPreferences(true)
+    }
+    fun doOnUserRegisteredError() {
+        showStatusMessage(
+            R.string.message_error_user_registered,
+            false
+        )
+    }
+    
+    private fun updateAuthorizationLayout() {
+        with(binding) {
+            authorizationLayout.visibility = View.VISIBLE
+    
+            buttonAuthorizeUser.setOnClickListener {
+                authorizeUser(
+                    setupAuthorizationLogin.text.toString(),
+                    setupAuthorizationPassword.text.toString()
+                )
+            }
+        }
+    }
+    
     private fun authorizeUser(
         emailOrUserPassword: String,
         password: String
@@ -111,8 +139,15 @@ class FragmentUser: Fragment() {
                 call: Call<User>,
                 response: Response<User>
             ) {
-                val userBody: User? = response.body()
-                print(userBody)
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        doOnUserAuthorizationSuccess(
+                            it
+                        )
+                    }
+                } else {
+                    doOnUserAuthorizationError()
+                }
             }
             override fun onFailure(
                 call: Call<User>,
@@ -121,5 +156,46 @@ class FragmentUser: Fragment() {
                 throwable.printStackTrace()
             }
         })
+    }
+    
+    fun doOnUserAuthorizationSuccess(user: User) {
+        showStatusMessage(R.string.message_successful_user_authorized)
+    
+        binding.authorizationLayout.visibility = View.GONE
+    
+        updateUserAuthorizedLayout()
+    
+        saveHashcodeToPreferences(user.hashCode().toString())
+    }
+    
+    private fun updateUserAuthorizedLayout() {
+        with(binding) {
+            userAuthorizedLayout.visibility = View.VISIBLE
+            
+            buttonExitAccount.setOnClickListener {
+                leaveAccount()
+            }
+        }
+    }
+    
+    fun leaveAccount() {
+        binding.userAuthorizedLayout.visibility = View.GONE
+        
+        saveHashcodeToPreferences(null)
+        
+        updateAuthorizationLayout()
+    }
+    
+    fun doOnUserAuthorizationError() {
+        showStatusMessage(
+            R.string.message_error_user_authorized,
+            false
+        )
+    }
+    
+    private fun showStatusMessage(@StringRes messageRes: Int, isSuccess: Boolean = true) {
+        (activity as? MainActivity)?.showMessage(
+            messageRes, isSuccess
+        )
     }
 }

@@ -28,6 +28,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
     <LinearLayout
+        android:id="@+id/registration_layout"
+        android:visibility="gone"
         android:orientation="vertical"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -35,7 +37,6 @@
         app:layout_constraintEnd_toStartOf="@id/end_guideline"
         app:layout_constraintTop_toBottomOf="@id/top_guideline"
         app:layout_constraintBottom_toTopOf="@id/bottom_guideline">
-
         <TextView
             style="@style/CustomDialogTitleText"
             android:layout_width="match_parent"
@@ -43,20 +44,80 @@
             android:gravity="center"
             android:text="@string/title_registration" />
         <EditText
-            android:id="@+id/setup_login"
+            android:id="@+id/setup_registration_login"
             android:hint="@string/hint_phone_number_or_email"
             android:layout_marginTop="35dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <EditText
-            android:id="@+id/setup_password"
+            android:id="@+id/setup_registration_password"
             android:hint="@string/hint_password"
             android:layout_marginTop="45dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Button
-            android:id="@+id/button"
+            android:id="@+id/button_register_user"
             android:text="@string/button_register_user"
+            android:background="@color/white"
+            android:layout_marginTop="55dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/authorization_layout"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toEndOf="@id/start_guideline"
+        app:layout_constraintEnd_toStartOf="@id/end_guideline"
+        app:layout_constraintTop_toBottomOf="@id/top_guideline"
+        app:layout_constraintBottom_toTopOf="@id/bottom_guideline">
+        <TextView
+            style="@style/CustomDialogTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/title_registration" />
+        <EditText
+            android:id="@+id/setup_authorization_login"
+            android:hint="@string/hint_phone_number_or_email"
+            android:layout_marginTop="35dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <EditText
+            android:id="@+id/setup_authorization_password"
+            android:hint="@string/hint_password"
+            android:layout_marginTop="45dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/button_authorize_user"
+            android:text="@string/button_authorize_user"
+            android:background="@color/white"
+            android:layout_marginTop="55dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/user_authorized_layout"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toEndOf="@id/start_guideline"
+        app:layout_constraintEnd_toStartOf="@id/end_guideline"
+        app:layout_constraintTop_toBottomOf="@id/top_guideline"
+        app:layout_constraintBottom_toTopOf="@id/bottom_guideline">
+        <TextView
+            style="@style/CustomDialogTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/title_greeting" />
+        <Button
+            android:id="@+id/button_exit_account"
+            android:text="@string/button_exit_account"
             android:background="@color/white"
             android:layout_marginTop="55dp"
             android:layout_width="match_parent"

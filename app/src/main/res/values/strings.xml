@@ -84,14 +84,21 @@
     <string name="message_error_file_saved_into_directory">Произошла ошибка при сохранении файла в директорию приложения</string>
     <!--Экран пользователя-->
     <string name="user_title">Пользователь</string>
+    <string name="title_registration">Регистрация</string>
+    <string name="hint_phone_number_or_email">Номер или логин:</string>
+    <string name="hint_password">Пароль:</string>
+    <string name="button_register_user">Зарегистрироваться</string>
+    <string name="message_successful_user_registered">Вы были успешно зарегистрированы!</string>
+    <string name="message_error_user_registered">Произошла ошибка при регистрации пользователя</string>
+    <string name="title_authorization">Авторизация</string>
+    <string name="button_authorize_user">Авторизоваться</string>
+    <string name="title_greeting">Здравствуйте, Михаил</string>
+    <string name="button_exit_account">Выйти из аккаунта</string>
+    <string name="message_successful_user_authorized">Вы были успешно авторизованы!</string>
+    <string name="message_error_user_authorized">Произошла ошибка при авторизации пользователя</string>
     <!--Экран продуктов-->
     <string name="product_title">Продукты</string>
 
     <string name="title_unathorized">Вы не авторизованы</string>
     <string name="message_unathorized">Нажмите "ОК" для перехода на главный экран для авторизации</string>
-
-    <string name="title_registration">Регистрация</string>
-    <string name="hint_phone_number_or_email">Номер или логин:</string>
-    <string name="hint_password">Пароль:</string>
-    <string name="button_register_user">Зарегистрироваться</string>
 </resources>
