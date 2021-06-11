@@ -10,7 +10,7 @@ class User(
     
     val password: String,
     
-    val userHashcode: Int,
+    val userHashcode: String,
     
     val isAuthorized: Boolean
 )

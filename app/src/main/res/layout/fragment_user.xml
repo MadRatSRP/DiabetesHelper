@@ -78,7 +78,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="@string/title_registration" />
+            android:text="@string/title_authorization" />
         <EditText
             android:id="@+id/setup_authorization_login"
             android:hint="@string/hint_phone_number_or_email"

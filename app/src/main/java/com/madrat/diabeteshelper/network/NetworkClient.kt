@@ -70,7 +70,7 @@ object NetworkClient {
         )
         
         val loggingInterceptor = HttpLoggingInterceptor()
-            .setLevel(HttpLoggingInterceptor.Level.HEADERS)
+            .setLevel(HttpLoggingInterceptor.Level.BODY)
         
         val client = OkHttpClient.Builder().apply {
             hostnameVerifier { _, _ -> true }

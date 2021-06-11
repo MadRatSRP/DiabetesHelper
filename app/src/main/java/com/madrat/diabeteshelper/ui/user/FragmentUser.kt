@@ -41,18 +41,12 @@ class FragmentUser: Fragment() {
         val userHashcode = getHashcodeFromPreferences()
         isRegistered?.let {
             if (!isRegistered) {
-                with(binding) {
-                    registrationLayout.visibility = View.VISIBLE
-                    registerUser(
-                        setupRegistrationLogin.text.toString(),
-                        setupRegistrationPassword.text.toString()
-                    )
-                }
+                updateRegistrationLayout()
             } else {
                 if (userHashcode == null) {
                     updateAuthorizationLayout()
                 } else {
-                
+                    updateUserAuthorizedLayout()
                 }
             }
         }
@@ -61,6 +55,18 @@ class FragmentUser: Fragment() {
         networkService = NetworkClient
                 .getRetrofit(context)
                 .create(UserNetworkInterface::class.java)
+    }
+    fun updateRegistrationLayout() {
+        with(binding) {
+            registrationLayout.visibility = View.VISIBLE
+            
+            buttonRegisterUser.setOnClickListener {
+                registerUser(
+                    setupRegistrationLogin.text.toString(),
+                    setupRegistrationPassword.text.toString()
+                )
+            }
+        }
     }
     private fun registerUser(
         emailOrUserPassword: String,
@@ -165,7 +171,7 @@ class FragmentUser: Fragment() {
     
         updateUserAuthorizedLayout()
     
-        saveHashcodeToPreferences(user.hashCode().toString())
+        saveHashcodeToPreferences(user.userHashcode)
     }
     
     private fun updateUserAuthorizedLayout() {

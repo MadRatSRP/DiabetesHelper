@@ -129,13 +129,13 @@ class FragmentFoodDiary: Fragment() {
     }
     
     private fun loadNotesFromServer() {
-        val foodNotesResponse = context?.let {
+        val response = context?.let {
             networkService?.getNotes()?.apply {
                 subscribeOn(Schedulers.io())
                 observeOn(AndroidSchedulers.mainThread())
             }
         }
-        foodNotesResponse?.subscribeWith(object : DisposableSingleObserver<ArrayList<FoodNote>>() {
+        response?.subscribeWith(object : DisposableSingleObserver<ArrayList<FoodNote>>() {
             override fun onSuccess(list: ArrayList<FoodNote>?) {
                 activity?.runOnUiThread {
                     list?.let { updateListOfFoodNotes(it) }

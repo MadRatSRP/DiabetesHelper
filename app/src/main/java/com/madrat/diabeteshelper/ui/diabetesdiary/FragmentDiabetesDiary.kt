@@ -71,7 +71,9 @@ class FragmentDiabetesDiary: Fragment() {
             showUnauthorizedUserDialog(view.context)
         } else {
             initializeDependencies(view.context)
-            loadNotesFromServer()
+            loadNotesFromServer(
+                userHashCode
+            )
         }
     }
     fun initializeDependencies(context: Context) {
@@ -129,17 +131,17 @@ class FragmentDiabetesDiary: Fragment() {
         return super.onOptionsItemSelected(item)
     }
     
-    private fun loadNotesFromServer() {
-        val diabetesNotesResponse = context?.let {
+    private fun loadNotesFromServer(userHashcode: String) {
+        val response = context?.let {
             networkService?.getNotes()?.apply {
                 subscribeOn(Schedulers.io())
                 observeOn(AndroidSchedulers.mainThread())
             }
         }
-        diabetesNotesResponse?.subscribeWith(object : DisposableSingleObserver<ArrayList<DiabetesNote>>() {
-            override fun onSuccess(list: ArrayList<DiabetesNote>?) {
+        response?.subscribeWith(object : DisposableSingleObserver<ArrayList<DiabetesNote>>() {
+            override fun onSuccess(notes: ArrayList<DiabetesNote>?) {
                 activity?.runOnUiThread {
-                    list?.let { updateListOfDiabetesNotes(it) }
+                    notes?.let { updateListOfDiabetesNotes(it) }
                 }
             }
             override fun onError(throwable: Throwable?) {
@@ -168,14 +170,9 @@ class FragmentDiabetesDiary: Fragment() {
         }
     }
     private fun uploadDiabetesNoteDataToServer(sugarLevel: Double) {
-        val response = context?.let {
-            networkService?.addNote(
-                DiabetesNote(
-                    0,
-                    sugarLevel
-                )
-            )
-        }
+        val response = networkService?.addNote(
+            sugarLevel
+        )
         response?.enqueue(object : Callback<DiabetesNote> {
             override fun onResponse(
                 call: Call<DiabetesNote>,
