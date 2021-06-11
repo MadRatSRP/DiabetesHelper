@@ -17,7 +17,7 @@ class DiabetesNotesAdapter(
     
     fun updateNote(diabetesNote: DiabetesNote) {
         val previousNote = listOfDiabetesNotes.find {
-            it.noteId == diabetesNote.noteId
+            it.id == diabetesNote.id
         }
         
         val position = listOfDiabetesNotes.indexOf(previousNote)
@@ -29,7 +29,7 @@ class DiabetesNotesAdapter(
     
     fun removeNote(noteId: Int) {
         listOfDiabetesNotes.removeIf {
-            it.noteId == noteId
+            it.id == noteId
         }
         notifyDataSetChanged()
     }
@@ -53,21 +53,21 @@ class DiabetesNotesAdapter(
     }
 
     override fun onBindViewHolder(holder: DiabetesNotesHolder, position: Int)
-            = holder.bind(listOfDiabetesNotes[position], position)
+            = holder.bind(listOfDiabetesNotes[position])
 
     override fun getItemCount(): Int
             = listOfDiabetesNotes.size
 
     inner class DiabetesNotesHolder(private val binding: ListDiabetesNotesBinding)
         : RecyclerView.ViewHolder(binding.root) {
-        fun bind(diabetesNote: DiabetesNote, position: Int) {
+        fun bind(diabetesNote: DiabetesNote) {
             with(binding) {
                 sugarLevel.text = diabetesNote.sugarLevel.toString()
                 buttonEditNote.setOnClickListener {
                     editNoteListener(diabetesNote)
                 }
                 buttonRemoveNote.setOnClickListener {
-                    removeNoteListener(diabetesNote.noteId)
+                    removeNoteListener(diabetesNote.id)
                 }
             }
         }

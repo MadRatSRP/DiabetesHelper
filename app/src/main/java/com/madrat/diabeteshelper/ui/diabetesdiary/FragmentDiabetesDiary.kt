@@ -203,7 +203,7 @@ class FragmentDiabetesDiary: Fragment() {
                 dialog?.dismiss()
                 updateDiabetesNoteOnServer(
                     DiabetesNote(
-                        diabetesNote.noteId,
+                        diabetesNote.id,
                         editSugarLevel.text.toString().toDouble()
                     )
                 )
@@ -221,7 +221,7 @@ class FragmentDiabetesDiary: Fragment() {
     private fun updateDiabetesNoteOnServer(diabetesNote: DiabetesNote) {
         val response = context?.let {
             networkService?.updateNote(
-                diabetesNote.noteId,
+                diabetesNote.id,
                 diabetesNote
             )
         }
@@ -1048,7 +1048,7 @@ class FragmentDiabetesDiary: Fragment() {
         )
         for (note in diabetesNotes) {
             val data = listOf(
-                note.noteId,
+                note.id,
                 note.sugarLevel
             )
             csvPrinter.printRecord(data)
