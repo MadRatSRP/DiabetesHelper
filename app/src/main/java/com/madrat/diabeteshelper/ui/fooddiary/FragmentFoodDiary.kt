@@ -22,6 +22,7 @@ import com.madrat.diabeteshelper.getHashcodeFromPreferences
 import com.madrat.diabeteshelper.linearManager
 import com.madrat.diabeteshelper.network.NetworkClient
 import com.madrat.diabeteshelper.ui.fooddiary.model.FoodNote
+import com.madrat.diabeteshelper.ui.fooddiary.model.RequestUpdateFoodNote
 import com.madrat.diabeteshelper.ui.general.ExportType
 import com.madrat.diabeteshelper.ui.general.Extension
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
@@ -89,8 +90,8 @@ class FragmentFoodDiary: Fragment() {
             recyclerView.adapter = adapter
             recyclerView.linearManager()
             buttonAddNote.setOnClickListener {
-                //showAddNoteDialog(view.context)
-                moveToProductScreen()
+                showAddNoteDialog(context)
+                //moveToProductScreen()
             }
         }
     }
@@ -130,9 +131,13 @@ class FragmentFoodDiary: Fragment() {
     
     private fun loadNotesFromServer() {
         val response = context?.let {
-            networkService?.getNotes()?.apply {
-                subscribeOn(Schedulers.io())
-                observeOn(AndroidSchedulers.mainThread())
+            getHashcodeFromPreferences()?.let { it1 ->
+                networkService?.getNotes(
+                    it1
+                )?.apply {
+                    subscribeOn(Schedulers.io())
+                    observeOn(AndroidSchedulers.mainThread())
+                }
             }
         }
         response?.subscribeWith(object : DisposableSingleObserver<ArrayList<FoodNote>>() {
@@ -170,12 +175,16 @@ class FragmentFoodDiary: Fragment() {
     }
     private fun uploadFoodNoteDataToServer(foodName: String) {
         val response = context?.let {
-            networkService?.addNote(
-                FoodNote(
-                    0,
-                    foodName
+            getHashcodeFromPreferences()?.let { it1 ->
+                RequestAddFoodNote(
+                    foodName,
+                    it1
                 )
-            )
+            }?.let { it2 ->
+                networkService?.addNote(
+                    it2
+                )
+            }
         }
         response?.enqueue(object : Callback<FoodNote> {
             override fun onResponse(
@@ -208,10 +217,8 @@ class FragmentFoodDiary: Fragment() {
             buttonSave.setOnClickListener {
                 dialog?.dismiss()
                 updateFoodNoteOnServer(
-                    FoodNote(
-                        foodNote.noteId,
-                        editFoodName.text.toString()
-                    )
+                    foodNote.id,
+                    editFoodName.text.toString()
                 )
             }
             buttonCancel.setOnClickListener {
@@ -224,12 +231,22 @@ class FragmentFoodDiary: Fragment() {
             this?.show()
         }
     }
-    private fun updateFoodNoteOnServer(foodNote: FoodNote) {
+    private fun updateFoodNoteOnServer(
+        noteId: Int,
+        foodName: String
+    ) {
         val response = context?.let {
-            networkService?.updateNote(
-                foodNote.noteId,
-                foodNote
-            )
+            getHashcodeFromPreferences()?.let { it1 ->
+                RequestUpdateFoodNote(
+                    it1,
+                    foodName
+                )
+            }?.let { it2 ->
+                networkService?.updateNote(
+                    noteId,
+                    it2
+                )
+            }
         }
         response?.enqueue(object : Callback<FoodNote> {
             override fun onResponse(
@@ -279,9 +296,12 @@ class FragmentFoodDiary: Fragment() {
     }
     private fun removeFoodNoteFromServer(noteId: Int) {
         val response = context?.let {
-            networkService?.deleteNote(
-                noteId
-            )
+            getHashcodeFromPreferences()?.let { it1 ->
+                networkService?.deleteNote(
+                    noteId,
+                    it1
+                )
+            }
         }
         response?.enqueue(object : Callback<Int> {
             override fun onResponse(
@@ -454,6 +474,7 @@ class FragmentFoodDiary: Fragment() {
             val records: Iterable<CSVRecord> = CSVFormat.DEFAULT
                 .withHeader(
                     "NoteId",
+                    "UserId",
                     "FoodName"
                 )
                 .parse(
@@ -464,7 +485,8 @@ class FragmentFoodDiary: Fragment() {
                 list.add(
                     FoodNote(
                         record[0].toInt(),
-                        record[1]
+                        record[1].toInt(),
+                        record[2]
                     )
                 )
             }
@@ -1049,12 +1071,14 @@ class FragmentFoodDiary: Fragment() {
             writer,
             CSVFormat.DEFAULT.withHeader(
                 "NoteId",
+                "UserId",
                 "FoodName"
             )
         )
         for (note in foodNotes) {
             val data = listOf(
-                note.noteId,
+                note.id,
+                note.userId,
                 note.foodName
             )
             csvPrinter.printRecord(data)

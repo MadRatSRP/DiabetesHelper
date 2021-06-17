@@ -22,6 +22,9 @@ import com.madrat.diabeteshelper.getHashcodeFromPreferences
 import com.madrat.diabeteshelper.linearManager
 import com.madrat.diabeteshelper.network.NetworkClient
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
+import com.madrat.diabeteshelper.ui.diabetesdiary.model.RequestAddDiabetesNote
+import com.madrat.diabeteshelper.ui.diabetesdiary.model.RequestGetDiabetesNotes
+import com.madrat.diabeteshelper.ui.diabetesdiary.model.RequestUpdateDiabetesNote
 import com.madrat.diabeteshelper.ui.general.ExportType
 import com.madrat.diabeteshelper.ui.general.Extension
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
@@ -34,6 +37,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import okhttp3.ResponseBody
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import org.apache.commons.csv.CSVRecord
@@ -133,7 +137,9 @@ class FragmentDiabetesDiary: Fragment() {
     
     private fun loadNotesFromServer(userHashcode: String) {
         val response = context?.let {
-            networkService?.getNotes()?.apply {
+            networkService?.getNotes(
+                userHashcode
+            )?.apply {
                 subscribeOn(Schedulers.io())
                 observeOn(AndroidSchedulers.mainThread())
             }
@@ -170,9 +176,16 @@ class FragmentDiabetesDiary: Fragment() {
         }
     }
     private fun uploadDiabetesNoteDataToServer(sugarLevel: Double) {
-        val response = networkService?.addNote(
-            sugarLevel
-        )
+        val response = getHashcodeFromPreferences()?.let {
+            RequestAddDiabetesNote(
+                sugarLevel,
+                it
+            )
+        }?.let {
+            networkService?.addNote(
+                it
+            )
+        }
         response?.enqueue(object : Callback<DiabetesNote> {
             override fun onResponse(
                 call: Call<DiabetesNote>,
@@ -204,6 +217,7 @@ class FragmentDiabetesDiary: Fragment() {
                 updateDiabetesNoteOnServer(
                     DiabetesNote(
                         diabetesNote.id,
+                        0,
                         editSugarLevel.text.toString().toDouble()
                     )
                 )
@@ -220,10 +234,17 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun updateDiabetesNoteOnServer(diabetesNote: DiabetesNote) {
         val response = context?.let {
-            networkService?.updateNote(
-                diabetesNote.id,
-                diabetesNote
-            )
+            getHashcodeFromPreferences()?.let { it1 ->
+                RequestUpdateDiabetesNote(
+                    it1,
+                    diabetesNote.sugarLevel
+                )
+            }?.let { it2 ->
+                networkService?.updateNote(
+                    diabetesNote.id,
+                    it2
+                )
+            }
         }
         response?.enqueue(object : Callback<DiabetesNote> {
             override fun onResponse(
@@ -273,9 +294,12 @@ class FragmentDiabetesDiary: Fragment() {
     }
     private fun removeDiabetesNoteFromServer(noteId: Int) {
         val response = context?.let {
-            networkService?.deleteNote(
-                noteId
-            )
+            getHashcodeFromPreferences()?.let { it1 ->
+                networkService?.deleteNote(
+                    noteId,
+                    it1
+                )
+            }
         }
         response?.enqueue(object : Callback<Int> {
             override fun onResponse(
@@ -448,6 +472,7 @@ class FragmentDiabetesDiary: Fragment() {
             val records: Iterable<CSVRecord> = CSVFormat.DEFAULT
                 .withHeader(
                     "NoteId",
+                    "UserId",
                     "SugarLevel"
                 )
                 .parse(
@@ -458,7 +483,8 @@ class FragmentDiabetesDiary: Fragment() {
                 list.add(
                     DiabetesNote(
                         record[0].toInt(),
-                        record[1].toDouble()
+                        record[1].toInt(),
+                        record[2].toDouble()
                     )
                 )
             }
@@ -1043,6 +1069,7 @@ class FragmentDiabetesDiary: Fragment() {
             writer,
             CSVFormat.DEFAULT.withHeader(
                 "NoteId",
+                "UserId",
                 "SugarLevel"
             )
         )

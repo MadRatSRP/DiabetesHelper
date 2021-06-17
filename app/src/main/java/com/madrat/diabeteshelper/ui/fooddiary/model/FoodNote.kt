@@ -4,7 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class FoodNote(
-    val noteId: Int,
+    val id: Int,
     
-    val foodName: String
+    val userId: Int,
+    
+    val foodName: String,
 )

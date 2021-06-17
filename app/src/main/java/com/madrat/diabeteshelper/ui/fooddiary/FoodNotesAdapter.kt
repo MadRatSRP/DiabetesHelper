@@ -17,7 +17,7 @@ class FoodNotesAdapter(
     
     fun updateNote(foodNote: FoodNote) {
         val previousNote = listOfFoodNotes.find {
-            it.noteId == foodNote.noteId
+            it.id == foodNote.id
         }
         
         val position = listOfFoodNotes.indexOf(previousNote)
@@ -27,9 +27,9 @@ class FoodNotesAdapter(
         notifyDataSetChanged()
     }
     
-    fun removeNote(noteId: Int) {
+    fun removeNote(id: Int) {
         listOfFoodNotes.removeIf {
-            it.noteId == noteId
+            it.id == id
         }
         notifyDataSetChanged()
     }
@@ -67,7 +67,7 @@ class FoodNotesAdapter(
                     editNoteListener(foodNote)
                 }
                 buttonRemoveNote.setOnClickListener {
-                    removeNoteListener(foodNote.noteId)
+                    removeNoteListener(foodNote.id)
                 }
             }
         }

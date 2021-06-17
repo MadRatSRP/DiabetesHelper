@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 class DiabetesNote(
     val id: Int,
     
+    val userId: Int,
+    
     val sugarLevel: Double,
 )
 
