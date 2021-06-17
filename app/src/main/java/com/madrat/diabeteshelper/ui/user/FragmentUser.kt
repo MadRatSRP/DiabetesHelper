@@ -13,9 +13,12 @@ import com.madrat.diabeteshelper.network.NetworkClient
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
 import com.madrat.diabeteshelper.ui.user.model.RequestAuthorizeUser
 import com.madrat.diabeteshelper.ui.user.model.RequestRegisterUser
+import com.madrat.diabeteshelper.ui.user.model.RequestUnauthorizeUser
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
 
 class FragmentUser: Fragment() {
     private var nullableBinding: FragmentUserBinding? = null
@@ -51,12 +54,13 @@ class FragmentUser: Fragment() {
             }
         }
     }
+    
     fun initializeDependencies(context: Context) {
         networkService = NetworkClient
                 .getRetrofit(context)
                 .create(UserNetworkInterface::class.java)
     }
-    fun updateRegistrationLayout() {
+    private fun updateRegistrationLayout() {
         with(binding) {
             registrationLayout.visibility = View.VISIBLE
             
@@ -80,10 +84,10 @@ class FragmentUser: Fragment() {
                 )
             )
         }
-        response?.enqueue(object : Callback<Int> {
+        response?.enqueue(object : Callback<String> {
             override fun onResponse(
-                call: Call<Int>,
-                response: Response<Int>
+                call: Call<String>,
+                response: Response<String>
             ) {
                 if (response.isSuccessful) {
                     doOnUserRegisteredSuccess()
@@ -92,7 +96,7 @@ class FragmentUser: Fragment() {
                 }
             }
             override fun onFailure(
-                call: Call<Int>,
+                call: Call<String>,
                 throwable: Throwable
             ) {
                 throwable.printStackTrace()
@@ -140,10 +144,10 @@ class FragmentUser: Fragment() {
                 )
             )
         }
-        response?.enqueue(object : Callback<User> {
+        response?.enqueue(object : Callback<String> {
             override fun onResponse(
-                call: Call<User>,
-                response: Response<User>
+                call: Call<String>,
+                response: Response<String>
             ) {
                 if (response.isSuccessful) {
                     response.body()?.let {
@@ -156,7 +160,7 @@ class FragmentUser: Fragment() {
                 }
             }
             override fun onFailure(
-                call: Call<User>,
+                call: Call<String>,
                 throwable: Throwable
             ) {
                 throwable.printStackTrace()
@@ -164,14 +168,37 @@ class FragmentUser: Fragment() {
         })
     }
     
-    fun doOnUserAuthorizationSuccess(user: User) {
+    fun doOnUserAuthorizationSuccess(userHashcode: String) {
         showStatusMessage(R.string.message_successful_user_authorized)
     
         binding.authorizationLayout.visibility = View.GONE
     
         updateUserAuthorizedLayout()
     
-        saveHashcodeToPreferences(user.userHashcode)
+        saveHashcodeToPreferences(userHashcode)
+    }
+    
+    private fun unathorizeUser(
+        userHashcode: String
+    ) {
+        val response = context?.let {
+            networkService?.unauthorizeUser(
+                RequestUnauthorizeUser(
+                    userHashcode
+                )
+            )
+        }
+        response?.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>,
+                                    response: Response<ResponseBody>) {
+                leaveAccount()
+            }
+    
+            override fun onFailure(call: Call<ResponseBody>,
+                                   throwable: Throwable) {
+                throwable.printStackTrace()
+            }
+        })
     }
     
     private fun updateUserAuthorizedLayout() {
@@ -179,7 +206,11 @@ class FragmentUser: Fragment() {
             userAuthorizedLayout.visibility = View.VISIBLE
             
             buttonExitAccount.setOnClickListener {
-                leaveAccount()
+                getHashcodeFromPreferences()?.let { it1 ->
+                    unathorizeUser(
+                        it1
+                    )
+                }
             }
         }
     }
