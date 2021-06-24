@@ -1,5 +1,7 @@
 package com.madrat.diabeteshelper.ui.diabetesstatistics
 
+import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +22,8 @@ import com.anychart.graphics.vector.Stroke
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentDiabetesStatisticsBinding
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
+import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.streams.toList
 
@@ -122,13 +126,67 @@ class FragmentDiabetesStatistics: Fragment() {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+    
         binding.buttonChangeDate.setOnClickListener {
-            calculateGlucoseMinAndMax("17.01.2019")
+            val diabetesNotes = args.diabetesNotes.toCollection(ArrayList())
+            val listOfDates = ArrayList<String>()
+            val groupedNotes = diabetesNotes.groupBy {it.noteDate}.entries
+            groupedNotes.forEach {
+                listOfDates.add(it.key)
+            }
+            
+            /*val filteredSet = groupedNotes.stream().filter {
+                it.key == noteDate
+            }
+            val listOfNotes = filteredSet.toList()[0].value*/
+            
+            changeDateClicklistener(listOfDates)
+        }
+    }
+    
+    fun changeDateClicklistener(listOfDates: ArrayList<String>) {
+        //calculateGlucoseMinAndMax("17.01.2019")
+    
+        val now: Calendar = Calendar.getInstance()
+        val dpd: DatePickerDialog = DatePickerDialog.newInstance(
+            { view, year, monthOfYear, dayOfMonth ->
+                val simpleDateFormat = SimpleDateFormat("dd.MM.yyyy", Locale("ru","RU"))
+                /*val date = "You picked the following date: " + dayOfMonth.toString() + "/" + (monthOfYear + 1).toString() + "/" + year
+                binding.setupDate.text = date*/
+                val calendar = java.util.Calendar.getInstance()
+                /*calendar.time = simpleDateFormat.parse(it)
+                calendars.add(calendar)*/
+                calendar.set(year, monthOfYear, dayOfMonth)
+                val selectedDate = simpleDateFormat.format(
+                    calendar.time
+                )
+                println("ВЫБРАННАЯ ДАТА:" + selectedDate)
+                calculateGlucoseMinAndMax(selectedDate)
+            },
+            now.get(Calendar.YEAR),  // Initial year selection
+            now.get(Calendar.MONTH),  // Initial month selection
+            now.get(Calendar.DAY_OF_MONTH) // Inital day selection
+        )
+        dpd.selectableDays = formCalendarArrayFromDates(
+            listOfDates
+        )
+        dpd.show(childFragmentManager, "Datepickerdialog")
+    
+        /*val glucoseList = arrayOf(2.22, 3.33, 4.44, 5.55, 6.66, 7.77)
+            calculateMinAndMaxGlucode(glucoseList)*/
+    }
+    
+    fun formCalendarArrayFromDates(listOfDates: ArrayList<String>): Array<java.util.Calendar> {
+        val calendars = ArrayList<java.util.Calendar>()
+        val simpleDateFormat = SimpleDateFormat("dd.MM.yy", Locale("ru","RU"))
+    
+        listOfDates.forEach {
+            val calendar = java.util.Calendar.getInstance()
+            calendar.time = simpleDateFormat.parse(it)
+            calendars.add(calendar)
         }
         
-        /*val glucoseList = arrayOf(2.22, 3.33, 4.44, 5.55, 6.66, 7.77)
-        calculateMinAndMaxGlucode(glucoseList)*/
+        return calendars.toTypedArray()
     }
     
     fun calculateGlucoseMinAndMax(noteDate: String) {
@@ -137,6 +195,7 @@ class FragmentDiabetesStatistics: Fragment() {
         val filteredSet = groupedNotes.stream().filter {
             it.key == noteDate
         }
+        
         val listOfNotes = filteredSet.toList()[0].value
         
         val minGlucose: Double? = getMinFromList(
