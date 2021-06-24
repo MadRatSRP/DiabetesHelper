@@ -100,7 +100,8 @@ class FragmentDiabetesDiary: Fragment() {
             recyclerView.adapter = adapter
             recyclerView.linearManager()
             binding.buttonAddNote.setOnClickListener {
-                showAddNoteDialog(context)
+                //showAddNoteDialog(context)
+                findNavController().navigate(R.id.action_navigation_diary_diabetes_to_navigation_diabetes_statistics)
             }
         }
     }

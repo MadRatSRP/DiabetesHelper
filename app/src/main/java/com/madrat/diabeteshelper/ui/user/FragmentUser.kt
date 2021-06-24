@@ -70,6 +70,12 @@ class FragmentUser: Fragment() {
                     setupRegistrationPassword.text.toString()
                 )
             }
+            
+            buttonChangeToAuthorization.setOnClickListener {
+                binding.registrationLayout.visibility = View.GONE
+    
+                updateAuthorizationLayout()
+            }
         }
     }
     private fun registerUser(
@@ -123,11 +129,21 @@ class FragmentUser: Fragment() {
         with(binding) {
             authorizationLayout.visibility = View.VISIBLE
     
+            if (setupAuthorizationLogin.text != null) {
+                setupAuthorizationLogin.setText("")
+                setupAuthorizationPassword.setText("")
+            }
+    
             buttonAuthorizeUser.setOnClickListener {
                 authorizeUser(
                     setupAuthorizationLogin.text.toString(),
                     setupAuthorizationPassword.text.toString()
                 )
+            }
+            buttonChangeToRegistration.setOnClickListener {
+                binding.authorizationLayout.visibility = View.GONE
+                
+                updateRegistrationLayout()
             }
         }
     }

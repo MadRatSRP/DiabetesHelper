@@ -24,7 +24,7 @@
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/bottom_guideline"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.75"
+        app:layout_constraintGuide_percent="0.9"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
     <LinearLayout
@@ -59,7 +59,15 @@
             android:id="@+id/button_register_user"
             android:text="@string/button_register_user"
             android:background="@color/white"
-            android:layout_marginTop="55dp"
+            android:layout_marginTop="40dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/button_change_to_authorization"
+            android:text="Перейти к авторизации"
+            android:background="@color/white"
+            android:layout_marginTop="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -95,7 +103,14 @@
             android:id="@+id/button_authorize_user"
             android:text="@string/button_authorize_user"
             android:background="@color/white"
-            android:layout_marginTop="55dp"
+            android:layout_marginTop="40dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/button_change_to_registration"
+            android:text="Перейти к регистрации"
+            android:background="@color/white"
+            android:layout_marginTop="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
