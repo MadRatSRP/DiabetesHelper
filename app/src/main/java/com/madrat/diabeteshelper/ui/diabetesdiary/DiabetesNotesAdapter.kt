@@ -12,6 +12,11 @@ class DiabetesNotesAdapter(
 ): RecyclerView.Adapter<DiabetesNotesAdapter.DiabetesNotesHolder>() {
     private val listOfDiabetesNotes = ArrayList<DiabetesNote>()
     
+    fun removeAll() {
+        listOfDiabetesNotes.clear()
+        this.notifyDataSetChanged()
+    }
+    
     fun sortNotesByGlucose() {
         listOfDiabetesNotes.sortBy { it.glucoseLevel }
         this.notifyDataSetChanged()
@@ -84,6 +89,8 @@ class DiabetesNotesAdapter(
                 buttonRemoveNote.setOnClickListener {
                     removeNoteListener(diabetesNote.id)
                 }
+                noteDate.text = diabetesNote.noteDate
+                noteTime.text = diabetesNote.noteTime
             }
         }
     }

@@ -135,18 +135,11 @@ class FragmentDiabetesStatistics: Fragment() {
                 listOfDates.add(it.key)
             }
             
-            /*val filteredSet = groupedNotes.stream().filter {
-                it.key == noteDate
-            }
-            val listOfNotes = filteredSet.toList()[0].value*/
-            
             changeDateClicklistener(listOfDates)
         }
     }
     
     fun changeDateClicklistener(listOfDates: ArrayList<String>) {
-        //calculateGlucoseMinAndMax("17.01.2019")
-    
         val now: Calendar = Calendar.getInstance()
         val dpd: DatePickerDialog = DatePickerDialog.newInstance(
             { view, year, monthOfYear, dayOfMonth ->
@@ -171,9 +164,6 @@ class FragmentDiabetesStatistics: Fragment() {
             listOfDates
         )
         dpd.show(childFragmentManager, "Datepickerdialog")
-    
-        /*val glucoseList = arrayOf(2.22, 3.33, 4.44, 5.55, 6.66, 7.77)
-            calculateMinAndMaxGlucode(glucoseList)*/
     }
     
     fun formCalendarArrayFromDates(listOfDates: ArrayList<String>): Array<java.util.Calendar> {

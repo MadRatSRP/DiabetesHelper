@@ -2,6 +2,8 @@ package com.madrat.diabeteshelper.ui.diabetesdiary
 
 import android.content.Context
 import android.content.Intent
+import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
 import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
@@ -30,6 +32,7 @@ import com.madrat.diabeteshelper.ui.general.ExportType
 import com.madrat.diabeteshelper.ui.general.Extension
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
 import com.thoughtworks.xstream.XStream
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
@@ -58,6 +61,8 @@ class FragmentDiabetesDiary: Fragment(), AdapterView.OnItemSelectedListener {
     private var dropboxClient: DbxClientV2? = null
     private var adapter: DiabetesNotesAdapter? = null
     private var networkService: DiabetesNotesNetworkInterface? = null
+    
+    private var diabetesNotes: ArrayList<DiabetesNote>? = null
     
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         when (parent?.selectedItemPosition) {
@@ -119,13 +124,22 @@ class FragmentDiabetesDiary: Fragment(), AdapterView.OnItemSelectedListener {
             recyclerView.adapter = adapter
             recyclerView.linearManager()
             binding.buttonAddNote.setOnClickListener {
-                //showAddNoteDialog(context)
-                val action = adapter?.getNotes()?.toTypedArray()?.let { it1 ->
-                    FragmentDiabetesDiaryDirections.actionNavigationDiaryDiabetesToNavigationDiabetesStatistics(
-                        it1
-                    )
+                showAddNoteDialog(context)
+            }
+            binding.buttonFilterList.setOnClickListener {
+                val notesCopy = diabetesNotes
+                val listOfDates = ArrayList<String>()
+                val groupedNotes = notesCopy?.groupBy {it.noteDate}?.entries
+                groupedNotes?.forEach {
+                    listOfDates.add(it.key)
                 }
-                action?.let { it1 -> findNavController().navigate(it1) }
+    
+                changeDateClicklistener(listOfDates)
+            }
+            binding.buttonCancelFilter.setOnClickListener {
+                binding.selectedDate.text = ""
+    
+                diabetesNotes?.let { it1 -> updateListOfDiabetesNotes(it1) }
             }
         }
         // Create an ArrayAdapter using the string array and a default spinner layout
@@ -142,6 +156,61 @@ class FragmentDiabetesDiary: Fragment(), AdapterView.OnItemSelectedListener {
             }
         }
     }
+    
+    fun changeDateClicklistener(listOfDates: ArrayList<String>) {
+        val now: Calendar = Calendar.getInstance()
+        val dpd: DatePickerDialog = DatePickerDialog.newInstance(
+            { _, year, monthOfYear, dayOfMonth ->
+                val simpleDateFormat = SimpleDateFormat("dd.MM.yyyy", Locale("ru","RU"))
+                val calendar = java.util.Calendar.getInstance()
+                calendar.set(year, monthOfYear, dayOfMonth)
+                val selectedDate = simpleDateFormat.format(
+                    calendar.time
+                )
+                
+                binding.selectedDate.text = selectedDate
+                
+                updateListWithFilteredValues(selectedDate)
+            },
+            now.get(Calendar.YEAR),  // Initial year selection
+            now.get(Calendar.MONTH),  // Initial month selection
+            now.get(Calendar.DAY_OF_MONTH) // Inital day selection
+        )
+        dpd.selectableDays = formCalendarArrayFromDates(
+            listOfDates
+        )
+        dpd.show(childFragmentManager, "Datepickerdialog")
+    }
+    
+    fun updateListWithFilteredValues(selectedDate: String) {
+        val listCopy = diabetesNotes
+        val updatedList = ArrayList<DiabetesNote>()
+    
+        listCopy?.filter { it.noteDate == selectedDate }?.let {
+            updatedList.addAll(
+                it
+            )
+        }
+        
+        updateListOfDiabetesNotes(
+            updatedList
+        )
+    }
+    
+    fun formCalendarArrayFromDates(listOfDates: ArrayList<String>): Array<java.util.Calendar> {
+        val calendars = ArrayList<java.util.Calendar>()
+        val simpleDateFormat = SimpleDateFormat("dd.MM.yy", Locale("ru","RU"))
+        
+        listOfDates.forEach {
+            val calendar = java.util.Calendar.getInstance()
+            calendar.time = simpleDateFormat.parse(it)
+            calendars.add(calendar)
+        }
+        
+        return calendars.toTypedArray()
+    }
+    
+    
     private fun showUnauthorizedUserDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
         builder.setCancelable(false)
@@ -161,12 +230,25 @@ class FragmentDiabetesDiary: Fragment(), AdapterView.OnItemSelectedListener {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
-        inflater.inflate(R.menu.button_import_and_export, menu)
+        inflater.inflate(R.menu.menu_diabetes_notes, menu)
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.button_import_and_export -> {
                 showImportAndExportDialog(requireContext())
+                return true
+            }
+            R.id.button_show_statistics -> {
+                val action = adapter?.getNotes()?.toTypedArray()?.let { it1 ->
+                    FragmentDiabetesDiaryDirections.actionNavigationDiaryDiabetesToNavigationDiabetesStatistics(
+                        it1
+                    )
+                }
+                action?.let { it1 -> findNavController().navigate(it1) }
+                return true
+            }
+            R.id.button_clear_list -> {
+                adapter?.removeAll()
                 return true
             }
         }
@@ -186,6 +268,7 @@ class FragmentDiabetesDiary: Fragment(), AdapterView.OnItemSelectedListener {
             override fun onSuccess(notes: ArrayList<DiabetesNote>?) {
                 activity?.runOnUiThread {
                     notes?.let { updateListOfDiabetesNotes(it) }
+                    diabetesNotes = notes
                 }
             }
             override fun onError(throwable: Throwable?) {
