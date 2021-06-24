@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
@@ -50,12 +52,30 @@ import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 
 
-class FragmentDiabetesDiary: Fragment() {
+class FragmentDiabetesDiary: Fragment(), AdapterView.OnItemSelectedListener {
     private var nullableBinding: FragmentDiabetesDiaryBinding? = null
     private val binding get() = nullableBinding!!
     private var dropboxClient: DbxClientV2? = null
     private var adapter: DiabetesNotesAdapter? = null
     private var networkService: DiabetesNotesNetworkInterface? = null
+    
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        when (parent?.selectedItemPosition) {
+            1 -> {
+                adapter?.sortNotesByGlucose()
+            }
+            2 -> {
+                adapter?.sortNotesByDate()
+            }
+            3 -> {
+                adapter?.sortNotesByTime()
+            }
+        }
+    }
+    
+    override fun onNothingSelected(parent: AdapterView<*>?) {
+        TODO("Not yet implemented")
+    }
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -64,6 +84,7 @@ class FragmentDiabetesDiary: Fragment() {
             container,
             false
         )
+        
         return binding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -105,6 +126,19 @@ class FragmentDiabetesDiary: Fragment() {
                     )
                 }
                 action?.let { it1 -> findNavController().navigate(it1) }
+            }
+        }
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        context.let {
+            ArrayAdapter.createFromResource(
+                it,
+                R.array.diabetes_sort_array,
+                android.R.layout.simple_spinner_item
+            ).also { adapter ->
+                // Specify the layout to use when the list of choices appears
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                // Apply the adapter to the spinner
+                binding.spinnerSort.adapter = adapter
             }
         }
     }
@@ -292,6 +326,7 @@ class FragmentDiabetesDiary: Fragment() {
     private fun updateListOfDiabetesNotes(listOfDiabetesNotes: ArrayList<DiabetesNote>) {
         adapter?.updateList(listOfDiabetesNotes)
         binding.recyclerView.adapter = adapter
+        binding.spinnerSort.onItemSelectedListener = this@FragmentDiabetesDiary
     }
     private fun showRemoveNoteDialog(noteId: Int) {
         val builder = context?.let { AlertDialog.Builder(it) }

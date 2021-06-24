@@ -12,6 +12,21 @@ class DiabetesNotesAdapter(
 ): RecyclerView.Adapter<DiabetesNotesAdapter.DiabetesNotesHolder>() {
     private val listOfDiabetesNotes = ArrayList<DiabetesNote>()
     
+    fun sortNotesByGlucose() {
+        listOfDiabetesNotes.sortBy { it.glucoseLevel }
+        this.notifyDataSetChanged()
+    }
+    
+    fun sortNotesByDate() {
+        listOfDiabetesNotes.sortBy { it.noteDate }
+        this.notifyDataSetChanged()
+    }
+    
+    fun sortNotesByTime() {
+        listOfDiabetesNotes.sortBy { it.noteTime }
+        this.notifyDataSetChanged()
+    }
+    
     fun getNotes()
         = listOfDiabetesNotes
     

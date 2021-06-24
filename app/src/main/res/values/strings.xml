@@ -103,4 +103,11 @@
     <string name="message_unathorized">Нажмите "ОК" для перехода на главный экран для авторизации</string>
 
     <string name="title_statistics">Статистика Диабет</string>
+
+    <string-array name="diabetes_sort_array">
+        <item>Сортировать по:</item>
+        <item>Уровню глюкозы в крови</item>
+        <item>Дате добавления записи</item>
+        <item>Времени добавления записи</item>
+    </string-array>
 </resources>
