@@ -1,14 +1,18 @@
 package com.madrat.diabeteshelper.ui.diabetesdiary.model
 
-import com.google.gson.annotations.SerializedName
-import kotlinx.serialization.Serializable
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-@Serializable
+@Parcelize
 class DiabetesNote(
     val id: Int,
     
     val userId: Int,
     
-    val sugarLevel: Double,
-)
+    val glucoseLevel: Double,
+    
+    val noteTime: String,
+    
+    val noteDate: String
+): Parcelable
 

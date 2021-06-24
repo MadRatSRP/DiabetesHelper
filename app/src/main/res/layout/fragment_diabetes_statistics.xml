@@ -12,6 +12,10 @@
         android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/button_change_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
     <LinearLayout
         android:orientation="horizontal"
         android:layout_marginTop="15dp"
@@ -23,14 +27,14 @@
             android:text="Ваш минимальный показатель уровня глюкозы в крови"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.75"/>
+            android:layout_weight="0.65"/>
         <TextView
             android:id="@+id/glucose_min"
-            android:text="2.22"
+            android:text="Нет данных за этот период"
             android:gravity="center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.25"/>
+            android:layout_weight="0.35"/>
     </LinearLayout>
     <LinearLayout
         android:orientation="horizontal"
@@ -43,13 +47,13 @@
             android:text="Ваш максимальный показатель уровня глюкозы в крови"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.75"/>
+            android:layout_weight="0.65"/>
         <TextView
             android:id="@+id/glucose_max"
-            android:text="4.44"
+            android:text="Нет данных за этот период"
             android:gravity="center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.25"/>
+            android:layout_weight="0.35"/>
     </LinearLayout>
 </LinearLayout>

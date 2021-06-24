@@ -23,7 +23,6 @@ import com.madrat.diabeteshelper.linearManager
 import com.madrat.diabeteshelper.network.NetworkClient
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.RequestAddDiabetesNote
-import com.madrat.diabeteshelper.ui.diabetesdiary.model.RequestGetDiabetesNotes
 import com.madrat.diabeteshelper.ui.diabetesdiary.model.RequestUpdateDiabetesNote
 import com.madrat.diabeteshelper.ui.general.ExportType
 import com.madrat.diabeteshelper.ui.general.Extension
@@ -37,7 +36,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import okhttp3.ResponseBody
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import org.apache.commons.csv.CSVRecord
@@ -101,7 +99,12 @@ class FragmentDiabetesDiary: Fragment() {
             recyclerView.linearManager()
             binding.buttonAddNote.setOnClickListener {
                 //showAddNoteDialog(context)
-                findNavController().navigate(R.id.action_navigation_diary_diabetes_to_navigation_diabetes_statistics)
+                val action = adapter?.getNotes()?.toTypedArray()?.let { it1 ->
+                    FragmentDiabetesDiaryDirections.actionNavigationDiaryDiabetesToNavigationDiabetesStatistics(
+                        it1
+                    )
+                }
+                action?.let { it1 -> findNavController().navigate(it1) }
             }
         }
     }
@@ -163,8 +166,12 @@ class FragmentDiabetesDiary: Fragment() {
         with(dialogLayoutBinding) {
             buttonAdd.setOnClickListener {
                 dialog.dismiss()
-                val currentSugarLevel = editSugarLevel.text.toString().toDouble()
-                uploadDiabetesNoteDataToServer(currentSugarLevel)
+                val currentGlucoseLevel = editGlucoseLevel.text.toString().toDouble()
+                uploadDiabetesNoteDataToServer(
+                    currentGlucoseLevel,
+                    "19:00",
+                    "24.06.21"
+                )
             }
             buttonCancel.setOnClickListener {
                 dialog.dismiss()
@@ -176,11 +183,17 @@ class FragmentDiabetesDiary: Fragment() {
             show()
         }
     }
-    private fun uploadDiabetesNoteDataToServer(sugarLevel: Double) {
+    private fun uploadDiabetesNoteDataToServer(
+        glucoseLevel: Double,
+        noteTime: String,
+        noteDate: String
+    ) {
         val response = getHashcodeFromPreferences()?.let {
             RequestAddDiabetesNote(
-                sugarLevel,
-                it
+                it,
+                glucoseLevel,
+                noteTime,
+                noteDate
             )
         }?.let {
             networkService?.addNote(
@@ -212,14 +225,16 @@ class FragmentDiabetesDiary: Fragment() {
         val dialogLayoutBinding = DialogEditDiabetesNoteBinding.inflate(LayoutInflater.from(context))
         val dialog: AlertDialog? = builder?.create()
         with(dialogLayoutBinding) {
-            editSugarLevel.setText(diabetesNote.sugarLevel.toString())
+            editGlucoseLevel.setText(diabetesNote.glucoseLevel.toString())
             buttonSave.setOnClickListener {
                 dialog?.dismiss()
                 updateDiabetesNoteOnServer(
                     DiabetesNote(
                         diabetesNote.id,
                         0,
-                        editSugarLevel.text.toString().toDouble()
+                        editGlucoseLevel.text.toString().toDouble(),
+                        "1i:00",
+                        "24.06.21"
                     )
                 )
             }
@@ -233,12 +248,16 @@ class FragmentDiabetesDiary: Fragment() {
             this?.show()
         }
     }
-    private fun updateDiabetesNoteOnServer(diabetesNote: DiabetesNote) {
+    private fun updateDiabetesNoteOnServer(
+        diabetesNote: DiabetesNote
+    ) {
         val response = context?.let {
             getHashcodeFromPreferences()?.let { it1 ->
                 RequestUpdateDiabetesNote(
                     it1,
-                    diabetesNote.sugarLevel
+                    diabetesNote.glucoseLevel,
+                    diabetesNote.noteTime,
+                    diabetesNote.noteDate
                 )
             }?.let { it2 ->
                 networkService?.updateNote(
@@ -474,7 +493,9 @@ class FragmentDiabetesDiary: Fragment() {
                 .withHeader(
                     "NoteId",
                     "UserId",
-                    "SugarLevel"
+                    "GlucoseLevel",
+                    "NoteTime",
+                    "NoteDate"
                 )
                 .parse(
                     reader
@@ -485,7 +506,9 @@ class FragmentDiabetesDiary: Fragment() {
                     DiabetesNote(
                         record[0].toInt(),
                         record[1].toInt(),
-                        record[2].toDouble()
+                        record[2].toDouble(),
+                        record[3],
+                        record[4]
                     )
                 )
             }
@@ -1071,13 +1094,18 @@ class FragmentDiabetesDiary: Fragment() {
             CSVFormat.DEFAULT.withHeader(
                 "NoteId",
                 "UserId",
-                "SugarLevel"
+                "GlucoseLevel",
+                "NoteTime",
+                "NoteDate"
             )
         )
         for (note in diabetesNotes) {
             val data = listOf(
                 note.id,
-                note.sugarLevel
+                note.userId,
+                note.glucoseLevel,
+                note.noteTime,
+                note.noteDate
             )
             csvPrinter.printRecord(data)
         }

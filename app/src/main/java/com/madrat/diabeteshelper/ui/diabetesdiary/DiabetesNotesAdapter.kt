@@ -62,7 +62,7 @@ class DiabetesNotesAdapter(
         : RecyclerView.ViewHolder(binding.root) {
         fun bind(diabetesNote: DiabetesNote) {
             with(binding) {
-                sugarLevel.text = diabetesNote.sugarLevel.toString()
+                sugarLevel.text = diabetesNote.glucoseLevel.toString()
                 buttonEditNote.setOnClickListener {
                     editNoteListener(diabetesNote)
                 }

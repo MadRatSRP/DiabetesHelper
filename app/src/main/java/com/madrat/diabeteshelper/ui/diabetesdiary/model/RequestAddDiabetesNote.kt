@@ -4,7 +4,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class RequestAddDiabetesNote(
-    val sugarLevel: Double,
+    val userHashcode: String,
     
-    val userHashcode: String
+    val glucoseLevel: Double,
+    
+    val noteTime: String,
+    
+    val noteDate: String
 )

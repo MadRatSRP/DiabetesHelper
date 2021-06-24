@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import com.anychart.AnyChart
 import com.anychart.AnyChartView
 import com.anychart.chart.common.dataentry.DataEntry
@@ -18,12 +19,15 @@ import com.anychart.enums.TooltipPositionMode
 import com.anychart.graphics.vector.Stroke
 import com.madrat.diabeteshelper.R
 import com.madrat.diabeteshelper.databinding.FragmentDiabetesStatisticsBinding
+import com.madrat.diabeteshelper.ui.diabetesdiary.model.DiabetesNote
 import kotlin.collections.ArrayList
+import kotlin.streams.toList
 
 
 class FragmentDiabetesStatistics: Fragment() {
     private var nullableBinding: FragmentDiabetesStatisticsBinding? = null
     private val binding get() = nullableBinding!!
+    val args: FragmentDiabetesStatisticsArgs by navArgs()
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,20 +40,11 @@ class FragmentDiabetesStatistics: Fragment() {
             false
         )
         val view = binding.root
-        val glucoseList = arrayListOf(
-            Example(10.0, "15.12.1996"),
-            Example(150.2, "15.12.1996"),
-            Example(30.0, "15.12.1996"),
-            Example(3.33, "05.06.1991"),
-            Example(3.53, "05.06.1991"),
-            Example(3.73, "05.06.1991"),
-            Example(8.88, "01.01.1988")
-        )
-        initializeGraphics(view, glucoseList)
+        initializeGraphics(view, args.diabetesNotes.toCollection(ArrayList()))
         return view
     }
     
-    fun initializeGraphics(view: View, glucoseList: ArrayList<Example>) {
+    fun initializeGraphics(view: View, glucoseList: ArrayList<DiabetesNote>) {
         val anyChartView: AnyChartView = view.findViewById(R.id.any_chart_view)
         anyChartView.setProgressBar(view.findViewById(R.id.progress_bar))
     
@@ -67,7 +62,7 @@ class FragmentDiabetesStatistics: Fragment() {
         cartesian.tooltip().positionMode(TooltipPositionMode.POINT)
     
         val seriesData: MutableList<DataEntry> = ArrayList()
-        val collection = glucoseList.groupBy {it.date}.entries
+        val collection = glucoseList.groupBy {it.noteDate}.entries
         
         collection.forEach {
             seriesData.add(
@@ -101,25 +96,56 @@ class FragmentDiabetesStatistics: Fragment() {
         anyChartView.setChart(cartesian)
     }
     
-    fun getAverageFromList(list: List<Example>): Double {
+    fun getAverageFromList(list: List<DiabetesNote>): Double {
         val listOfDoubles = ArrayList<Double>()
         list.forEach {
-            listOfDoubles.add(it.value)
+            listOfDoubles.add(it.glucoseLevel)
         }
         return listOfDoubles.average()
+    }
+    
+    fun getMinFromList(list: List<DiabetesNote>): Double? {
+        val listOfDoubles = ArrayList<Double>()
+        list.forEach {
+            listOfDoubles.add(it.glucoseLevel)
+        }
+        return listOfDoubles.minOrNull()
+    }
+    
+    fun getMaxFromList(list: List<DiabetesNote>): Double? {
+        val listOfDoubles = ArrayList<Double>()
+        list.forEach {
+            listOfDoubles.add(it.glucoseLevel)
+        }
+        return listOfDoubles.maxOrNull()
     }
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        val glucoseList = arrayOf(2.22, 3.33, 4.44, 5.55, 6.66, 7.77)
-        calculateMinAndMaxGlucode(glucoseList)
+        binding.buttonChangeDate.setOnClickListener {
+            calculateGlucoseMinAndMax("17.01.2019")
+        }
+        
+        /*val glucoseList = arrayOf(2.22, 3.33, 4.44, 5.55, 6.66, 7.77)
+        calculateMinAndMaxGlucode(glucoseList)*/
     }
     
-    fun calculateMinAndMaxGlucode(list: Array<Double>) {
+    fun calculateGlucoseMinAndMax(noteDate: String) {
+        val diabetesNotes = args.diabetesNotes.toCollection(ArrayList())
+        val groupedNotes = diabetesNotes.groupBy {it.noteDate}.entries
+        val filteredSet = groupedNotes.stream().filter {
+            it.key == noteDate
+        }
+        val listOfNotes = filteredSet.toList()[0].value
         
-        val minGlucose: Double? = list.minOrNull()
-        val maxGlucose: Double? = list.maxOrNull()
+        val minGlucose: Double? = getMinFromList(
+            listOfNotes
+        )
+        val maxGlucose: Double? = getMaxFromList(
+            listOfNotes
+        )
+        
         if (minGlucose != null && maxGlucose != null) {
             binding.glucoseMin.text = minGlucose.toString()
             binding.glucoseMax.text = maxGlucose.toString()
