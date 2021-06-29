@@ -92,7 +92,7 @@
     <string name="message_error_user_registered">Произошла ошибка при регистрации пользователя</string>
     <string name="title_authorization">Авторизация</string>
     <string name="button_authorize_user">Авторизоваться</string>
-    <string name="title_greeting">Здравствуйте, Михаил</string>
+    <string name="title_greeting">Здравствуйте, Сергей</string>
     <string name="button_exit_account">Выйти из аккаунта</string>
     <string name="message_successful_user_authorized">Вы были успешно авторизованы!</string>
     <string name="message_error_user_authorized">Произошла ошибка при авторизации пользователя</string>

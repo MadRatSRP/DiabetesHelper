@@ -7,7 +7,7 @@ import retrofit2.Call
 import retrofit2.http.*
 
 interface DiabetesNotesNetworkInterface {
-    @POST("diabetesNotes/addNote")
+    @POST("diabetesNotes/addNote/")
     fun addNote(
         @Body requestAddDiabetesNote: RequestAddDiabetesNote
     ): Call<DiabetesNote>

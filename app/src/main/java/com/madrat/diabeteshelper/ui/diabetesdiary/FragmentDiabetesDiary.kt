@@ -10,6 +10,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SearchView
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -33,6 +34,7 @@ import com.madrat.diabeteshelper.ui.general.Extension
 import com.madrat.diabeteshelper.ui.mainactivity.MainActivity
 import com.thoughtworks.xstream.XStream
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
+import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
@@ -141,6 +143,30 @@ class FragmentDiabetesDiary: Fragment(), AdapterView.OnItemSelectedListener {
     
                 diabetesNotes?.let { it1 -> updateListOfDiabetesNotes(it1) }
             }
+            binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    adapter?.getFilter()?.filter(query)
+                    return true
+                }
+        
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    adapter?.getFilter()?.filter(newText);
+                    return true
+                }
+            })
+    
+            /*searchView.setOnQueryTextListener(object : android.widget.SearchView.OnQueryTextListener{
+                open  fun onQueryTextSubmit(query: String): Boolean{
+                    renderList(true)
+                    return false
+                }
+                open  fun onQueryTextChange(newText: String): Boolean{
+                    if (searchView.getQuery().length() === 0){
+                        renderList(true)
+                    }
+                    return false
+                }
+            })*/
         }
         // Create an ArrayAdapter using the string array and a default spinner layout
         context.let {
@@ -281,13 +307,40 @@ class FragmentDiabetesDiary: Fragment(), AdapterView.OnItemSelectedListener {
         val dialogLayoutBinding = DialogAddDiabetesNoteBinding.inflate(LayoutInflater.from(context))
         val dialog: AlertDialog = builder.create()
         with(dialogLayoutBinding) {
+            buttonSetupDate.setOnClickListener {
+                val dateDialog = DatePickerDialog.newInstance {
+                        _, year, monthOfYear, dayOfMonth ->
+                    val calendar = Calendar.getInstance()
+                    val simpleDateFormat = SimpleDateFormat("dd.MM.yyyy", Locale("ru","RU"))
+                    calendar.set(year, monthOfYear, dayOfMonth)
+                    val selectedDate = simpleDateFormat.format(
+                        calendar.time
+                    )
+                    setupDate.text = selectedDate
+                }
+                dateDialog.show(childFragmentManager, "Datepickerdialog")
+            }
+            buttonSetupTime.setOnClickListener {
+                val timeDialog = TimePickerDialog.newInstance(
+                    { _, hourOfDay, minute, _ ->
+                        val calendar = Calendar.getInstance()
+                        val simpleDateFormat = SimpleDateFormat("HH:mm", Locale("ru","RU"))
+                        calendar.set(hourOfDay, minute)
+                        val selectedDate = simpleDateFormat.format(
+                            calendar.time
+                        )
+                        setupTime.text = selectedDate
+                    }, true
+                )
+                timeDialog.show(childFragmentManager, "TimePickerDialog")
+            }
             buttonAdd.setOnClickListener {
                 dialog.dismiss()
                 val currentGlucoseLevel = editGlucoseLevel.text.toString().toDouble()
                 uploadDiabetesNoteDataToServer(
                     currentGlucoseLevel,
-                    "19:00",
-                    "24.06.21"
+                    setupTime.text.toString(),
+                    setupDate.text.toString()
                 )
             }
             buttonCancel.setOnClickListener {
@@ -337,12 +390,62 @@ class FragmentDiabetesDiary: Fragment(), AdapterView.OnItemSelectedListener {
         adapter?.addNote(diabetesNote)
         binding.recyclerView.adapter = adapter
     }
+    
     private fun showEditNoteDialog(diabetesNote: DiabetesNote) {
         val builder = context?.let { AlertDialog.Builder(it) }
         val dialogLayoutBinding = DialogEditDiabetesNoteBinding.inflate(LayoutInflater.from(context))
         val dialog: AlertDialog? = builder?.create()
         with(dialogLayoutBinding) {
             editGlucoseLevel.setText(diabetesNote.glucoseLevel.toString())
+            setupDate.text = diabetesNote.noteDate
+            setupTime.text = diabetesNote.noteTime
+    
+            val dateCalendar = java.util.Calendar.getInstance()
+            val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale("ru","RU"))
+            dateCalendar.time = dateFormat.parse(
+                diabetesNote.noteDate
+            )
+            
+            val dateSetObj = DatePickerDialog.OnDateSetListener {
+                    view, year, monthOfYear, dayOfMonth ->
+                
+                dateCalendar.set(year, monthOfYear, dayOfMonth)
+                val selectedDate = dateFormat.format(
+                    dateCalendar.time
+                )
+                
+                setupDate.text = selectedDate
+            }
+            buttonSetupDate.setOnClickListener {
+                val dateDialog = DatePickerDialog.newInstance(
+                    dateSetObj,
+                    dateCalendar
+                )
+                dateDialog.show(childFragmentManager, "Datepickerdialog")
+            }
+    
+            val timeCalendar = java.util.Calendar.getInstance()
+            val timeFormat = SimpleDateFormat("HH:mm", Locale("ru","RU"))
+            timeCalendar.time = timeFormat.parse(
+                diabetesNote.noteTime
+            )
+            val timeSetObj = TimePickerDialog.OnTimeSetListener {
+                    _, hourOfDay, minute, _ ->
+                timeCalendar.set(java.util.Calendar.HOUR_OF_DAY, hourOfDay)
+                timeCalendar.set(java.util.Calendar.MINUTE, minute)
+                val selectedTime = timeFormat.format(
+                    timeCalendar.time
+                )
+                setupTime.text = selectedTime
+            }
+            
+            buttonSetupTime.setOnClickListener {
+                val timeDialog = TimePickerDialog.newInstance(
+                    timeSetObj,
+                    true
+                )
+                timeDialog.show(childFragmentManager, "TimePickerDialog")
+            }
             buttonSave.setOnClickListener {
                 dialog?.dismiss()
                 updateDiabetesNoteOnServer(
@@ -609,7 +712,7 @@ class FragmentDiabetesDiary: Fragment(), AdapterView.OnItemSelectedListener {
         
             val records: Iterable<CSVRecord> = CSVFormat.DEFAULT
                 .withHeader(
-                    "NoteId",
+                    "Id",
                     "UserId",
                     "GlucoseLevel",
                     "NoteTime",
@@ -1210,7 +1313,7 @@ class FragmentDiabetesDiary: Fragment(), AdapterView.OnItemSelectedListener {
         val csvPrinter = CSVPrinter(
             writer,
             CSVFormat.DEFAULT.withHeader(
-                "NoteId",
+                "Id",
                 "UserId",
                 "GlucoseLevel",
                 "NoteTime",

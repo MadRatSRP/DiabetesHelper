@@ -44,6 +44,12 @@
             android:gravity="center"
             android:text="@string/title_registration" />
         <EditText
+            android:id="@+id/setup_name"
+            android:hint="Имя:"
+            android:layout_marginTop="35dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <EditText
             android:id="@+id/setup_registration_login"
             android:hint="@string/hint_phone_number_or_email"
             android:layout_marginTop="35dp"
